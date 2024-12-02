@@ -27,7 +27,10 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Tokens.cpp">
+    <ClCompile Include="Token.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Lexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,7 +41,10 @@
     <ClInclude Include="graph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tokens.h">
+    <ClInclude Include="Token.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lexer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

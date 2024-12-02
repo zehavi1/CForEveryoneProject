@@ -1,6 +1,4 @@
 state,symbol,nextState,isToken
-TRUE,',true!!!!,y
-FALSE,',false!!!,y
 wh,i,whi,n
 w,h,wh,n
 var!!!,!!!,,n
@@ -8,6 +6,7 @@ var,',var!!!,y
 va,r,var,n
 v,a,va,n
 true!!!!,!!!,,n
+TRUE,',true!!!!,y
 tru,e,TRUE,n
 tr,u,tru,n
 t,r,tr,n
@@ -18,8 +17,16 @@ stri,n,strin,n
 str,i,stri,n
 st,r,str,n
 s,t,st,n
-printf,',printf!!!,y
+return!!!,!!!,,n
+return,,return!!!,y
+retur,n,return,n
+retu,r,retur,n
+ret,u,retu,n
+re,t,ret,n
+r,e,re,n
 print!!!,!!!,,n
+printf!!!,,,n
+printf,',printf!!!,y
 print,',print!!!,y
 print,f,printf,n
 prin,t,print,n
@@ -35,6 +42,7 @@ long,',long!!!,y
 lon,g,long,n
 lo,n,lon,n
 l,o,lo,n
+int!!!,,,n
 int,',int!!!,y
 in!!!,!!!,,n
 in,',in!!!,y
@@ -61,6 +69,7 @@ flou,',flout,n
 flo,u,flou,n
 fl,o,flo,n
 false!!!,!!!,,n
+FALSE,',false!!!,y
 fals,e,FALSE,n
 fal,s,fals,n
 fa,l,fal,n
@@ -89,3 +98,18 @@ bool,',bool!!!,y
 boo,l,bool,n
 bo,o,boo,n
 b,o,bo,n
+start,a,a,n
+start,b,b,n
+start,c,c,n
+start,d,d,n
+start,e,e,n
+start,f,f,n
+start,i,i,n
+start,l,l,n
+start,n,n,n
+start,p,p,n
+start,s,s,n
+start,t,t,n
+start,v,v,n
+start,w,w,n
+start,r,r,n

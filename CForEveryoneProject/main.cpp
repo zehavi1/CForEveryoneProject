@@ -1,15 +1,25 @@
 #include <iostream>
 #include "graph.h"
+#include "Lexer.h"
 
 int main() {
     Graph g;
     g.loadFromCSV("‏‏automations1.csv");  // נתיב הקובץ שלך
 
     // הדפסת הגרף
-    g.printGraph();
+   // g.printGraph();
 
     // הצגת כל המסלולים למצב טוקן ממצב התחלתי מסוים
-    g.printPathsToToken("f");  // התחל ממצב התחלה שאתה רוצה
+   // g.printPathsToToken("start");  // התחל ממצב התחלה שאתה רוצה
+    Lexer lexer;
+    string program = lexer.readFileToString("programExample.txt");
 
+    if (program.empty()) {
+        cerr << "Failed to read program file!" << endl;
+        return 1;
+    }
+
+    auto tokens = lexer.tokenize(program, g);
+    lexer.printTokens(tokens);
     return 0;
 }

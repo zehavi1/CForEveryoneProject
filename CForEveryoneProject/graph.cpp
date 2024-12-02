@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
+#include <queue>
 
 // קריאת הנתונים מהקובץ CSV
 void Graph::loadFromCSV(const std::string& filename) {
@@ -28,6 +29,7 @@ void Graph::loadFromCSV(const std::string& filename) {
         // הוספת הקשת לגרף
         states[state]->transitions[symbol[0]] = states[nextState];
     }
+    setInitialState();
 }
 
 // הדפסת כל המצבים עם מעבריהם
@@ -73,4 +75,23 @@ void Graph::printPathsToToken(const std::string& startState) {
             }
         }
     }
+
 }
+shared_ptr<State> Graph::getState(const string& stateName) {
+    if (states.count(stateName)) {
+        return states[stateName];
+    }
+    return nullptr; // אם המצב לא קיים, מחזירים nullptr
+}
+void Graph::setInitialState() {
+    string stateName = "start";
+    auto state = getState(stateName);
+    if (state != nullptr) {
+        initialState = state;
+    }
+    else {
+        cerr << "Error: State " << stateName << " does not exist!" << endl;
+    }
+}
+
+
