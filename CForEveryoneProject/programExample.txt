@@ -1,7 +1,4 @@
 
-
-
-
 var calculateSum(int a, int b) {
     return a + b;
 }
@@ -55,7 +52,6 @@ int main() {
     return 0;
 }
 
-// פונקציה להדפסת מחרוזת
 void print(string message) {
     printf("%s\n", message);
 }

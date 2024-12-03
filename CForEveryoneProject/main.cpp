@@ -1,10 +1,9 @@
 #include <iostream>
-#include "graph.h"
 #include "Lexer.h"
 
 int main() {
-    Graph g;
-    g.loadFromCSV("‏‏automations1.csv");  // נתיב הקובץ שלך
+    //Graph g;
+   // g.loadFromCSV("‏‏automations1.csv");  // נתיב הקובץ שלך
 
     // הדפסת הגרף
    // g.printGraph();
@@ -19,7 +18,7 @@ int main() {
         return 1;
     }
 
-    auto tokens = lexer.tokenize(program, g);
+    auto tokens = lexer.tokenize(program);
     lexer.printTokens(tokens);
     return 0;
 }

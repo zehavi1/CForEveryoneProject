@@ -129,16 +129,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CForEveryoneProject.cpp" />
-    <ClCompile Include="graph.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="state.cpp" />
     <ClCompile Include="Token.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="graph.h" />
+    <ClInclude Include="enums.h" />
     <ClInclude Include="Lexer.h" />
-    <ClInclude Include="state.h" />
     <ClInclude Include="Token.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

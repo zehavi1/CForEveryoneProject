@@ -1,14 +1,18 @@
 #pragma once
 #include <string>
+#include "enums.h"
 using namespace std;
 class Token
 {
 public:
-	string type;   // סוג הטוקן (Keyword, Identifier, Punctuation וכו')
+	Pattern typeToken;   // סוג הטוקן (Keyword, Identifier, Punctuation וכו')
 	string value;
 	// הערך של הטוקן (כמו שם המשתנה או המילה שמורה)
 	int lineNumber;
 
-	Token(string type, string value,int lineNumber):type(type),value(value),lineNumber(lineNumber){}
+	Token(Pattern typeToken, string value,int lineNumber):typeToken(typeToken),value(value),lineNumber(lineNumber){}
+	Token(Pattern typeToken):typeToken(typeToken) {};
+	Token() {};
+	/*void setType(string type) { this->type = type; }*/
 };
 
