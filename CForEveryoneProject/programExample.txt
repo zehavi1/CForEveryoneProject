@@ -22,8 +22,7 @@ int main() {
     ifrange (x, 1, 20) {
         printf("x is within the range 1 to 20\n");
     }
-
-    int numbers[] = {1, 2, 3, 4, 5};
+    int numbers[] = {1, 2, 3, 4, 5};////
     foreach (num in numbers) {
         printf("Number: %d\n", num);
         if (num % 2 == 0) {

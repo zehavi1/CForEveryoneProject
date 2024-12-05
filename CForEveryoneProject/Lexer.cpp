@@ -3,10 +3,10 @@
 #include <sstream>
 #include <iostream>
 #include <regex>
-#define asString(a) #a
+#include <list>
 enum Lexical
 {
-   START,IDENTITY,ERROR,COMMENTLINE,COMMENTLINES,ALPHA,NUMBER,CHARACTER,NEWLINE,CHECK,MAKETOKEN,STRING
+   START,IDENTITY,ERROR1,COMMENTLINE,COMMENTLINES,ALPHA,NUMBER,CHARACTER,NEWLINE,CHECK,MAKETOKEN,STRING
 };
 string Lexer::readFileToString(const string& filename) {
     ifstream file(filename);
@@ -75,7 +75,7 @@ vector<Token> Lexer::tokenize(const string& input) {
                    
                 if (c == '/')
                 {
-                lexState:COMMENTLINE;
+                    lexState=COMMENTLINE;
                     break;
                 }
                     
@@ -106,7 +106,7 @@ vector<Token> Lexer::tokenize(const string& input) {
                             pattern = TOK_ID;
                         else
                         {
-                            lexState = ERROR;
+                            lexState = ERROR1;
                             break;
                         }
                            
@@ -124,7 +124,12 @@ vector<Token> Lexer::tokenize(const string& input) {
                 lexState = START;
                 break;
             }
-            case COMMENTLINE:break;
+            case COMMENTLINE:
+            {
+                lexState = ERROR1;
+                break;
+            }
+                
             case STRING:
             {
                 if (c == '"')
@@ -159,7 +164,7 @@ vector<Token> Lexer::tokenize(const string& input) {
                     }
                     else
                     {
-                        lexState = ERROR;
+                        lexState = ERROR1;
                         break;
                     }
                     
@@ -183,9 +188,20 @@ vector<Token> Lexer::tokenize(const string& input) {
                 }
                 break;
             }
-         case ERROR:
+         case ERROR1:
          default:
+             list<Token> v1;
+             int i = tokens.size()-1;
+             while (tokens[i].typeToken != TOK_SEMICOLON)
+                 v1.push_front(tokens[i--]);
+             //currentTokenValue = "lexical error occured in line" + lineNumber;
              printf("lexical error occured in line %d in characters %s\n", lineNumber, currentTokenValue);
+             cout << "in ";
+             for (Token i :v1)
+             {
+                 cout << i.value<<" ";
+             }
+             //tokens.emplace_back(TOK_ERROR, currentTokenValue, lineNumber);
              return tokens;
              break;
          }
