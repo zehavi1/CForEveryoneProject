@@ -132,6 +132,7 @@
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Token.cpp" />
+    <ClCompile Include="trySyntax.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="enums.h" />
