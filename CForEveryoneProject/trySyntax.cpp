@@ -5,6 +5,7 @@
 #include <iostream>
 class Syntax
 {
+
 public:
 	Syntax(vector<Token>& tokens):tokens(tokens){}
 	Tree& syntaxAnalisis()
@@ -75,6 +76,11 @@ public:
 	void addChild(shared_ptr<Node> n)
 	{
 		v.push_back(n);
+	}
+	void addChild(Node n)
+	{
+		shared_ptr<Node> p = make_shared<Node>(n);
+		v.push_back(p);
 	}
 };
 
