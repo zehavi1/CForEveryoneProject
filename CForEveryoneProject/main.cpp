@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Lexer.h"
+#include "Parser.h"
 
 int main() {
     //Graph g;
@@ -11,14 +12,18 @@ int main() {
     // הצגת כל המסלולים למצב טוקן ממצב התחלתי מסוים
    // g.printPathsToToken("start");  // התחל ממצב התחלה שאתה רוצה
     Lexer lexer;
-    string program = lexer.readFileToString("programExample.txt");
-
+    //string program = lexer.readFileToString("programExample.txt");
+	string program = "print(3 + 5);";
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
     }
-
+    program += ' ';
     auto tokens = lexer.tokenize(program);
     lexer.printTokens(tokens);
+    Parser parser(tokens);
+    vector<shared_ptr<ASTNode>> ast = parser.parse();
+	parser.printAST(ast);
+
     return 0;
 }

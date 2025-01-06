@@ -25,6 +25,9 @@ vector<Token> Lexer::tokenize(const string& input) {
      vector<Token> tokens;
      bool isInString = false;
      Pattern pattern = TOK_ERROR;
+	 //add a char '!' to the end of the string to make sure that the last token will be added to the tokens list
+     
+
     // shared_ptr<State> currentState = graph.getInitialState();
      string currentTokenValue="";
      bool canBeIdentifier = false;
@@ -40,6 +43,8 @@ vector<Token> Lexer::tokenize(const string& input) {
      regex stringRegex("^\".*\"$");
      for (int i=0;i<input.size();)
      {
+		 if (i == input.size()-1)
+			 cout << "";
          char c = input[i];
          switch (lexState)
          {
