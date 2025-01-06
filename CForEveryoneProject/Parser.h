@@ -98,7 +98,20 @@ class Parser {
                 throw runtime_error("Expected ';' at the end of statement");
             }
             return expr; // נניח שבינתיים משפט הוא ביטוי
-        }
+		}
+		else if (match(TOK_INT)) {
+			if (!match(TOK_ID)) {
+				throw runtime_error("Expected identifier after int");
+			}
+			if (!match(TOK_ASSIGN)) {
+				throw runtime_error("Expected '=' after identifier");
+			}
+			shared_ptr<ASTNode> expr = parseExpression();
+			if (!match(TOK_SEMICOLON)) {
+				throw runtime_error("Expected ';' at the end of statement");
+			}
+			return make_shared<StatementNode>(expr);
+		}
         else {
             throw runtime_error("Unknown statement type");
         }
@@ -115,11 +128,87 @@ public:
         }
         return ast;
     }
-	void printAST(const vector<shared_ptr<ASTNode>>& ast) {
+    //void printAST(const shared_ptr<ASTNode>& node, int depth = 0, bool isLast = true) {
+    //    if (!node) return;
+
+    //    // הדפסת רווחים והתאמת תצוגה גרפית לפי העומק
+    //    for (int i = 0; i < depth; ++i) {
+    //        if (i == depth - 1 && !isLast) {
+    //            cout << "|   ";
+    //        }
+    //        else if (i < depth - 1) {
+    //            cout << "    ";
+    //        }
+    //    }
+
+    //    // סמלים גרפיים
+    //    if (depth > 0) {
+    //        cout << (isLast ? "- " : "|- ");
+    //    }
+
+    //    // זיהוי סוג הצומת
+    //    if (auto numNode = dynamic_pointer_cast<NumberNode>(node)) {
+    //        cout << "TOK_INT(" << numNode->value << ")" << endl;
+    //    }
+    //    else if (auto idNode = dynamic_pointer_cast<IdentifierNode>(node)) {
+    //        cout << "TOK_ID(" << idNode->name << ")" << endl;
+    //    }
+    //    else if (auto binOpNode = dynamic_pointer_cast<BinaryOpNode>(node)) {
+    //        cout << "<BinaryOpNode> " << binOpNode->op << endl;
+    //        printAST(binOpNode->left, depth + 1, false);  // צד שמאל
+    //        printAST(binOpNode->right, depth + 1, true); // צד ימין
+    //    }
+    //    else if (auto exprNode = dynamic_pointer_cast<ExpressionNode>(node)) {
+    //        cout << "<ExpressionNode>" << endl;
+    //        printAST(exprNode->expression, depth + 1, true);
+    //    }
+    //    else if (auto stmtNode = dynamic_pointer_cast<StatementNode>(node)) {
+    //        cout << "<StatementNode>" << endl;
+    //        printAST(stmtNode->statement, depth + 1, true);
+    //    }
+    //    else {
+    //        cout << "<Unknown Node>" << endl;
+    //    }
+    //}
+
+	/*void printAST(const vector<shared_ptr<ASTNode>>& ast) {
 		for (const auto& node : ast) {
 			node->printASTNode();
 		}
-	}
+	}*/
+    void printAST(const shared_ptr<ASTNode>& node, int depth = 0) {
+        if (!node) return;
+
+        // הדפסת רווחים בהתאם לעומק העץ
+        for (int i = 0; i < depth; ++i) {
+            cout << "  ";
+        }
+
+        // הדפסת סוג הצומת
+        if (auto numNode = dynamic_pointer_cast<NumberNode>(node)) {
+            cout << "NumberNode: " << numNode->value << endl;
+        }
+        else if (auto idNode = dynamic_pointer_cast<IdentifierNode>(node)) {
+            cout << "IdentifierNode: " << idNode->name << endl;
+        }
+        else if (auto binOpNode = dynamic_pointer_cast<BinaryOpNode>(node)) {
+            cout << "BinaryOpNode: " << binOpNode->op << endl;
+            printAST(binOpNode->left, depth + 1);  // צד שמאל
+            printAST(binOpNode->right, depth + 1); // צד ימין
+        }
+        else if (auto exprNode = dynamic_pointer_cast<ExpressionNode>(node)) {
+            cout << "ExpressionNode:" << endl;
+            printAST(exprNode->expression, depth + 1);
+        }
+        else if (auto stmtNode = dynamic_pointer_cast<StatementNode>(node)) {
+            cout << "StatementNode:" << endl;
+            printAST(stmtNode->statement, depth + 1);
+        }
+        else {
+            cout << "Unknown Node" << endl;
+        }
+    }
+
 };
 
 

@@ -23,7 +23,9 @@ int main() {
     lexer.printTokens(tokens);
     Parser parser(tokens);
     vector<shared_ptr<ASTNode>> ast = parser.parse();
-	parser.printAST(ast);
-
+    cout << "Abstract Syntax Tree:" << endl;
+    for (const auto& node : ast) {
+        parser.printAST(node, 0);
+    }
     return 0;
 }
