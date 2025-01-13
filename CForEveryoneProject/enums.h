@@ -1,5 +1,18 @@
 #pragma once
+#include <map>
 enum Pattern {
+	// מילים שמורות
+	//סוגי משתנים
+    TOK_DOUBLE_TYPE,
+    TOK_INT_TYPE,
+	TOK_CHAR_TYPE,
+	TOK_BOOL_TYPE,
+	TOK_FLOAT_TYPE,
+	TOK_STRING_TYPE,
+	TOK_LONG_TYPE,
+	//מילים שמורות נוספות
+    TOK_VOID,
+    TOK_INCLUDE,
     TOK_DOUBLE,
     TOK_VAR,
     TOK_TRUE,
@@ -11,7 +24,7 @@ enum Pattern {
     TOK_IFRANGE,
     TOK_IF,
     TOK_FOR,
-    TOK_FLOUT,
+    TOK_FLOAT,
     TOK_FALSE,
     TOK_ELSE,
     TOK_ELIF,
@@ -44,9 +57,22 @@ enum Pattern {
     TOK_STRING_LITERAL,
     TOK_RIGHT_ARRAY,
     TOK_LEFT_ARRAY,
-    TOK_MODULO
+    TOK_PERCENT,
+	TOK_EOF,
+	TOK_UNKNOWN,
+	TOK_INCREMENT,
+	TOK_DECREMENT
 };
 const std::string tokenNames[] = {
+	"TOK_DOUBLE_TYPE",
+	"TOK_INT_TYPE",
+	"TOK_CHAR_TYPE",
+	"TOK_BOOL_TYPE",
+	"TOK_FLOAT_TYPE",
+	"TOK_STRING_TYPE",
+	"TOK_LONG_TYPE",
+    "TOK_VOID",
+    "TOK_INCLUDE",
     "TOK_DOUBLE",
     "TOK_VAR",
     "TOK_TRUE",
@@ -58,7 +84,7 @@ const std::string tokenNames[] = {
     "TOK_IFRANGE",
     "TOK_IF",
     "TOK_FOR",
-    "TOK_FLOUT",
+    "TOK_FLOAT",
     "TOK_FALSE",
     "TOK_ELSE",
     "TOK_ELIF",
@@ -89,5 +115,60 @@ const std::string tokenNames[] = {
     "TOK_STRING_LITERAL",
     "TOK_RIGHT_ARRAY",
     "TOK_LEFT_ARRAY",
-    "TOK_MODULO"
+    "TOK_PERCENT",
+	"TOK_EOF",
+	"TOK_UNKNOWN",
+	"TOK_INCREMENT",
+	"TOK_DECREMENT"
+};
+const std::map<std::string, Pattern> mapAlphaTokens = {
+		//{"type", TOK_TYPE},
+	{"void", TOK_VOID},
+	{"include", TOK_INCLUDE},
+	{"double", TOK_DOUBLE_TYPE},
+    {"var", TOK_VAR},
+    {"true", TOK_TRUE},
+    {"string", TOK_STRING_TYPE},
+    {"return", TOK_RETURN},
+    {"print", TOK_PRINT},
+    {"new", TOK_NEW},
+    {"long", TOK_LONG_TYPE},
+    {"int", TOK_LONG_TYPE},
+    {"ifrange", TOK_IFRANGE},
+    {"if", TOK_IF},
+    {"for", TOK_FOR},
+    {"float", TOK_FLOAT_TYPE},
+    {"false", TOK_FALSE},
+    {"else", TOK_ELSE},
+    {"elif", TOK_ELIF},
+    {"char", TOK_CHAR_TYPE},
+    {"bool", TOK_BOOL_TYPE},
+
+};
+const std::map<std::string, Pattern> mapNonAlphaTokens = {
+{"==", TOK_EQUAL},
+{"!=", TOK_NOT_EQUAL},
+{">=", TOK_GREATER_EQUAL},
+{"<=", TOK_LESS_EQUAL},
+{"&&", TOK_AND},
+{"||", TOK_OR},
+{";", TOK_SEMICOLON},
+{",", TOK_COMMA},
+{"{", TOK_OPEN_CURLY},
+{"}", TOK_CLOSE_CURLY},
+{"(", TOK_OPEN_PAREN},
+{")", TOK_CLOSE_PAREN},
+{"+", TOK_PLUS},
+{"-", TOK_MINUS},
+{"*", TOK_ASTERISK},
+{"/", TOK_SLASH},
+{"=", TOK_ASSIGN},
+{"<", TOK_LESS},
+{">", TOK_GREATER},
+{"\"", TOK_STRING_LITERAL},
+{"[",TOK_LEFT_ARRAY},
+{"]",TOK_RIGHT_ARRAY},
+{"%",TOK_PERCENT},
+{"++",TOK_INCREMENT},
+{"--",TOK_DECREMENT}
 };

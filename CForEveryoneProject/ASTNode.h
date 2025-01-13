@@ -11,14 +11,37 @@ struct ASTNode {
 };
 
 // צומת עבור מזהים
-struct IdentifierNode : ASTNode {
-    string name;
-    IdentifierNode(const string& name) : name(name) {}
-    void printASTNode() {
-		cout << "IdentifierNode: " << name << endl;
+//struct IdentifierNode : ASTNode {
+//    string name;
+//    IdentifierNode(const string& name) : name(name) {}
+//    void printASTNode() {
+//		cout << "IdentifierNode: " << name << endl;
+//	}
+//};
+struct TokenNode:ASTNode{
+	Token token;
+	TokenNode(Token token) :token(token) {}
+	void printASTNode() {
+		cout << "TokenNode: " << token.typeToken << endl;
 	}
 };
-
+struct ParentNode :ASTNode {
+	string name;
+	vector<shared_ptr<ASTNode>> children;
+	ParentNode(const string& name, vector<shared_ptr<ASTNode>> children) :name(name), children(children) {}
+	ParentNode(const string& name) :name(name){}
+public:
+	void printASTNode() {
+		cout << "ParentNode: " << name << endl;
+		for (auto child : children) {
+			child->printASTNode();
+		}
+	}
+	void addChild(shared_ptr<ASTNode> child) {
+		children.push_back(child);
+	}
+	
+};
 // צומת עבור מספרים
 struct NumberNode : ASTNode {
     double value;

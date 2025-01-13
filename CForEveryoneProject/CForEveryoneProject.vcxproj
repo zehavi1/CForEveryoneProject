@@ -132,6 +132,7 @@
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="ParserLex-try.cpp" />
     <ClCompile Include="Token.cpp" />
     <ClCompile Include="trySyntax.cpp" />
   </ItemGroup>

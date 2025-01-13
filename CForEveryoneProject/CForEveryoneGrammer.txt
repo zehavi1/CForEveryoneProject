@@ -1,7 +1,8 @@
 <expr> ::= <term> (TOK_PLUS <term> | TOK_MINUS <term>)*
-<term> ::= <factor> (TOK_ASTERISK <factor> | TOK_SLASH <factor>)*
-<factor> ::= TOK_ID | TOK_INT | TOK_DOUBLE | TOK_STRING_LITERAL | TOK_OPEN_PAREN <expr> TOK_CLOSE_PAREN
-<number> ::= TOK_INT | TOK_DOUBLE
+<term> ::= <factor> (TOK_ASTERISK <factor> | TOK_SLASH <factor> | TOK_PERCENT <factor>)*
+<factor> ::= TOK_ID | <number>  | TOK_OPEN_PAREN <expr> TOK_CLOSE_PAREN | TOK_INCREMENT TOK_ID | TOK_DECREMENT TOK_ID
+<number> ::= TOK_INT | TOK_DOUBLE | TOK_FLOAT | TOK_CHAR
+
 <condition> ::= <expr> (TOK_EQUAL | TOK_NOT_EQUAL | TOK_LESS | TOK_GREATER | TOK_LESS_EQUAL | TOK_GREATER_EQUAL) <expr>
 <range_condition> ::= <expr> TOK_LESS <expr> TOK_LESS <expr> | <expr> TOK_GREATER <expr> TOK_GREATER <expr>
 
@@ -26,5 +27,10 @@
               | TOK_RETURN <expr> TOK_SEMICOLON
 
 <assignment> ::= <type> TOK_ID TOK_ASSIGN <expr> TOK_SEMICOLON | TOK_VAR TOK_ID TOK_ASSIGN <expr> TOK_SEMICOLON
-<type> ::= TOK_INT | TOK_DOUBLE | TOK_FLOAT | TOK_CHAR | TOK_BOOL | TOK_STRING
+<type> ::=TOK_DOUBLE_TYPE | TOK_INT_TYPE | TOK_CHAR_TYPE |
+                 TOK_BOOL_TYPE | TOK_FLOAT_TYPE | TOK_STRING_TYPE | TOK_LONG_TYPE
 <print_statement> ::= TOK_PRINT TOK_OPEN_PAREN <expr> TOK_CLOSE_PAREN TOK_SEMICOLON
+
+<parameter_list> ::= <type> TOK_ID (TOK_COMMA <type> TOK_ID)*
+<function_definition> ::= (<type>|TOK_VOID) TOK_ID TOK_OPEN_PAREN <parameter_list> TOK_CLOSE_PAREN <block>
+
