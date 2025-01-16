@@ -1,7 +1,6 @@
 #include <iostream>
 #include "Lexer.h"
-#include "Parser.h"
-#include "ParserLex-try.cpp"
+#include "SyntacticAnalysis.h"
 
 int main() {
     //Graph g;
@@ -23,7 +22,7 @@ int main() {
     program += ' ';
     auto tokens = lexer.tokenize(program);
     lexer.printTokens(tokens);
-    ParserLex parser(tokens);
+    SyntacticAnalysis parser(tokens);
     vector<shared_ptr<ASTNode>> ast = parser.parse();
     cout << "Abstract Syntax Tree:" << endl;
     for (const auto& node : ast) {
