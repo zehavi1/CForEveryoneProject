@@ -371,7 +371,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::assignment() {
 		else
 		{
 			startNode->addChild(expression());
-	}
+		}
 		break;
 	default:
 		break;
@@ -382,51 +382,53 @@ shared_ptr<ASTNode> SyntacticAnalysis::assignment() {
 	else {
 		throw runtime_error("Expected '=' after identifier");
 	}
-	
+
 	startNode->addChild(match(TOK_SEMICOLON, "Expected ';' at the end of statement"));
 	return startNode;
+	}
+	//shared_ptr<ASTNode> SyntacticAnalysis::statement() {
+	//	Pattern p = currentToken().typeToken;
+	//	switch (p)
+	//	{
+	//	case TOK_DOUBLE_TYPE:
+	//		break;
+	//	case TOK_INT_TYPE:
+	//		break;
+	//	case TOK_CHAR_TYPE:
+	//		break;
+	//	case TOK_BOOL_TYPE:
+	//		break;
+	//	case TOK_FLOAT_TYPE:
+	//		break;
+	//	case TOK_STRING_TYPE:
+	//		break;
+	//	case TOK_LONG_TYPE:
+	//		break;
+	//	case TOK_VOID:
+	//		break;
+	//	case TOK_INCLUDE:
+	//		break;
+	//	case TOK_VAR:
+	//		break;
+	//	case TOK_PRINT:
+	//		return print_statement();
+	//		break;
+	//	case TOK_ID:
+	//		return assignment();
+	//		break;
+	//	case TOK_INT:
+	//	{
+	//		Token t = currentToken();
+	//		nextToken();
+	//		return make_shared<TokenNode>(t);
+	//	}
+	//	default:
+	//		break;
+	//	}
+	//}
 }
-//shared_ptr<ASTNode> SyntacticAnalysis::statement() {
-//	Pattern p = currentToken().typeToken;
-//	switch (p)
-//	{
-//	case TOK_DOUBLE_TYPE:
-//		break;
-//	case TOK_INT_TYPE:
-//		break;
-//	case TOK_CHAR_TYPE:
-//		break;
-//	case TOK_BOOL_TYPE:
-//		break;
-//	case TOK_FLOAT_TYPE:
-//		break;
-//	case TOK_STRING_TYPE:
-//		break;
-//	case TOK_LONG_TYPE:
-//		break;
-//	case TOK_VOID:
-//		break;
-//	case TOK_INCLUDE:
-//		break;
-//	case TOK_VAR:
-//		break;
-//	case TOK_PRINT:
-//		return print_statement();
-//		break;
-//	case TOK_ID:
-//		return assignment();
-//		break;
-//	case TOK_INT:
-//	{
-//		Token t = currentToken();
-//		nextToken();
-//		return make_shared<TokenNode>(t);
-//	}
-//	default:
-//		break;
-//	}
-//}
-vector<shared_ptr<ASTNode>> SyntacticAnalysis::parse() {
+vector<shared_ptr<ASTNode>> SyntacticAnalysis::parse() 
+{
 	vector<shared_ptr<ASTNode>> ast;
 	try {
 		while (currentTokenIndex < tokens.size() - 1) {
