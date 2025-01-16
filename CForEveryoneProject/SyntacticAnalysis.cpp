@@ -18,7 +18,7 @@ void SyntacticAnalysis::nextToken() {
 }
 shared_ptr<TokenNode> SyntacticAnalysis::match(Pattern pattern, string msg) {
 	if (currentToken().typeToken != pattern) {
-		string s = currentToken().value + msg;
+		string s = "error occured in "+currentToken().value+'\n' + " describtion: " + msg;
 		throw s;
 	}
 	Token t = currentToken();
@@ -28,7 +28,7 @@ shared_ptr<TokenNode> SyntacticAnalysis::match(Pattern pattern, string msg) {
 shared_ptr<ASTNode> SyntacticAnalysis::expression() {
 	shared_ptr<ASTNode> left = term();
 	while (currentToken().typeToken == TOK_PLUS || currentToken().typeToken == TOK_MINUS) {
-		string op = tokenNames[currentToken().typeToken];
+		Token op = currentToken();
 		nextToken();
 		shared_ptr<ASTNode> right = term();
 		left = make_shared<BinaryOpNode>(op, left, right);
@@ -38,7 +38,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::expression() {
 shared_ptr<ASTNode> SyntacticAnalysis::term() {
 	shared_ptr<ASTNode> left = factor();
 	while (currentToken().typeToken == TOK_ASTERISK || currentToken().typeToken == TOK_SLASH || currentToken().typeToken == TOK_PERCENT) {
-		string op = tokenNames[currentToken().typeToken];
+		Token op = currentToken();
 		nextToken();
 		shared_ptr<ASTNode> right = factor();
 		left = make_shared<BinaryOpNode>(op, left, right);
@@ -49,7 +49,10 @@ shared_ptr<ASTNode> SyntacticAnalysis::factor() {
 	shared_ptr<ParentNode> factorNode = make_shared<ParentNode>("factor");
 	Pattern pattern = currentToken().typeToken;
 	switch (pattern) {
-	case TOK_ID:
+	case TOK_ID:{
+		shared_ptr<ASTNode> node=match(TOK_ID);
+		return node;
+	}
 	case TOK_BOOL:
 	case TOK_CHAR:
 	case TOK_DOUBLE:
@@ -57,7 +60,9 @@ shared_ptr<ASTNode> SyntacticAnalysis::factor() {
 	case TOK_FLOAT:
 	case TOK_LONG:
 	{
+		
 		shared_ptr<ASTNode> node = number();
+		
 		return node;
 	}
 	case TOK_OPEN_PAREN:
@@ -71,10 +76,12 @@ shared_ptr<ASTNode> SyntacticAnalysis::factor() {
 	case TOK_INCREMENT:
 	case TOK_DECREMENT:
 	{
-		Token t = currentToken();
+		factorNode->addChild(make_shared<TokenNode>(currentToken()));
 		nextToken();
-		return make_shared<TokenNode>(t);
+		factorNode->addChild(match(TOK_ID, "Expected identifier after increment/decrement"));
+		return factorNode;
 	}
+	break;
 	default:
 		match(TOK_EOF, "Unexpected token in parseFactor");
 	}
@@ -89,6 +96,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::number() {
 	else {
 		match(TOK_EOF, "Expected number");
 	}
+	return nullptr;
 }
 shared_ptr<ASTNode> SyntacticAnalysis::print_statement()
 {
@@ -110,7 +118,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::assignment() {
 	startNode->addChild(match(TOK_SEMICOLON, "Expected ';' at the end of statement"));
 	return startNode;
 }
-shared_ptr<ASTNode> SyntacticAnalysis::parseStatement() {
+shared_ptr<ASTNode> SyntacticAnalysis::statement() {
 	Pattern p = currentToken().typeToken;
 	switch (p)
 	{
@@ -154,7 +162,7 @@ vector<shared_ptr<ASTNode>> SyntacticAnalysis::parse() {
 	vector<shared_ptr<ASTNode>> ast;
 	try {
 		while (currentTokenIndex < tokens.size() - 1) {
-			ast.push_back(parseStatement());
+			ast.push_back(statement());
 		}
 		return ast;
 	}
@@ -162,36 +170,44 @@ vector<shared_ptr<ASTNode>> SyntacticAnalysis::parse() {
 		cerr << s << endl;
 	}
 }
-void SyntacticAnalysis::printAST(const shared_ptr<ASTNode>& node, int depth) {
-	if (!node) return;
-
-	// הדפסת רווחים בהתאם לעומק העץ
-	for (int i = 0; i < depth; ++i) {
-		cout << "  ";
-	}
-
-	// הדפסת סוג הצומת
-	if (auto numNode = dynamic_pointer_cast<TokenNode>(node)) {
-		cout << "tokenNode: " << numNode->token.value << endl;
-	}
-
-	else if (auto binOpNode = dynamic_pointer_cast<BinaryOpNode>(node)) {
-		cout << "BinaryOpNode: " << binOpNode->op << endl;
-		printAST(binOpNode->left, depth + 1);  // צד שמאל
-		printAST(binOpNode->right, depth + 1); // צד ימין
-	}
-	else if (auto exprNode = dynamic_pointer_cast<ExpressionNode>(node)) {
-		cout << "ExpressionNode:" << endl;
-		printAST(exprNode->expression, depth + 1);
-	}
-	else if (auto stmtNode = dynamic_pointer_cast<ParentNode>(node)) {
-		cout << "parentNode of" << stmtNode->name << ":" << endl;
-		for (const auto& child : stmtNode->children)
-			printAST(child, depth + 1);
-	}
-	else {
-		cout << "Unknown Node" << endl;
-	}
+//void SyntacticAnalysis::printAST(const shared_ptr<ASTNode>& node, int depth) {
+//	if (!node) return;
+//
+//	// הדפסת רווחים בהתאם לעומק העץ
+//	for (int i = 0; i < depth; ++i) {
+//		cout << "  ";
+//	}
+//
+//	// הדפסת סוג הצומת
+//	if (auto numNode = dynamic_pointer_cast<TokenNode>(node)) {
+//		cout << "tokenNode: " << numNode->token.value << endl;
+//	}
+//
+//	/*else if (auto binOpNode = dynamic_pointer_cast<BinaryOpNode>(node)) {
+//		cout << "BinaryOpNode: " << binOpNode->op << endl;
+//		for (int i = 0; i < depth; ++i) {
+//			cout << "  ";
+//		}*/
+//		cout << "Left:" << endl;
+//		printAST(binOpNode->left, depth + 1);  // צד שמאל
+//		for (int i = 0; i < depth; ++i) {
+//			cout << "  ";
+//		}
+//		cout << "Right:" << endl;
+//		printAST(binOpNode->right, depth + 1); // צד ימין
+//	}
+//	else if (auto stmtNode = dynamic_pointer_cast<ParentNode>(node)) {
+//		cout << "ParentNode of " << stmtNode->name << ":" << endl;
+//		for (const auto& child : stmtNode->children)
+//			printAST(child, depth + 1);
+//	}
+//	else {
+//		cout << "Unknown Node" << endl;
+//	}
+//}
+void SyntacticAnalysis::printASTNodes(const shared_ptr<ASTNode>& node)
+{
+	node->printASTNode();
 }
 SyntacticAnalysis::~SyntacticAnalysis() {
 }

@@ -19,10 +19,10 @@ public:
 	shared_ptr<ASTNode> number();
 	shared_ptr<ASTNode> print_statement();
 	shared_ptr<ASTNode> assignment();
-	shared_ptr<ASTNode> parseStatement();
+	shared_ptr<ASTNode> statement();
 	vector<shared_ptr<ASTNode>> parse();
-	void printAST(const shared_ptr<ASTNode>& node, int depth = 0);
-	
+	//void printAST(const shared_ptr<ASTNode>& node, int depth = 0);
+	void printASTNodes(const shared_ptr<ASTNode>& node);
 
 	~SyntacticAnalysis();
 };

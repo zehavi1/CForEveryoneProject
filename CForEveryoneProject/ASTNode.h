@@ -6,10 +6,14 @@
 using namespace std;
 // מחלקת בסיס לכל הצמתים
 struct ASTNode {
-   virtual void printASTNode() = 0;
+   virtual void printASTNode(int depth=0) = 0;
     virtual ~ASTNode() {}
 };
-
+inline void printTabsDepth(int depth) {
+	for (int i = 0; i < depth; ++i) {
+		cout << "  ";
+	}
+}
 // צומת עבור מזהים
 //struct IdentifierNode : ASTNode {
 //    string name;
@@ -21,8 +25,9 @@ struct ASTNode {
 struct TokenNode:ASTNode{
 	Token token;
 	TokenNode(Token token) :token(token) {}
-	void printASTNode() {
-		cout << "TokenNode: " << token.typeToken << endl;
+	void printASTNode(int depth=0) {
+		printTabsDepth(depth);
+		cout << "TokenNode: " << token.value << endl;
 	}
 };
 struct ParentNode :ASTNode {
@@ -31,10 +36,11 @@ struct ParentNode :ASTNode {
 	ParentNode(const string& name, vector<shared_ptr<ASTNode>> children) :name(name), children(children) {}
 	ParentNode(const string& name) :name(name){}
 public:
-	void printASTNode() {
+	void printASTNode(int depth = 0) {
+		printTabsDepth(depth);
 		cout << "ParentNode: " << name << endl;
 		for (auto child : children) {
-			child->printASTNode();
+			child->printASTNode(depth+1);
 		}
 	}
 	void addChild(shared_ptr<ASTNode> child) {
@@ -42,47 +48,52 @@ public:
 	}
 	
 };
-// צומת עבור מספרים
-struct NumberNode : ASTNode {
-    double value;
-    NumberNode(double value) : value(value) {}
-    void printASTNode() {
-		cout << "NumberNode: " << value << endl;
-    }
-};
 
 // צומת עבור ביטויים בינאריים
 struct BinaryOpNode : ASTNode {
-    string op;
+    Token op;
     shared_ptr<ASTNode> left;
     shared_ptr<ASTNode> right;
-    BinaryOpNode(const string& op, shared_ptr<ASTNode> left, shared_ptr<ASTNode> right)
+    BinaryOpNode(const Token& op, shared_ptr<ASTNode> left, shared_ptr<ASTNode> right)
         : op(op), left(left), right(right) {}
-	void printASTNode() {
-		cout << "BinaryOpNode: " << op << endl;
-		left->printASTNode();
-		right->printASTNode();
+	void printASTNode(int depth = 0) {
+		printTabsDepth(depth);
+		cout << "BinaryOpNode: " << op.value << endl;
+		printTabsDepth(depth+1);
+		cout << "Left: " << endl;
+		left->printASTNode(depth+1);
+		printTabsDepth(depth+1);
+		cout << "Right: " << endl;
+		right->printASTNode(depth+1);
 	}
 };
+// צומת עבור מספרים
+//struct NumberNode : ASTNode {
+//    double value;
+//    NumberNode(double value) : value(value) {}
+//    void printASTNode() {
+//		cout << "NumberNode: " << value << endl;
+//    }
+//};
 
 // צומת עבור ביטויים
-struct ExpressionNode : ASTNode {
-    shared_ptr<ASTNode> expression;
-    ExpressionNode(shared_ptr<ASTNode> expr) : expression(expr) {}
-	void printASTNode() {
-		cout << "ExpressionNode: " << endl;
-		expression->printASTNode();
-	}
-};
-
-// צומת עבור משפטים
-struct StatementNode : ASTNode {
-	shared_ptr<ASTNode> statement;
-	StatementNode(shared_ptr<ASTNode> stmt) : statement(stmt) {}
-	void printASTNode() {
-		cout << "StatementNode: " << endl;
-		statement->printASTNode();
-	}
-    
-};
+//struct ExpressionNode : ASTNode {
+//    shared_ptr<ASTNode> expression;
+//    ExpressionNode(shared_ptr<ASTNode> expr) : expression(expr) {}
+//	void printASTNode() {
+//		cout << "ExpressionNode: " << endl;
+//		expression->printASTNode();
+//	}
+//};
+//
+//// צומת עבור משפטים
+//struct StatementNode : ASTNode {
+//	shared_ptr<ASTNode> statement;
+//	StatementNode(shared_ptr<ASTNode> stmt) : statement(stmt) {}
+//	void printASTNode() {
+//		cout << "StatementNode: " << endl;
+//		statement->printASTNode();
+//	}
+//    
+//};
 
