@@ -1,6 +1,6 @@
 <expr> ::= <term> (TOK_PLUS <term> | TOK_MINUS <term>)*
 <term> ::= <factor> (TOK_ASTERISK <factor> | TOK_SLASH <factor> | TOK_PERCENT <factor>)*
-<factor> ::= TOK_ID | <number>  | TOK_OPEN_PAREN <expr> TOK_CLOSE_PAREN | TOK_INCREMENT TOK_ID | TOK_DECREMENT TOK_ID
+<factor> ::= TOK_ID | <number>  | TOK_OPEN_PAREN <expr> TOK_CLOSE_PAREN | TOK_INCREMENT TOK_ID | TOK_DECREMENT TOK_ID | TOK_ID TOK_INCREMENT | TOK_ID TOK_DECREMENT
 <number> ::= TOK_INT | TOK_DOUBLE | TOK_FLOAT | TOK_CHAR
 
 <condition> ::= <expr> (TOK_EQUAL | TOK_NOT_EQUAL | TOK_LESS | TOK_GREATER | TOK_LESS_EQUAL | TOK_GREATER_EQUAL) <expr>

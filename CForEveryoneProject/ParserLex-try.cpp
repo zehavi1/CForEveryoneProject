@@ -25,10 +25,12 @@ class ParserLex {
     // התאמת טוקן מסוים
     shared_ptr<TokenNode> match(Pattern pattern,string msg="UnExcepted") {
 		if (currentToken().typeToken != pattern) {
-			throw currentToken().value + msg;
+            string s = currentToken().value + msg;
+            throw s;
 		}
+		Token t = currentToken();
         nextToken();
-        return make_shared<TokenNode>(currentToken()); // ליצור ולהחזיר צומת חדש
+        return make_shared<TokenNode>(t); // ליצור ולהחזיר צומת חדש
     }
 
     // ניתוח ביטוי
@@ -76,13 +78,14 @@ class ParserLex {
         {
             // במקרה שהטוקן הוא מספר שלם ארוך
             shared_ptr<ASTNode> node = number(); // ניתוח מספר
+			Token t = currentToken();
             nextToken(); // לעבור לטוקן הבא
-            return make_shared<TokenNode>(currentToken()); // ליצור ולהחזיר טון חדש
+            return make_shared<TokenNode>(t); // ליצור ולהחזיר טון חדש
             // אין צורך ב-break כאן כי return יוצא מהפונקציה
         }
         case TOK_OPEN_PAREN: // במקרה של סוגריים פתוחים
         {
-			nextToken(); // לעבור לטוקן הבא
+			
             factorNode->addChild(match(TOK_OPEN_PAREN)); // ליצור ולהחזיר טון חדש
             factorNode->addChild(expression()); // ניתוח הביטוי שבתוך הסוגריים
             factorNode->addChild(match(TOK_CLOSE_PAREN,"Expected closing parenthesis"));  // throw runtime_error("Expected closing parenthesis"); // זריקת חריגה אם אין סוגריים סגורים
@@ -92,44 +95,170 @@ class ParserLex {
 		case TOK_INCREMENT: // במקרה של אופרטור הגדלה
 		case TOK_DECREMENT: // במקרה של אופרטור הפחתה
         {
+			Token t = currentToken();
             nextToken(); // לעבור לטוקן הבא
-            return make_shared<TokenNode>(currentToken()); // ליצור ולהחזיר טון חדש
+            return make_shared<TokenNode>(t); // ליצור ולהחזיר טון חדש
         }
         default: // במקרה של טוקן לא צפוי
-            throw runtime_error("Unexpected token in parseFactor"); // זריקת חריגה עם הודעה מתאימה
+            match(TOK_EOF,"Unexpected token in parseFactor"); // זריקת חריגה עם הודעה מתאימה
         }
     }
 	shared_ptr<ASTNode> number() {
         Pattern p = currentToken().typeToken;
 		if (p == TOK_INT || p == TOK_DOUBLE || p == TOK_FLOAT || p == TOK_LONG||p==TOK_CHAR) {
+			Token t = currentToken();
 			nextToken();
-			return make_shared<TokenNode>(currentToken());
+			return make_shared<TokenNode>(t);
 		}
 		else {
-			throw runtime_error("Expected number");
+			match(TOK_EOF,"Expected number");
 		}
 	}
+    shared_ptr<ASTNode> print_statement()
+    {
+		shared_ptr<ParentNode> printNode = make_shared<ParentNode>("print");
+		printNode->addChild(match(TOK_PRINT)); // להתאים את הטוקן הנוכחי לפונקציה
+		printNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after print")); // להתאים את הטוקן הנוכחי לפונקציה
+		printNode->addChild(expression()); // להתאים את הטוקן הנוכחי לפונקציה
+		printNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after expression")); // להתאים את הטוקן הנוכחי לפונקציה
+		printNode->addChild(match(TOK_SEMICOLON, "Expected ';' at the end of statement")); // להתאים את הטוקן הנוכחי לפונקציה
+            return printNode; // נניח שבינתיים משפט הוא ביטוי
+        
+    }
 
-
-    
-    
+	
+	// ניתוח השמה-assignment--לא לשכוח לעשות גם לאתחול משתנים
+	shared_ptr<ASTNode> assignment() {
+		shared_ptr<ParentNode> startNode = make_shared<ParentNode>("assignment");
+		startNode->addChild(match(TOK_ID, "Expected identifier"));
+		startNode->addChild(match(TOK_EQUAL,"Expected '=' after identifier"));
+		startNode->addChild(expression());
+		startNode->addChild(match(TOK_SEMICOLON, "Expected ';' at the end of statement"));
+		return startNode;
+	}
 
     // ניתוח משפט
     shared_ptr<ASTNode> parseStatement() {
-        if (match(TOK_PRINT)) {
-            if (!match(TOK_OPEN_PAREN)) {
-                throw runtime_error("Expected '(' after print");
-            }
-            shared_ptr<ASTNode> expr = expression();
-            if (!match(TOK_CLOSE_PAREN)) {
-                throw runtime_error("Expected ')' after expression");
-            }
-            if (!match(TOK_SEMICOLON)) {
-                throw runtime_error("Expected ';' at the end of statement");
-            }
-            return expr; // נניח שבינתיים משפט הוא ביטוי
+        
+		Pattern p = currentToken().typeToken;
+        switch (p)
+        {
+        case TOK_DOUBLE_TYPE:
+            break;
+        case TOK_INT_TYPE:
+            break;
+        case TOK_CHAR_TYPE:
+            break;
+        case TOK_BOOL_TYPE:
+            break;
+        case TOK_FLOAT_TYPE:
+            break;
+        case TOK_STRING_TYPE:
+            break;
+        case TOK_LONG_TYPE:
+            break;
+        case TOK_VOID:
+            break;
+        case TOK_INCLUDE:
+            break;
+        case TOK_DOUBLE:
+            break;
+        case TOK_VAR:
+            break;
+        case TOK_TRUE:
+            break;
+        case TOK_RETURN:
+            break;
+        case TOK_PRINT: { return print_statement(); }
+            break;
+        case TOK_NEW:
+            break;
+        case TOK_LONG:
+            break;
+        case TOK_INT:
+            break;
+        case TOK_IFRANGE:
+            break;
+        case TOK_IF:
+            break;
+        case TOK_FOR:
+            break;
+        case TOK_FLOAT:
+            break;
+        case TOK_FALSE:
+            break;
+        case TOK_ELSE:
+            break;
+        case TOK_ELIF:
+            break;
+        case TOK_CHAR:
+            break;
+        case TOK_BOOL:
+            break;
+        case TOK_ERROR:
+            break;
+        case TOK_ID:
+            break;
+        case TOK_STRING:
+            break;
+        case TOK_EQUAL:
+            break;
+        case TOK_NOT_EQUAL:
+            break;
+        case TOK_GREATER_EQUAL:
+            break;
+        case TOK_LESS_EQUAL:
+            break;
+        case TOK_AND:
+            break;
+        case TOK_OR:
+            break;
+        case TOK_SEMICOLON:
+            break;
+        case TOK_COMMA:
+            break;
+        case TOK_OPEN_CURLY:
+            break;
+        case TOK_CLOSE_CURLY:
+            break;
+        case TOK_OPEN_PAREN:
+            break;
+        case TOK_CLOSE_PAREN:
+            break;
+        case TOK_PLUS:
+            break;
+        case TOK_MINUS:
+            break;
+        case TOK_ASTERISK:
+            break;
+        case TOK_SLASH:
+            break;
+        case TOK_ASSIGN:
+            break;
+        case TOK_LESS:
+            break;
+        case TOK_GREATER:
+            break;
+        case TOK_STRING_LITERAL:
+            break;
+        case TOK_RIGHT_ARRAY:
+            break;
+        case TOK_LEFT_ARRAY:
+            break;
+        case TOK_PERCENT:
+            break;
+        case TOK_EOF:
+            break;
+        case TOK_UNKNOWN:
+            break;
+        case TOK_INCREMENT:
+            break;
+        case TOK_DECREMENT:
+            break;
+        default:
+            break;
         }
-        else if (match(TOK_INT)) {
+         if (match(TOK_INT)) {
             if (!match(TOK_ID)) {
                 throw runtime_error("Expected identifier after int");
             }
@@ -140,7 +269,7 @@ class ParserLex {
             if (!match(TOK_SEMICOLON)) {
                 throw runtime_error("Expected ';' at the end of statement");
             }
-            return make_shared<StatementNode>(expr);
+            return expr;
         }
         else {
             throw runtime_error("Unknown statement type");
@@ -153,10 +282,16 @@ public:
     // ניתוח הקלט כולו
     vector<shared_ptr<ASTNode>> parse() {
         vector<shared_ptr<ASTNode>> ast;
-        while (currentTokenIndex < tokens.size() - 1) {
-            ast.push_back(parseStatement());
+        try {
+            while (currentTokenIndex < tokens.size() - 1) {
+                ast.push_back(parseStatement());
+            }
+            return ast;
         }
-        return ast;
+		catch (string s) {
+			cout << s << endl;
+		}
+        
     }
    
     void printAST(const shared_ptr<ASTNode>& node, int depth = 0) {

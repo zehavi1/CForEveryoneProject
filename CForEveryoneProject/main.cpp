@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Lexer.h"
 #include "Parser.h"
+#include "ParserLex-try.cpp"
 
 int main() {
     //Graph g;
@@ -13,7 +14,7 @@ int main() {
    // g.printPathsToToken("start");  // התחל ממצב התחלה שאתה רוצה
     Lexer lexer;
     //string program = lexer.readFileToString("programExample.txt");
-	string program = "print(3 + 5);";
+	string program = "print(3 + ++5*2+(a-b));";
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
@@ -21,7 +22,7 @@ int main() {
     program += ' ';
     auto tokens = lexer.tokenize(program);
     lexer.printTokens(tokens);
-    Parser parser(tokens);
+    ParserLex parser(tokens);
     vector<shared_ptr<ASTNode>> ast = parser.parse();
     cout << "Abstract Syntax Tree:" << endl;
     for (const auto& node : ast) {

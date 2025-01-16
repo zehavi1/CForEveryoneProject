@@ -11,7 +11,7 @@ using namespace std;
 
 class Lexer {
 private:
-    const vector<string> multiCharTokens = { "==", "!=", ">=", "<=", "&&", "||" }; // דוגמאות לטוקנים מרובי-תווים
+    const vector<string> multiCharTokens = { "==", "!=", ">=", "<=", "&&", "||","++","--"}; // דוגמאות לטוקנים מרובי-תווים
     const vector<char> singleCharTokens = { ';', ',', '{', '}', '(', ')', '+', '-', '*', '/', '=', '<', '>','"','[',']','%'}; // טוקנים חד-תווים
     const std::map<std::string, Pattern> mapSaved = mapAlphaTokens;
 	const std::map<std::string, Pattern> mapSavedNonAlphaTokens = mapNonAlphaTokens;
