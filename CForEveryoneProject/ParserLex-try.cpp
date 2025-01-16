@@ -77,10 +77,12 @@ class ParserLex {
 		case TOK_LONG:
         {
             // במקרה שהטוקן הוא מספר שלם ארוך
-            shared_ptr<ASTNode> node = number(); // ניתוח מספר
-			Token t = currentToken();
-            nextToken(); // לעבור לטוקן הבא
-            return make_shared<TokenNode>(t); // ליצור ולהחזיר טון חדש
+            shared_ptr<ASTNode> node = number(); 
+            // ניתוח מספר
+			return node; // החזרת המספר
+			//Token t = currentToken();
+            //nextToken(); // לעבור לטוקן הבא
+            //return make_shared<TokenNode>(t); // ליצור ולהחזיר טון חדש
             // אין צורך ב-break כאן כי return יוצא מהפונקציה
         }
         case TOK_OPEN_PAREN: // במקרה של סוגריים פתוחים
@@ -161,22 +163,22 @@ class ParserLex {
             break;
         case TOK_INCLUDE:
             break;
-        case TOK_DOUBLE:
-            break;
+        /*case TOK_DOUBLE:
+            break;*/
         case TOK_VAR:
             break;
-        case TOK_TRUE:
-            break;
+        /*case TOK_TRUE:
+            break;*/
         case TOK_RETURN:
             break;
         case TOK_PRINT: { return print_statement(); }
             break;
-        case TOK_NEW:
+        /*case TOK_NEW:
             break;
         case TOK_LONG:
             break;
         case TOK_INT:
-            break;
+            break;*/
         case TOK_IFRANGE:
             break;
         case TOK_IF:
@@ -185,7 +187,7 @@ class ParserLex {
             break;
         case TOK_FLOAT:
             break;
-        case TOK_FALSE:
+        /*case TOK_FALSE:
             break;
         case TOK_ELSE:
             break;
@@ -196,10 +198,10 @@ class ParserLex {
         case TOK_BOOL:
             break;
         case TOK_ERROR:
-            break;
+            break;*/
         case TOK_ID:
             break;
-        case TOK_STRING:
+        /*case TOK_STRING:
             break;
         case TOK_EQUAL:
             break;
@@ -214,7 +216,7 @@ class ParserLex {
         case TOK_OR:
             break;
         case TOK_SEMICOLON:
-            break;
+            break;*/
         case TOK_COMMA:
             break;
         case TOK_OPEN_CURLY:
@@ -316,9 +318,10 @@ public:
             cout << "ExpressionNode:" << endl;
             printAST(exprNode->expression, depth + 1);
         }
-        else if (auto stmtNode = dynamic_pointer_cast<StatementNode>(node)) {
-            cout << "StatementNode:" << endl;
-            printAST(stmtNode->statement, depth + 1);
+        else if (auto stmtNode = dynamic_pointer_cast<ParentNode>(node)) {
+            cout << "parentNode of"<<stmtNode->name <<":"<< endl;
+			for (const auto& child : stmtNode->children)
+				printAST(child, depth + 1);
         }
         else {
             cout << "Unknown Node" << endl;

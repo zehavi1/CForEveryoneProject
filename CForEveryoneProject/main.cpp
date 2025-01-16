@@ -14,7 +14,8 @@ int main() {
    // g.printPathsToToken("start");  // התחל ממצב התחלה שאתה רוצה
     Lexer lexer;
     //string program = lexer.readFileToString("programExample.txt");
-	string program = "print(3 + ++5*2+(a-b));";
+	//string program = "print(3 + ++5*2+(a-b));";
+	string program = "print(3+5);";
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
