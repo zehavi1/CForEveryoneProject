@@ -3,13 +3,16 @@
 <factor> ::= TOK_ID | <number>  | TOK_OPEN_PAREN <expr> TOK_CLOSE_PAREN | TOK_INCREMENT TOK_ID | TOK_DECREMENT TOK_ID | TOK_ID TOK_INCREMENT | TOK_ID TOK_DECREMENT
 <number> ::= TOK_INT | TOK_DOUBLE | TOK_FLOAT | TOK_CHAR
 
-<condition> ::= <expr> (TOK_EQUAL | TOK_NOT_EQUAL | TOK_LESS | TOK_GREATER | TOK_LESS_EQUAL | TOK_GREATER_EQUAL) <expr>
-<range_condition> ::= <expr> TOK_LESS <expr> TOK_LESS <expr> | <expr> TOK_GREATER <expr> TOK_GREATER <expr>
+<comparison_operator> ::= TOK_EQUAL | TOK_NOT_EQUAL | TOK_LESS | TOK_GREATER | TOK_LESS_EQUAL | TOK_GREATER_EQUAL
+<logical_operator> ::= TOK_AND | TOK_OR
+<conditions> ::= <condition> (logical_operator <condition>)*
+<condition>::=(<expr> comparison_operator <expr>) (^same^ comparison_operator <expr>)--<range_condition>
+//<range_condition> ::= <expr> TOK_LESS <expr> TOK_LESS <expr> | <expr> TOK_GREATER <expr> TOK_GREATER <expr>
 
-<if_statement> ::= TOK_IF TOK_OPEN_PAREN <condition> TOK_CLOSE_PAREN <block>
-<if_range_statement> ::= TOK_IFRANGE TOK_OPEN_PAREN <range_condition> TOK_CLOSE_PAREN <block>
-<if_else_statement> ::= TOK_IF TOK_OPEN_PAREN <condition> TOK_CLOSE_PAREN <block> TOK_ELSE <block>
-<elif_statement> ::= TOK_IF TOK_OPEN_PAREN <condition> TOK_CLOSE_PAREN <block> (TOK_ELIF TOK_OPEN_PAREN <condition> TOK_CLOSE_PAREN <block>)* (TOK_ELSE <block>)?
+//<if_statement> ::= TOK_IF TOK_OPEN_PAREN <conditions> TOK_CLOSE_PAREN <block>
+//<if_range_statement> ::= TOK_IFRANGE TOK_OPEN_PAREN <range_condition> TOK_CLOSE_PAREN <block>
+//<if_else_statement> ::= TOK_IF TOK_OPEN_PAREN <condition> TOK_CLOSE_PAREN <block>( TOK_ELSE <block>)?
+<ifelif_statement> ::= TOK_IF TOK_OPEN_PAREN <condition> TOK_CLOSE_PAREN <block> (TOK_ELIF TOK_OPEN_PAREN <condition> TOK_CLOSE_PAREN <block>)* (TOK_ELSE <block>)?
 
 <loop> ::= <for_loop> | <while_loop> | <foreach_loop>
 <for_loop> ::= TOK_FOR TOK_OPEN_PAREN <assignment> TOK_SEMICOLON <condition> TOK_SEMICOLON <assignment> TOK_CLOSE_PAREN <block>
@@ -29,7 +32,8 @@
 <assignment> ::= (<type>|TOK_VAR) TOK_ID ((TOK_PLUS | TOK_MINUS | TOK_ASTERISK | TOK_SLASH)  TOK_ASSIGN <expr>) | (TOK_INCREMENT | TOK_DECREMENT) (TOK_ASSIGN <expr>)? TOK_SEMICOLON
 <type> ::=TOK_DOUBLE_TYPE | TOK_INT_TYPE | TOK_CHAR_TYPE |
                  TOK_BOOL_TYPE | TOK_FLOAT_TYPE | TOK_STRING_TYPE | TOK_LONG_TYPE
-<print_statement> ::= TOK_PRINT TOK_OPEN_PAREN <expr> TOK_CLOSE_PAREN TOK_SEMICOLON
+<print_statement> ::= TOK_PRINT TOK_OPEN_PAREN <expr_print> TOK_CLOSE_PAREN TOK_SEMICOLON
+<expr_print>::=(<expr>|TOK_STRING) TOK_PLUS ((<expr>|TOK_STRING))*
 
 <parameter_list> ::= (<type> TOK_ID (TOK_COMMA <type> TOK_ID)*)?
 <function_definition> ::= (<type>|TOK_VOID) TOK_ID TOK_OPEN_PAREN <parameter_list> TOK_CLOSE_PAREN <block>

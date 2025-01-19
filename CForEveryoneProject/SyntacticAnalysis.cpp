@@ -35,6 +35,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::expression() {
 	}
 	return left;
 }
+
 shared_ptr<ASTNode> SyntacticAnalysis::term() {
 	shared_ptr<ASTNode> left = factor();
 	while (currentToken().typeToken == TOK_ASTERISK || currentToken().typeToken == TOK_SLASH || currentToken().typeToken == TOK_PERCENT) {
@@ -45,6 +46,8 @@ shared_ptr<ASTNode> SyntacticAnalysis::term() {
 	}
 	return left;
 }
+// פונקציה לניתוח פקודות השמה
+//נבדק בהצלחה
 shared_ptr<ASTNode> SyntacticAnalysis::factor() {
 	shared_ptr<ParentNode> factorNode = make_shared<ParentNode>("factor");
 	Pattern pattern = currentToken().typeToken;
@@ -86,6 +89,8 @@ shared_ptr<ASTNode> SyntacticAnalysis::factor() {
 		match(TOK_EOF, "Unexpected token in parseFactor");
 	}
 }
+// פונקציה לניתוח מספרים
+//נבדק בהצלחה
 shared_ptr<ASTNode> SyntacticAnalysis::number() {
 	Pattern p = currentToken().typeToken;
 	if (p == TOK_INT || p == TOK_DOUBLE || p == TOK_FLOAT || p == TOK_LONG || p == TOK_CHAR) {
@@ -98,46 +103,105 @@ shared_ptr<ASTNode> SyntacticAnalysis::number() {
 	}
 	return nullptr;
 }
-shared_ptr<ASTNode> SyntacticAnalysis::print_statement()
-{
+// פונקציה לניתוח פקודת הדפסה
+//נבדק בהצלחה
+shared_ptr<ASTNode> SyntacticAnalysis::print_statement() {
 	shared_ptr<ParentNode> printNode = make_shared<ParentNode>("print");
 	printNode->addChild(match(TOK_PRINT)); // להתאים את הטוקן הנוכחי לפונקציה
 	printNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after print")); // להתאים את הטוקן הנוכחי לפונקציה
-	printNode->addChild(expression()); // להתאים את הטוקן הנוכחי לפונקציה
+	printNode->addChild(expr_print()); // להתאים את הביטוי להדפסה
 	printNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after expression")); // להתאים את הטוקן הנוכחי לפונקציה
 	printNode->addChild(match(TOK_SEMICOLON, "Expected ';' at the end of statement")); // להתאים את הטוקן הנוכחי לפונקציה
-	return printNode; // נניח שבינתיים משפט הוא ביטוי
-
+	return printNode; // החזרת צומת הדפסה
 }
-shared_ptr<ASTNode> SyntacticAnalysis::condition() {
-	shared_ptr<ASTNode> left = expression(); // ניתוח הביטוי הראשון
-	Token op = currentToken(); // טוקן אופרטור
-	if (op.typeToken == TOK_EQUAL || op.typeToken == TOK_NOT_EQUAL ||
-		op.typeToken == TOK_LESS || op.typeToken == TOK_GREATER ||
-		op.typeToken == TOK_LESS_EQUAL || op.typeToken == TOK_GREATER_EQUAL) {
-		nextToken(); // לעבור לטוקן הבא
-		shared_ptr<ASTNode> right = expression(); // ניתוח הביטוי השני
-		return make_shared<BinaryOpNode>(op, left, right); // החזרת צומת בינארית
+// פונקציה לניתוח הביטויים להדפסה
+//נבדק בהצלחה
+shared_ptr<ASTNode> SyntacticAnalysis::expr_print() {
+	shared_ptr<ParentNode> exprNode = make_shared<ParentNode>("expr_print");
+	// ניתוח הביטוי הראשון או המחרוזת
+	if (currentToken().typeToken == TOK_STRING_LITERAL) {
+		exprNode->addChild(match(TOK_STRING_LITERAL, "Expected string literal"));
+		exprNode->addChild(match(TOK_STRING, "Expected string"));
+		exprNode->addChild(match(TOK_STRING_LITERAL, "Expected string literal"));
 	}
-	throw runtime_error("Expected a comparison operator in condition");
-}
+	else {
+		exprNode->addChild(expression()); // ניתוח ביטוי
+	}
 
-shared_ptr<ASTNode> SyntacticAnalysis::range_condition() {
-	shared_ptr<ParentNode> rangeNode = make_shared<ParentNode>("range");
-	rangeNode->addChild( expression()); // ניתוח הביטוי הראשון
-	Token op1 = currentToken(); // טוקן אופרטור ראשון
-	if (op1.typeToken == TOK_LESS || op1.typeToken == TOK_GREATER) {
-		rangeNode->addChild(match(op1.typeToken)); // להתאים את הטוקן הנוכחי לפונקציה
-		rangeNode->addChild(expression()); // ניתוח הביטוי האמצעי
-		Token op2 = currentToken(); // טוקן אופרטור שני
-		if (op2.typeToken == TOK_LESS || op2.typeToken == TOK_GREATER) {
-			rangeNode->addChild(match(op2.typeToken)); // להתאים את הטוקן הנוכחי לפונקציה
-			rangeNode->addChild(expression()); // ניתוח הביטוי האחרון
-			return rangeNode; // החזרת צומת טווח
+	// חיבור עם '+' למחרוזות נוספות או ביטויים
+	while (currentToken().typeToken == TOK_PLUS) {
+		exprNode->addChild(match(TOK_PLUS)); // להתאים את סימן החיבור
+		if (currentToken().typeToken == TOK_STRING_LITERAL) {
+			exprNode->addChild(match(TOK_STRING_LITERAL, "Expected string literal"));
+			exprNode->addChild(match(TOK_STRING, "Expected string"));
+			exprNode->addChild(match(TOK_STRING_LITERAL, "Expected string literal"));
+		}
+		else {
+			exprNode->addChild(expression()); // ניתוח ביטוי נוסף
 		}
 	}
-	throw runtime_error("Expected a range comparison operator in range_condition");
+
+	return exprNode; // החזרת צומת הביטוי להדפסה
 }
+
+
+shared_ptr<ASTNode> SyntacticAnalysis::conditions() {
+	shared_ptr<ParentNode> conditionNode = make_shared<ParentNode>("condition");
+	conditionNode->addChild(expression()); // ניתוח הביטוי הראשון
+	conditionNode->addChild(comparison_operator()); // ניתוח אופרטור השוואה
+	conditionNode->addChild(expression()); // ניתוח הביטוי השני
+	while (currentToken().typeToken == TOK_AND || currentToken().typeToken == TOK_OR) {
+		conditionNode->addChild(logical_operator()); // ניתוח אופרטור לוגי
+		conditionNode->addChild(expression()); // ניתוח הביטוי הבא
+		conditionNode->addChild(comparison_operator()); // ניתוח אופרטור השוואה
+		conditionNode->addChild(expression()); // ניתוח הביטוי השני
+	}
+	return conditionNode; // החזרת צומת תנאי
+}
+shared_ptr<ASTNode> SyntacticAnalysis::condition() {
+	
+	shared_ptr<ParentNode> conditionNode = make_shared<ParentNode>("condition");
+	conditionNode->addChild(expression()); // ניתוח הביטוי הראשון
+	Pattern p = currentToken().typeToken;
+	conditionNode->addChild(comparison_operator()); // ניתוח אופרטור השוואה
+	conditionNode->addChild(expression()); // ניתוח הביטוי השני
+	if (currentToken().typeToken == p)
+	{
+		conditionNode->name = "condition-range";
+		conditionNode->addChild(comparison_operator()); // ניתוח אופרטור השוואה
+		conditionNode->addChild(expression()); // ניתוח הביטוי השני
+	}
+	return conditionNode; // החזרת צומת תנאי
+}
+shared_ptr<ASTNode> SyntacticAnalysis::comparison_operator() {
+	Pattern p = currentToken().typeToken;
+	if (p == TOK_EQUAL || p == TOK_NOT_EQUAL || p == TOK_LESS || p == TOK_GREATER || p == TOK_LESS_EQUAL || p == TOK_GREATER_EQUAL) {
+		return match(p);
+	}
+	else {
+		match(TOK_EOF, "Expected comparison operator");
+	}
+}
+shared_ptr<ASTNode> SyntacticAnalysis::logical_operator() {
+	Pattern p = currentToken().typeToken;
+	if (p == TOK_AND || p == TOK_OR) {
+		return match(p);
+	}
+	else {
+		match(TOK_EOF, "Expected logical operator");
+	}
+}
+shared_ptr<ASTNode> SyntacticAnalysis::if_range_statement() {
+	shared_ptr<ParentNode> ifRangeNode = make_shared<ParentNode>("if_range");
+	ifRangeNode->addChild(match(TOK_IFRANGE));
+	ifRangeNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after if_range"));
+	ifRangeNode->addChild(range_condition());
+	ifRangeNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after range condition"));
+	ifRangeNode->addChild(block());
+	return ifRangeNode;
+}
+
+
 
 // הוספת פונקציות לניתוח פקודות אם
 shared_ptr<ASTNode> SyntacticAnalysis::if_statement() {
@@ -150,7 +214,15 @@ shared_ptr<ASTNode> SyntacticAnalysis::if_statement() {
 
 	return ifNode;
 }
-
+shared_ptr<ASTNode> SyntacticAnalysis::elif_statement() {
+	shared_ptr<ParentNode> ifElseIfNode = make_shared<ParentNode>("if_else_if");
+	ifElseIfNode->addChild(match(TOK_ELIF));
+	ifElseIfNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after elif"));
+	ifElseIfNode->addChild(condition());
+	ifElseIfNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
+	ifElseIfNode->addChild(block());
+	return ifElseIfNode;
+}
 shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement() {
 	shared_ptr<ParentNode> ifElseNode = make_shared<ParentNode>("if_else");
 	ifElseNode->addChild(match(TOK_IF));
@@ -158,6 +230,10 @@ shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement() {
 	ifElseNode->addChild(condition());
 	ifElseNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
 	ifElseNode->addChild(block());
+	while (currentToken().typeToken == TOK_ELIF)
+	{
+		ifElseNode->addChild(if_else_if_statement());
+	}
 	if (currentToken().typeToken == TOK_ELSE) {
 		ifElseNode->addChild(match(TOK_ELSE));
 		ifElseNode->addChild(block());

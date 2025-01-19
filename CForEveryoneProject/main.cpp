@@ -15,13 +15,16 @@ int main() {
     //string program = lexer.readFileToString("programExample.txt");
 	//string program = "print(3 + ++a*2+(a-b));";
 	//string program = "print(3+5);";
-    string program = R"(
+    /*string program = R"(
         int x = 10;
         print(x);
         if (x > 5) {
             print("x is greater than 5");
         }
         return 0;
+    )";*/
+    string program = R"(
+            print("x is greater than"+x+y*3);
     )";
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;

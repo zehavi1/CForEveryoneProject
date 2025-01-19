@@ -57,11 +57,11 @@ struct BinaryOpNode : ASTNode {
     BinaryOpNode(const Token& op, shared_ptr<ASTNode> left, shared_ptr<ASTNode> right)
         : op(op), left(left), right(right) {}
 	void printASTNode(int depth = 0) {
+		printTabsDepth(depth + 1);
+		cout << "Left: " << endl;
+		left->printASTNode(depth + 1);
 		printTabsDepth(depth);
 		cout << "BinaryOpNode: " << op.value << endl;
-		printTabsDepth(depth+1);
-		cout << "Left: " << endl;
-		left->printASTNode(depth+1);
 		printTabsDepth(depth+1);
 		cout << "Right: " << endl;
 		right->printASTNode(depth+1);
