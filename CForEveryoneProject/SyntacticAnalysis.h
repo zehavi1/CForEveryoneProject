@@ -18,19 +18,23 @@ public:
 	shared_ptr<ASTNode> factor();
 	shared_ptr<ASTNode> number();
 	shared_ptr<ASTNode> type(); // ניתוח סוגי משתנים
+
+	//משתנים
+	shared_ptr<ASTNode> declaration();
+	shared_ptr<ASTNode> variable(Pattern typeVariable); // ניתוח משתנה
+	shared_ptr<ASTNode> variable_list(Pattern typeVariable); // ניתוח מזהה
+
 	//משפטי השמה והדפסה
 	shared_ptr<ASTNode> print_statement();
 	shared_ptr<ASTNode> variable_declaration(); // ניתוח הצהרות משתנים
 	shared_ptr<ASTNode> expr_print();
-	shared_ptr<ASTNode> assignment();
+	shared_ptr<ASTNode> assignment(); // ניתוח השמות
 	shared_ptr<ASTNode> statement(); // ניתוח פקודות
 	//פקודות if
-	shared_ptr<ASTNode> if_statement(); // ניתוח פקודות if
 	shared_ptr<ASTNode> if_else_statement(); // ניתוח פקודות if-else
 	shared_ptr<ASTNode> elif_statement(); // ניתוח פקודות if-else-if
 	shared_ptr<ASTNode> conditions(); // ניתוח תנאים
 	shared_ptr<ASTNode> condition(); // ניתוח תנאי
-	shared_ptr<ASTNode> condition1(); // ניתוח תנאי
 	shared_ptr<ASTNode> comparison_operator(); // ניתוח אופרטורים להשוואה
 	shared_ptr<ASTNode> logical_operator(); // ניתוח אופרטורים לוגיים
 	shared_ptr<ASTNode> block(); // ניתוח בלוקים

@@ -35,7 +35,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::expression() {
 	}
 	return left;
 }
-
 shared_ptr<ASTNode> SyntacticAnalysis::term() {
 	shared_ptr<ASTNode> left = factor();
 	while (currentToken().typeToken == TOK_ASTERISK || currentToken().typeToken == TOK_SLASH || currentToken().typeToken == TOK_PERCENT) {
@@ -46,7 +45,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::term() {
 	}
 	return left;
 }
-// פונקציה לניתוח פקודות השמה
 //נבדק בהצלחה
 shared_ptr<ASTNode> SyntacticAnalysis::factor() {
 	shared_ptr<ParentNode> factorNode = make_shared<ParentNode>("factor");
@@ -103,6 +101,19 @@ shared_ptr<ASTNode> SyntacticAnalysis::number() {
 	}
 	return nullptr;
 }
+// הוספת פונקציה לניתוח בלוקים
+
+shared_ptr<ASTNode> SyntacticAnalysis::block()
+{
+	shared_ptr<ParentNode> blockNode = make_shared<ParentNode>("block");
+	match(TOK_OPEN_CURLY, "Expected '{' at the beginning of block");
+	while (currentToken().typeToken != TOK_CLOSE_CURLY) {
+		blockNode->addChild(statement());
+	}
+	match(TOK_CLOSE_CURLY, "Expected '}' at the end of block");
+	return blockNode;
+}
+
 // פונקציה לניתוח פקודת הדפסה
 //נבדק בהצלחה
 shared_ptr<ASTNode> SyntacticAnalysis::print_statement() {
@@ -143,8 +154,8 @@ shared_ptr<ASTNode> SyntacticAnalysis::expr_print() {
 
 	return exprNode; // החזרת צומת הביטוי להדפסה
 }
-
-
+//פונקציות לניתוח תנאים-עובדות טוב אבל יש באג
+//אם יש סוגריים של ביטויים זה לא עובד
 shared_ptr<ASTNode> SyntacticAnalysis::conditions() {
 	shared_ptr<ParentNode> conditionNode = make_shared<ParentNode>("conditions");
 	conditionNode->addChild(condition()); // ניתוח הביטוי הראשון
@@ -182,28 +193,24 @@ shared_ptr<ASTNode> SyntacticAnalysis::condition() {
 	
 	return conditionNode; // החזרת צומת תנאי
 }
-shared_ptr<ASTNode> SyntacticAnalysis::condition1() {
-	
-	shared_ptr<ParentNode> conditionNode = make_shared<ParentNode>("condition");
-	conditionNode->addChild(expression()); // ניתוח הביטוי הראשון
-	Pattern p = currentToken().typeToken;
-	conditionNode->addChild(comparison_operator()); // ניתוח אופרטור השוואה
-	conditionNode->addChild(expression()); // ניתוח הביטוי השני
-	if (currentToken().typeToken == p)
-	{
-		conditionNode->name = "condition-range";
-		conditionNode->addChild(comparison_operator()); // ניתוח אופרטור השוואה
-		conditionNode->addChild(expression()); // ניתוח הביטוי השני
-	}
-	return conditionNode; // החזרת צומת תנאי
-}
 shared_ptr<ASTNode> SyntacticAnalysis::comparison_operator() {
 	Pattern p = currentToken().typeToken;
-	if (p == TOK_EQUAL || p == TOK_NOT_EQUAL || p == TOK_LESS || p == TOK_GREATER || p == TOK_LESS_EQUAL || p == TOK_GREATER_EQUAL) {
+	switch (p)
+	{
+	case TOK_EQUAL:
+	case TOK_NOT_EQUAL:
+	case TOK_GREATER_EQUAL:
+	case TOK_LESS_EQUAL:
+	case TOK_LESS:
+	case TOK_GREATER:
+	{
 		return match(p);
+		break;
 	}
-	else {
+	
+	default:
 		match(TOK_EOF, "Expected comparison operator");
+		break;
 	}
 }
 shared_ptr<ASTNode> SyntacticAnalysis::logical_operator() {
@@ -214,21 +221,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::logical_operator() {
 	else {
 		match(TOK_EOF, "Expected logical operator");
 	}
-}
-
-
-
-
-// הוספת פונקציות לניתוח פקודות אם
-shared_ptr<ASTNode> SyntacticAnalysis::if_statement() {
-	shared_ptr<ParentNode> ifNode = make_shared<ParentNode>("if");
-	ifNode->addChild(match(TOK_IF));
-	ifNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after if"));
-	ifNode->addChild(condition());
-	ifNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
-	ifNode->addChild(block());
-
-	return ifNode;
 }
 shared_ptr<ASTNode> SyntacticAnalysis::elif_statement() {
 	shared_ptr<ParentNode> ifElseIfNode = make_shared<ParentNode>("elif");
@@ -263,133 +255,69 @@ shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement() {
 	}
 	return ifElseNode;
 }
-
-// הוספת פונקציות לניתוח לולאות
-shared_ptr<ASTNode> SyntacticAnalysis::for_loop() {
-	shared_ptr<ParentNode> forNode = make_shared<ParentNode>("for");
-	forNode->addChild(match(TOK_FOR));
-	forNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after for"));
-	forNode->addChild(assignment());
-	forNode->addChild((match(TOK_SEMICOLON, "Expected ';' after assignment")));
-	forNode->addChild(condition());
-	forNode->addChild(match(TOK_SEMICOLON, "Expected ';' after condition"));
-	forNode->addChild(assignment());
-	forNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after for loop"));
-	forNode->addChild(block());
-	return forNode;
-}
-
-shared_ptr<ASTNode> SyntacticAnalysis::while_loop() {
-	shared_ptr<ParentNode> whileNode = make_shared<ParentNode>("while");
-	whileNode->addChild(match(TOK_WHILE));
-	whileNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after while"));
-	whileNode->addChild(condition());
-	whileNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
-	whileNode->addChild(block());
-	return whileNode;
-}
-//לא טוב בכלל צריך לשנות את הדקדוק של מערך
-shared_ptr<ASTNode> SyntacticAnalysis::collection() {
-	return match(TOK_ID, "Expected identifier in collection");
-	
-
-	//Token idToken = currentToken(); // טוקן עבור מזהה
-	//if (idToken.typeToken == TOK_ID) {
-	//	nextToken(); // לעבור לטוקן הבא
-	//	if (currentToken().typeToken == TOK_LEFT_ARRAY) {
-	//		nextToken(); // לעבור לטוקן הפותח של המערך
-	//		std::vector<shared_ptr<ASTNode>> elements; // רשימה לאחסון ביטויים
-	//		elements.push_back(expression()); // ניתוח הביטוי הראשון
-	//		while (currentToken().typeToken == TOK_COMMA) {
-	//			nextToken(); // לעבור לטוקן הבא
-	//			elements.push_back(expression()); // ניתוח הביטוי הבא
-	//		}
-	//		Token rightArrayToken = currentToken(); // טוקן עבור סוגר המערך
-	//		if (rightArrayToken.typeToken == TOK_RIGHT_ARRAY) {
-	//			nextToken(); // לעבור לטוקן הבא
-	//			//return make_shared<ArrayNode>(idToken, elements); // החזרת צומת מערך
-	//		}
-	//		throw runtime_error("Expected closing bracket for array");
-	//	}
-	//	return make_shared<IdentifierNode>(idToken); // החזרת מזהה
-	//}
-	//throw runtime_error("Expected an identifier in collection");
-}
-
-shared_ptr<ASTNode> SyntacticAnalysis::foreach_loop() {
-	shared_ptr<ParentNode> foreachNode = make_shared<ParentNode>("foreach");
-	match(TOK_FOREACH);
-	match(TOK_OPEN_PAREN, "Expected '(' after foreach");
-	match(TOK_ID, "Expected identifier after foreach");
-	match(TOK_IN, "Expected 'in' after identifier");
-	foreachNode->addChild(collection());
-	match(TOK_CLOSE_PAREN, "Expected ')' after foreach");
-	foreachNode->addChild(block());
-	return foreachNode;
-}
-
-// הוספת פונקציה לניתוח הגדרות פונקציות
-shared_ptr<ASTNode> SyntacticAnalysis::function_definition() {
-	shared_ptr<ParentNode> funcNode = make_shared<ParentNode>("function");
-	Pattern returnType = currentToken().typeToken;
-	if (returnType == TOK_VOID) {
-		funcNode->addChild(match(TOK_VOID));
-	}
-	else 
-		funcNode->addChild(type());
-	funcNode->addChild(match(TOK_ID, "Expected function name"));
-	match(TOK_OPEN_PAREN, "Expected '(' after function name");
-	funcNode->addChild(parameter_list());
-	match(TOK_CLOSE_PAREN, "Expected ')' after parameter list");
-	funcNode->addChild(block());
-	return funcNode;
-}
-shared_ptr<ASTNode> SyntacticAnalysis::type()
-{
-	Pattern p = currentToken().typeToken;
-	if (p == TOK_DOUBLE_TYPE || p == TOK_INT_TYPE || p == TOK_CHAR_TYPE ||
- p == TOK_BOOL_TYPE || p == TOK_FLOAT_TYPE || p == TOK_STRING_TYPE || p == TOK_LONG_TYPE)
+//עד כאן נבדק בהצלחה
+// פונקציה לניתוח הצהרת משתנים
+shared_ptr<ASTNode> SyntacticAnalysis::declaration() {
+	shared_ptr<ParentNode> declarationNode = make_shared<ParentNode>("declaration");
+	Pattern typeVariable = currentToken().typeToken;
+	if (currentToken().typeToken == TOK_VAR)
 	{
-		Token t = currentToken();
-		nextToken();
-		return make_shared<TokenNode>(t);
+		declarationNode->addChild(match(TOK_VAR)); // לבדוק אם יש מילת מפתח var
 	}
 	else
 	{
-		match(TOK_EOF, "Expected type");
+		declarationNode->addChild(type()); // ניתוח סוג המשתנה 
 	}
+	
+	declarationNode->addChild(variable_list(typeVariable)); // ניתוח רשימת המשתנים
+	declarationNode->addChild(match(TOK_SEMICOLON, "Expected ';' after variable declaration")); // לבדוק אם יש נקודה-פסיק
+	return declarationNode; // החזרת צומת הצהרת משתנים
 }
-shared_ptr<ASTNode> SyntacticAnalysis::parameter_list() {
-	shared_ptr<ParentNode> paramListNode = make_shared<ParentNode>("parameters");
-	if (currentToken().typeToken != TOK_CLOSE_PAREN) {
-		paramListNode->addChild(type()); // סוג משתנה
-		paramListNode->addChild(match(TOK_ID, "Expected identifier"));
-		while (currentToken().typeToken == TOK_COMMA) {
-			paramListNode->addChild(match(TOK_COMMA));
-			paramListNode->addChild(type()); // סוג משתנה
-			paramListNode->addChild(match(TOK_ID, "Expected identifier"));
+
+// פונקציה לניתוח רשימת משתנים
+shared_ptr<ASTNode> SyntacticAnalysis::variable_list(Pattern typeVariable) {
+	shared_ptr<ParentNode> variableListNode = make_shared<ParentNode>("variable_list");
+	variableListNode->addChild(variable(typeVariable)); // ניתוח המשתנה הראשון
+
+	// ניתוח משתנים נוספים המופרדים בפסיקים
+	while (currentToken().typeToken == TOK_COMMA) {
+		variableListNode->addChild(match(TOK_COMMA)); // לעבור על הפסיק
+		variableListNode->addChild(variable(typeVariable)); // ניתוח משתנה נוסף
+	}
+	return variableListNode; // החזרת רשימת המשתנים
+}
+
+// פונקציה לניתוח משתנה
+shared_ptr<ASTNode> SyntacticAnalysis::variable(Pattern typeVariable) {
+	shared_ptr<ParentNode> variableNode = make_shared<ParentNode>("variable");
+	variableNode->addChild(match(TOK_ID)); // ניתוח מזהה המשתנה
+
+	// בדיקה אם יש השמה
+	if (currentToken().typeToken == TOK_ASSIGN|| typeVariable==TOK_VAR) {
+		
+		variableNode->addChild(match(TOK_ASSIGN)); // לעבור על סימן ההשמה
+		if (typeVariable == TOK_STRING_TYPE)
+		{
+			variableNode->addChild(expr_print()); // ניתוח הביטוי המוקצה
 		}
+		else
+		variableNode->addChild(expression()); // ניתוח הביטוי המוקצה
 	}
-	return paramListNode;
-}
-// הוספת פונקציה לניתוח בלוקים
-shared_ptr<ASTNode> SyntacticAnalysis::block()
-{
-	shared_ptr<ParentNode> blockNode = make_shared<ParentNode>("block");
-	match(TOK_OPEN_CURLY, "Expected '{' at the beginning of block");
-	while (currentToken().typeToken != TOK_CLOSE_CURLY) {
-		blockNode->addChild(statement());
-	}
-	match(TOK_CLOSE_CURLY, "Expected '}' at the end of block");
-	return blockNode;
+	return variableNode; // החזרת צומת המשתנה
 }
 
 // הוספת פונקציה לניתוח הצהרות משתנים
 shared_ptr<ASTNode> SyntacticAnalysis::variable_declaration() {
+	bool isString = false;
 	shared_ptr<ParentNode> varDeclNode = make_shared<ParentNode>("variable_declaration");
 	if (currentToken().typeToken == TOK_VAR)
 		varDeclNode->addChild(match(TOK_VAR));
 	else
+		if (currentToken().typeToken == TOK_STRING)
+		{
+			isString = true;
+		}
+		else
 		varDeclNode->addChild(type()); // סוג משתנה
 	varDeclNode->addChild(match(TOK_ID, "Expected identifier"));
 	match(TOK_ASSIGN, "Expected '=' after identifier");
@@ -397,49 +325,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::variable_declaration() {
 	match(TOK_SEMICOLON, "Expected ';' at the end of declaration");
 	return varDeclNode;
 }
-shared_ptr<ASTNode> SyntacticAnalysis::return_statement()
-{
-	shared_ptr<ParentNode> returnNode = make_shared<ParentNode>("return");
-	returnNode->addChild(match(TOK_RETURN));
-	returnNode->addChild(expression());
-	returnNode->addChild(match(TOK_SEMICOLON, "Expected ';' at the end of statement"));
-	return returnNode;
-}
-// עדכון פונקציה statement
-shared_ptr<ASTNode> SyntacticAnalysis::statement() {
-	Pattern p = currentToken().typeToken;
-	switch (p) {
-	case TOK_IF:
-		return if_else_statement();
-	/*case TOK_IFRANGE:
-		return if_range_statement();*/
-	case TOK_FOR:
-		return for_loop();
-	case TOK_WHILE:
-		return while_loop();
-	case TOK_FOREACH:
-		return foreach_loop();
-	case TOK_PRINT:
-		return print_statement();
-	case TOK_RETURN:
-		return return_statement();
-	case TOK_VAR:
-	case TOK_DOUBLE_TYPE:
-	case TOK_INT_TYPE:
-	case TOK_CHAR_TYPE:
-	case TOK_BOOL_TYPE:
-	case TOK_FLOAT_TYPE:
-	case TOK_STRING_TYPE:
-	case TOK_LONG_TYPE:
-		return variable_declaration();
-	case TOK_ID:
-		return assignment();
-	default:
-		throw runtime_error("Unexpected token in statement");
-	}
-}
-
-// ניתוח השמה-assignment--לא לשכוח לעשות גם לאתחול משתנים
 shared_ptr<ASTNode> SyntacticAnalysis::assignment() {
 	shared_ptr<ParentNode> startNode = make_shared<ParentNode>("assignment");
 	startNode->addChild(match(TOK_ID, "Expected identifier"));
@@ -452,6 +337,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::assignment() {
 	case TOK_SLASH: {
 		startNode->addChild(match(p));
 	}
+
 	case TOK_ASSIGN:
 	{
 		startNode->addChild(match(TOK_ASSIGN, "Expected '=' after identifier"));
@@ -481,11 +367,14 @@ shared_ptr<ASTNode> SyntacticAnalysis::assignment() {
 	else {
 		throw runtime_error("Expected '=' after identifier");
 	}
-
+	startNode->addChild(expression());
 	startNode->addChild(match(TOK_SEMICOLON, "Expected ';' at the end of statement"));
 	return startNode;
 	}
-	//shared_ptr<ASTNode> SyntacticAnalysis::statement() {
+	
+}
+
+//shared_ptr<ASTNode> SyntacticAnalysis::statement() {
 	//	Pattern p = currentToken().typeToken;
 	//	switch (p)
 	//	{
@@ -525,7 +414,162 @@ shared_ptr<ASTNode> SyntacticAnalysis::assignment() {
 	//		break;
 	//	}
 	//}
+// הוספת פונקציות לניתוח לולאות
+shared_ptr<ASTNode> SyntacticAnalysis::for_loop() {
+	shared_ptr<ParentNode> forNode = make_shared<ParentNode>("for");
+	forNode->addChild(match(TOK_FOR));
+	forNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after for"));
+	forNode->addChild(assignment());
+	forNode->addChild((match(TOK_SEMICOLON, "Expected ';' after assignment")));
+	forNode->addChild(condition());
+	forNode->addChild(match(TOK_SEMICOLON, "Expected ';' after condition"));
+	forNode->addChild(assignment());
+	forNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after for loop"));
+	forNode->addChild(block());
+	return forNode;
 }
+shared_ptr<ASTNode> SyntacticAnalysis::while_loop() {
+	shared_ptr<ParentNode> whileNode = make_shared<ParentNode>("while");
+	whileNode->addChild(match(TOK_WHILE));
+	whileNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after while"));
+	whileNode->addChild(condition());
+	whileNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
+	whileNode->addChild(block());
+	return whileNode;
+}
+//לא טוב בכלל צריך לשנות את הדקדוק של מערך
+shared_ptr<ASTNode> SyntacticAnalysis::collection() {
+	return match(TOK_ID, "Expected identifier in collection");
+	
+
+	//Token idToken = currentToken(); // טוקן עבור מזהה
+	//if (idToken.typeToken == TOK_ID) {
+	//	nextToken(); // לעבור לטוקן הבא
+	//	if (currentToken().typeToken == TOK_LEFT_ARRAY) {
+	//		nextToken(); // לעבור לטוקן הפותח של המערך
+	//		std::vector<shared_ptr<ASTNode>> elements; // רשימה לאחסון ביטויים
+	//		elements.push_back(expression()); // ניתוח הביטוי הראשון
+	//		while (currentToken().typeToken == TOK_COMMA) {
+	//			nextToken(); // לעבור לטוקן הבא
+	//			elements.push_back(expression()); // ניתוח הביטוי הבא
+	//		}
+	//		Token rightArrayToken = currentToken(); // טוקן עבור סוגר המערך
+	//		if (rightArrayToken.typeToken == TOK_RIGHT_ARRAY) {
+	//			nextToken(); // לעבור לטוקן הבא
+	//			//return make_shared<ArrayNode>(idToken, elements); // החזרת צומת מערך
+	//		}
+	//		throw runtime_error("Expected closing bracket for array");
+	//	}
+	//	return make_shared<IdentifierNode>(idToken); // החזרת מזהה
+	//}
+	//throw runtime_error("Expected an identifier in collection");
+}
+shared_ptr<ASTNode> SyntacticAnalysis::foreach_loop() {
+	shared_ptr<ParentNode> foreachNode = make_shared<ParentNode>("foreach");
+	match(TOK_FOREACH);
+	match(TOK_OPEN_PAREN, "Expected '(' after foreach");
+	match(TOK_ID, "Expected identifier after foreach");
+	match(TOK_IN, "Expected 'in' after identifier");
+	foreachNode->addChild(collection());
+	match(TOK_CLOSE_PAREN, "Expected ')' after foreach");
+	foreachNode->addChild(block());
+	return foreachNode;
+}
+// הוספת פונקציה לניתוח הגדרות פונקציות
+shared_ptr<ASTNode> SyntacticAnalysis::function_definition() {
+	shared_ptr<ParentNode> funcNode = make_shared<ParentNode>("function");
+	Pattern returnType = currentToken().typeToken;
+	if (returnType == TOK_VOID) {
+		funcNode->addChild(match(TOK_VOID));
+	}
+	else 
+		funcNode->addChild(type());
+	funcNode->addChild(match(TOK_ID, "Expected function name"));
+	match(TOK_OPEN_PAREN, "Expected '(' after function name");
+	funcNode->addChild(parameter_list());
+	match(TOK_CLOSE_PAREN, "Expected ')' after parameter list");
+	funcNode->addChild(block());
+	return funcNode;
+}
+shared_ptr<ASTNode> SyntacticAnalysis::type()
+{
+	Pattern p = currentToken().typeToken;
+	switch (p)
+	{
+	case TOK_DOUBLE_TYPE:	
+	case TOK_INT_TYPE:	
+	case TOK_CHAR_TYPE:	
+	case TOK_BOOL_TYPE:	
+	case TOK_FLOAT_TYPE:	
+	case TOK_STRING_TYPE:	
+	case TOK_LONG_TYPE:
+	{
+		return match(p);
+		break;
+	}
+		
+	default:
+		match(TOK_EOF);
+	}
+}
+shared_ptr<ASTNode> SyntacticAnalysis::parameter_list() {
+	shared_ptr<ParentNode> paramListNode = make_shared<ParentNode>("parameters");
+	if (currentToken().typeToken != TOK_CLOSE_PAREN) {
+		paramListNode->addChild(type()); // סוג משתנה
+		paramListNode->addChild(match(TOK_ID, "Expected identifier"));
+		while (currentToken().typeToken == TOK_COMMA) {
+			paramListNode->addChild(match(TOK_COMMA));
+			paramListNode->addChild(type()); // סוג משתנה
+			paramListNode->addChild(match(TOK_ID, "Expected identifier"));
+		}
+	}
+	return paramListNode;
+}
+
+shared_ptr<ASTNode> SyntacticAnalysis::return_statement()
+{
+	shared_ptr<ParentNode> returnNode = make_shared<ParentNode>("return");
+	returnNode->addChild(match(TOK_RETURN));
+	returnNode->addChild(expression());
+	returnNode->addChild(match(TOK_SEMICOLON, "Expected ';' at the end of statement"));
+	return returnNode;
+}
+// עדכון פונקציה statement
+shared_ptr<ASTNode> SyntacticAnalysis::statement() {
+	Pattern p = currentToken().typeToken;
+	switch (p) {
+	case TOK_IF:
+		return if_else_statement();
+	/*case TOK_IFRANGE:
+		return if_range_statement();*/
+	case TOK_FOR:
+		return for_loop();
+	case TOK_WHILE:
+		return while_loop();
+	case TOK_FOREACH:
+		return foreach_loop();
+	case TOK_PRINT:
+		return print_statement();
+	case TOK_RETURN:
+		return return_statement();
+	case TOK_VAR:
+	case TOK_DOUBLE_TYPE:
+	case TOK_INT_TYPE:
+	case TOK_CHAR_TYPE:
+	case TOK_BOOL_TYPE:
+	case TOK_FLOAT_TYPE:
+	case TOK_STRING_TYPE:
+	case TOK_LONG_TYPE:
+		return declaration();
+	case TOK_ID:
+		return assignment();
+	default:
+		throw runtime_error("Unexpected token in statement");
+	}
+}
+
+// ניתוח השמה-assignment--לא לשכוח לעשות גם לאתחול משתנים
+
 vector<shared_ptr<ASTNode>> SyntacticAnalysis::parse() 
 {
 	vector<shared_ptr<ASTNode>> ast;

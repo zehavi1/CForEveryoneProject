@@ -6,7 +6,7 @@
 #include <list>
 enum Lexical
 {
-   START,IDENTITY,ERROR1,COMMENTLINE,COMMENTLINES,ALPHA,NUMBER,CHARACTER,NEWLINE,CHECK,MAKETOKEN,STRING
+  CHAR, START,IDENTITY,ERROR1,COMMENTLINE,COMMENTLINES,ALPHA,NUMBER,CHARACTER,NEWLINE,CHECK,MAKETOKEN,STRING
 };
 string Lexer::readFileToString(const string& filename) {
     ifstream file(filename);
@@ -33,6 +33,7 @@ vector<Token> Lexer::tokenize(const string& input) {
      bool canBeIdentifier = false;
      bool isKnownState = true;
      int lineNumber = 1;
+     int countChar = 0;
      size_t i = 0;
      Lexical lexState = START;
      regex number_regex(R"(\d+)");
@@ -54,7 +55,11 @@ vector<Token> Lexer::tokenize(const string& input) {
                     lexState = STRING; 
                     break;
                 }
-                   
+                if(c== '\''&&countChar==0)
+				{
+					lexState = CHAR;
+					break;
+				}
                    
                 if (isWhitespace(c)) {
                     i++;
@@ -154,6 +159,7 @@ vector<Token> Lexer::tokenize(const string& input) {
             case CHARACTER: {
                 if (c == '"')
                     isInString = !isInString;
+             
                 string s2 = { c,input[i + 1] };
                 string s3 = {c};
                 if (mapNonAlphaTokens.find(s2) != mapNonAlphaTokens.end()) {
@@ -190,6 +196,21 @@ vector<Token> Lexer::tokenize(const string& input) {
                     else
                         pattern = TOK_DOUBLE;
                     lexState = MAKETOKEN;
+                }
+                break;
+            }
+            case CHAR:
+            {
+                currentTokenValue += c; i++;
+                switch (countChar)
+                {
+                   
+                case 0:
+                case 1:countChar++; break;
+                case 2:  pattern = TOK_CHAR; lexState = MAKETOKEN; countChar = 0; break;
+                default:
+                    lexState = ERROR1;
+                    
                 }
                 break;
             }

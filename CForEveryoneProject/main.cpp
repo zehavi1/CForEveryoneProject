@@ -38,7 +38,14 @@ int main() {
 }
 
     )";
-	string program = program_if;
+	string program_declaration = R"(
+        int x = 10,y=40;
+        double y = 3.14;
+        string z = "hello";
+        var b = TRUE;
+        char c = 'F';
+    )";
+	string program = program_declaration;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;

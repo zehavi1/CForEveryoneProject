@@ -181,3 +181,11 @@ const std::map<std::string, Pattern> mapNonAlphaTokens = {
 {"++",TOK_INCREMENT},
 {"--",TOK_DECREMENT}
 };
+const std::map<Pattern, Pattern> mapTypes = {
+    {TOK_BOOL_TYPE, TOK_BOOL},
+    {TOK_CHAR_TYPE, TOK_CHAR},
+    {TOK_DOUBLE_TYPE, TOK_DOUBLE},
+    {TOK_FLOAT_TYPE, TOK_FLOAT},
+    {TOK_INT_TYPE, TOK_INT},
+    {TOK_LONG_TYPE, TOK_LONG},
+    {TOK_STRING_TYPE, TOK_STRING}};
