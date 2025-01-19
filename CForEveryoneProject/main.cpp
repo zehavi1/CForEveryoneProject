@@ -23,9 +23,22 @@ int main() {
         }
         return 0;
     )";*/
-    string program = R"(
+    string program_print = R"(
             print("x is greater than"+x+y*3);
     )";
+	string program_if = R"(
+        if ((x > 10 && y < 5) || (z == 20)) {
+            print("x is greater than 10 and y is less than 5 or z is equal to 20");
+         }
+    elif(x<8)
+        {print(t);}
+    else
+    {print(y);}
+    
+}
+
+    )";
+	string program = program_if;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;

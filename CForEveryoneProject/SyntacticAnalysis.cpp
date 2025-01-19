@@ -146,19 +146,43 @@ shared_ptr<ASTNode> SyntacticAnalysis::expr_print() {
 
 
 shared_ptr<ASTNode> SyntacticAnalysis::conditions() {
-	shared_ptr<ParentNode> conditionNode = make_shared<ParentNode>("condition");
-	conditionNode->addChild(expression()); // ניתוח הביטוי הראשון
-	conditionNode->addChild(comparison_operator()); // ניתוח אופרטור השוואה
-	conditionNode->addChild(expression()); // ניתוח הביטוי השני
+	shared_ptr<ParentNode> conditionNode = make_shared<ParentNode>("conditions");
+	conditionNode->addChild(condition()); // ניתוח הביטוי הראשון
 	while (currentToken().typeToken == TOK_AND || currentToken().typeToken == TOK_OR) {
 		conditionNode->addChild(logical_operator()); // ניתוח אופרטור לוגי
-		conditionNode->addChild(expression()); // ניתוח הביטוי הבא
-		conditionNode->addChild(comparison_operator()); // ניתוח אופרטור השוואה
-		conditionNode->addChild(expression()); // ניתוח הביטוי השני
+		conditionNode->addChild(condition());
 	}
 	return conditionNode; // החזרת צומת תנאי
 }
 shared_ptr<ASTNode> SyntacticAnalysis::condition() {
+	shared_ptr<ParentNode> conditionNode = make_shared<ParentNode>("condition");
+	int current = currentTokenIndex;
+	Pattern p;
+	if (currentToken().typeToken == TOK_OPEN_PAREN)
+	{
+		conditionNode->addChild(match(TOK_OPEN_PAREN));
+		conditionNode->addChild(conditions());
+		conditionNode->addChild(match(TOK_CLOSE_PAREN));
+	}
+	else
+	{
+		conditionNode->addChild(expression()); // ניתוח הביטוי הראשון
+		p = currentToken().typeToken;
+		conditionNode->addChild(comparison_operator()); // ניתוח אופרטור השוואה
+		conditionNode->addChild(expression()); // ניתוח הביטוי השני
+
+		if (currentToken().typeToken == p)
+		{
+			conditionNode->name = "condition-range";
+			conditionNode->addChild(comparison_operator()); // ניתוח אופרטור השוואה
+			conditionNode->addChild(expression()); // ניתוח הביטוי השני
+		}
+	}
+	
+	
+	return conditionNode; // החזרת צומת תנאי
+}
+shared_ptr<ASTNode> SyntacticAnalysis::condition1() {
 	
 	shared_ptr<ParentNode> conditionNode = make_shared<ParentNode>("condition");
 	conditionNode->addChild(expression()); // ניתוח הביטוי הראשון
@@ -191,15 +215,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::logical_operator() {
 		match(TOK_EOF, "Expected logical operator");
 	}
 }
-shared_ptr<ASTNode> SyntacticAnalysis::if_range_statement() {
-	shared_ptr<ParentNode> ifRangeNode = make_shared<ParentNode>("if_range");
-	ifRangeNode->addChild(match(TOK_IFRANGE));
-	ifRangeNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after if_range"));
-	ifRangeNode->addChild(range_condition());
-	ifRangeNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after range condition"));
-	ifRangeNode->addChild(block());
-	return ifRangeNode;
-}
+
 
 
 
@@ -215,7 +231,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::if_statement() {
 	return ifNode;
 }
 shared_ptr<ASTNode> SyntacticAnalysis::elif_statement() {
-	shared_ptr<ParentNode> ifElseIfNode = make_shared<ParentNode>("if_else_if");
+	shared_ptr<ParentNode> ifElseIfNode = make_shared<ParentNode>("elif");
 	ifElseIfNode->addChild(match(TOK_ELIF));
 	ifElseIfNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after elif"));
 	ifElseIfNode->addChild(condition());
@@ -227,16 +243,23 @@ shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement() {
 	shared_ptr<ParentNode> ifElseNode = make_shared<ParentNode>("if_else");
 	ifElseNode->addChild(match(TOK_IF));
 	ifElseNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after if"));
-	ifElseNode->addChild(condition());
+	ifElseNode->addChild(conditions());
 	ifElseNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
 	ifElseNode->addChild(block());
 	while (currentToken().typeToken == TOK_ELIF)
 	{
-		ifElseNode->addChild(if_else_if_statement());
+		ifElseNode->addChild(elif_statement());
 	}
 	if (currentToken().typeToken == TOK_ELSE) {
 		ifElseNode->addChild(match(TOK_ELSE));
-		ifElseNode->addChild(block());
+		if (currentToken().typeToken == TOK_IF)
+		{
+			ifElseNode->addChild(if_else_statement());
+		}
+		else
+		{
+			ifElseNode->addChild(block());
+		}
 	}
 	return ifElseNode;
 }
@@ -387,7 +410,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::statement() {
 	Pattern p = currentToken().typeToken;
 	switch (p) {
 	case TOK_IF:
-		return if_statement();
+		return if_else_statement();
 	/*case TOK_IFRANGE:
 		return if_range_statement();*/
 	case TOK_FOR:
