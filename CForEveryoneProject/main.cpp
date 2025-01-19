@@ -31,7 +31,7 @@ int main() {
             print("x is greater than 10 and y is less than 5 or z is equal to 20");
          }
     elif(x<8)
-        {print(t);}
+        print(t);
     else
     {print(y);}
     
@@ -45,7 +45,7 @@ int main() {
         var b = TRUE;
         char c = 'F';
     )";
-	string program = program_declaration;
+	string program = program_if;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;

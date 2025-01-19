@@ -106,14 +106,42 @@ shared_ptr<ASTNode> SyntacticAnalysis::number() {
 shared_ptr<ASTNode> SyntacticAnalysis::block()
 {
 	shared_ptr<ParentNode> blockNode = make_shared<ParentNode>("block");
-	match(TOK_OPEN_CURLY, "Expected '{' at the beginning of block");
-	while (currentToken().typeToken != TOK_CLOSE_CURLY) {
+	if (currentToken().typeToken != TOK_OPEN_CURLY)
+	{
 		blockNode->addChild(statement());
 	}
-	match(TOK_CLOSE_CURLY, "Expected '}' at the end of block");
+	else
+	{
+		blockNode->addChild(match(TOK_OPEN_CURLY, "Expected '{' at the beginning of block"));
+		while (currentToken().typeToken != TOK_CLOSE_CURLY) {
+			blockNode->addChild(statement());
+		}
+		blockNode->addChild(match(TOK_CLOSE_CURLY, "Expected '}' at the end of block"));
+	}
+	
 	return blockNode;
 }
+shared_ptr<ASTNode> SyntacticAnalysis::type()
+{
+	Pattern p = currentToken().typeToken;
+	switch (p)
+	{
+	case TOK_DOUBLE_TYPE:
+	case TOK_INT_TYPE:
+	case TOK_CHAR_TYPE:
+	case TOK_BOOL_TYPE:
+	case TOK_FLOAT_TYPE:
+	case TOK_STRING_TYPE:
+	case TOK_LONG_TYPE:
+	{
+		return match(p);
+		break;
+	}
 
+	default:
+		match(TOK_EOF);
+	}
+}
 // פונקציה לניתוח פקודת הדפסה
 //נבדק בהצלחה
 shared_ptr<ASTNode> SyntacticAnalysis::print_statement() {
@@ -255,7 +283,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement() {
 	}
 	return ifElseNode;
 }
-//עד כאן נבדק בהצלחה
+
 // פונקציה לניתוח הצהרת משתנים
 shared_ptr<ASTNode> SyntacticAnalysis::declaration() {
 	shared_ptr<ParentNode> declarationNode = make_shared<ParentNode>("declaration");
@@ -325,6 +353,8 @@ shared_ptr<ASTNode> SyntacticAnalysis::variable_declaration() {
 	match(TOK_SEMICOLON, "Expected ';' at the end of declaration");
 	return varDeclNode;
 }
+//עד כאן נבדק בהצלחה
+/////////////////////////////////////////////////////////////////////////////////////
 shared_ptr<ASTNode> SyntacticAnalysis::assignment() {
 	shared_ptr<ParentNode> startNode = make_shared<ParentNode>("assignment");
 	startNode->addChild(match(TOK_ID, "Expected identifier"));
@@ -491,27 +521,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::function_definition() {
 	funcNode->addChild(block());
 	return funcNode;
 }
-shared_ptr<ASTNode> SyntacticAnalysis::type()
-{
-	Pattern p = currentToken().typeToken;
-	switch (p)
-	{
-	case TOK_DOUBLE_TYPE:	
-	case TOK_INT_TYPE:	
-	case TOK_CHAR_TYPE:	
-	case TOK_BOOL_TYPE:	
-	case TOK_FLOAT_TYPE:	
-	case TOK_STRING_TYPE:	
-	case TOK_LONG_TYPE:
-	{
-		return match(p);
-		break;
-	}
-		
-	default:
-		match(TOK_EOF);
-	}
-}
+
 shared_ptr<ASTNode> SyntacticAnalysis::parameter_list() {
 	shared_ptr<ParentNode> paramListNode = make_shared<ParentNode>("parameters");
 	if (currentToken().typeToken != TOK_CLOSE_PAREN) {
