@@ -21,6 +21,7 @@ public:
 
 	//משתנים
 	shared_ptr<ASTNode> declaration();
+	shared_ptr<ASTNode> declaration1();
 	shared_ptr<ASTNode> variable(Pattern typeVariable); // ניתוח משתנה
 	shared_ptr<ASTNode> variable_list(Pattern typeVariable); // ניתוח מזהה
 
@@ -29,6 +30,7 @@ public:
 	shared_ptr<ASTNode> variable_declaration(); // ניתוח הצהרות משתנים
 	shared_ptr<ASTNode> expr_print();
 	shared_ptr<ASTNode> assignment(); // ניתוח השמות
+	shared_ptr<ASTNode> assignment1();
 	shared_ptr<ASTNode> statement(); // ניתוח פקודות
 	//פקודות if
 	shared_ptr<ASTNode> if_else_statement(); // ניתוח פקודות if-else

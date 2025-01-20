@@ -285,7 +285,13 @@ shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement() {
 }
 
 // פונקציה לניתוח הצהרת משתנים
-shared_ptr<ASTNode> SyntacticAnalysis::declaration() {
+shared_ptr<ASTNode> SyntacticAnalysis::declaration()
+{
+    shared_ptr<ParentNode> declarationNode = dynamic_pointer_cast<ParentNode>(declaration1());
+	declarationNode->addChild(match(TOK_SEMICOLON, "Expected ';' after variable declaration")); // לבדוק אם יש נקודה-פסיק
+	return declarationNode;
+}
+shared_ptr<ASTNode> SyntacticAnalysis::declaration1() {
 	shared_ptr<ParentNode> declarationNode = make_shared<ParentNode>("declaration");
 	Pattern typeVariable = currentToken().typeToken;
 	if (currentToken().typeToken == TOK_VAR)
@@ -298,7 +304,8 @@ shared_ptr<ASTNode> SyntacticAnalysis::declaration() {
 	}
 	
 	declarationNode->addChild(variable_list(typeVariable)); // ניתוח רשימת המשתנים
-	declarationNode->addChild(match(TOK_SEMICOLON, "Expected ';' after variable declaration")); // לבדוק אם יש נקודה-פסיק
+	//declarationNode->addChild(match(TOK_SEMICOLON, "Expected ';' after variable declaration")); // לבדוק אם יש נקודה-פסיק
+
 	return declarationNode; // החזרת צומת הצהרת משתנים
 }
 
@@ -356,7 +363,17 @@ shared_ptr<ASTNode> SyntacticAnalysis::variable_declaration() {
 //עד כאן נבדק בהצלחה
 /////////////////////////////////////////////////////////////////////////////////////
 shared_ptr<ASTNode> SyntacticAnalysis::assignment() {
+    shared_ptr<ParentNode> startNode = dynamic_pointer_cast<ParentNode>(assignment1());
+    if (!startNode) {
+        throw runtime_error("Failed to cast ASTNode to ParentNode");
+    }
+	startNode->addChild(match(TOK_SEMICOLON, "Expected ';' at the end of statement"));
+	return startNode;
+}
+shared_ptr<ASTNode> SyntacticAnalysis::assignment1() {
 	shared_ptr<ParentNode> startNode = make_shared<ParentNode>("assignment");
+	if (currentToken().typeToken != TOK_ID)
+		return declaration1();
 	startNode->addChild(match(TOK_ID, "Expected identifier"));
 	Pattern p = currentToken().typeToken;
 	switch (p)
@@ -381,27 +398,18 @@ shared_ptr<ASTNode> SyntacticAnalysis::assignment() {
 		if (currentToken().typeToken == TOK_ASSIGN)
 		{
 			startNode->addChild(match(TOK_ASSIGN, "Expected '=' after identifier"));
-			startNode->addChild(expression());
-		}
-		else
-		{
-			startNode->addChild(expression());
+			
 		}
 		break;
 	default:
+		match(TOK_EOF, "error in assigment statement");
 		break;
 	}
-	if (p == TOK_ASSIGN || p == TOK_INCREMENT || p == TOK_DECREMENT) {
-		startNode->addChild(match(p));
-	}
-	else {
-		throw runtime_error("Expected '=' after identifier");
-	}
-	startNode->addChild(expression());
-	startNode->addChild(match(TOK_SEMICOLON, "Expected ';' at the end of statement"));
-	return startNode;
-	}
 	
+	
+	
+	}
+	return startNode;
 }
 
 //shared_ptr<ASTNode> SyntacticAnalysis::statement() {
@@ -450,10 +458,10 @@ shared_ptr<ASTNode> SyntacticAnalysis::for_loop() {
 	forNode->addChild(match(TOK_FOR));
 	forNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after for"));
 	forNode->addChild(assignment());
-	forNode->addChild((match(TOK_SEMICOLON, "Expected ';' after assignment")));
+	//forNode->addChild((match(TOK_SEMICOLON, "Expected ';' after assignment")));
 	forNode->addChild(condition());
 	forNode->addChild(match(TOK_SEMICOLON, "Expected ';' after condition"));
-	forNode->addChild(assignment());
+	forNode->addChild(assignment1());
 	forNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after for loop"));
 	forNode->addChild(block());
 	return forNode;
@@ -469,39 +477,40 @@ shared_ptr<ASTNode> SyntacticAnalysis::while_loop() {
 }
 //לא טוב בכלל צריך לשנות את הדקדוק של מערך
 shared_ptr<ASTNode> SyntacticAnalysis::collection() {
-	return match(TOK_ID, "Expected identifier in collection");
-	
-
-	//Token idToken = currentToken(); // טוקן עבור מזהה
-	//if (idToken.typeToken == TOK_ID) {
-	//	nextToken(); // לעבור לטוקן הבא
-	//	if (currentToken().typeToken == TOK_LEFT_ARRAY) {
-	//		nextToken(); // לעבור לטוקן הפותח של המערך
-	//		std::vector<shared_ptr<ASTNode>> elements; // רשימה לאחסון ביטויים
-	//		elements.push_back(expression()); // ניתוח הביטוי הראשון
-	//		while (currentToken().typeToken == TOK_COMMA) {
-	//			nextToken(); // לעבור לטוקן הבא
-	//			elements.push_back(expression()); // ניתוח הביטוי הבא
-	//		}
-	//		Token rightArrayToken = currentToken(); // טוקן עבור סוגר המערך
-	//		if (rightArrayToken.typeToken == TOK_RIGHT_ARRAY) {
-	//			nextToken(); // לעבור לטוקן הבא
-	//			//return make_shared<ArrayNode>(idToken, elements); // החזרת צומת מערך
-	//		}
-	//		throw runtime_error("Expected closing bracket for array");
-	//	}
-	//	return make_shared<IdentifierNode>(idToken); // החזרת מזהה
-	//}
-	//throw runtime_error("Expected an identifier in collection");
+	Token idToken = currentToken(); // טוקן עבור מזהה
+	if (idToken.typeToken == TOK_ID)
+		return match(TOK_ID, "Expected identifier in collection");
+	else
+	{
+		shared_ptr<ParentNode> collectionNode = make_shared<ParentNode>("collection");
+		if (currentToken().typeToken == TOK_LEFT_ARRAY) {
+			collectionNode->addChild(match(TOK_LEFT_ARRAY, "expected an array"));
+			collectionNode->addChild(expression()); // ניתוח הביטוי הראשון
+			while (currentToken().typeToken == TOK_COMMA) {
+				nextToken(); // לעבור לטוקן הבא
+				collectionNode->addChild(expression()); // ניתוח הביטוי הבא
+			}
+			collectionNode->addChild(match(TOK_RIGHT_ARRAY, "Expected closing bracket for array"));
+				return collectionNode;
+		}
+	}
 }
 shared_ptr<ASTNode> SyntacticAnalysis::foreach_loop() {
 	shared_ptr<ParentNode> foreachNode = make_shared<ParentNode>("foreach");
-	match(TOK_FOREACH);
-	match(TOK_OPEN_PAREN, "Expected '(' after foreach");
-	match(TOK_ID, "Expected identifier after foreach");
-	match(TOK_IN, "Expected 'in' after identifier");
+	foreachNode->addChild( match(TOK_FOREACH));
+	foreachNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after foreach"));
+	try
+	{
+		foreachNode->addChild(type());
+	}
+	catch (string s)
+	{
+
+	}
+	foreachNode->addChild(match(TOK_ID, "Expected identifier after foreach"));
+	foreachNode->addChild(match(TOK_IN, "Expected 'in' after identifier"));
 	foreachNode->addChild(collection());
-	match(TOK_CLOSE_PAREN, "Expected ')' after foreach");
+	foreachNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after foreach"));
 	foreachNode->addChild(block());
 	return foreachNode;
 }

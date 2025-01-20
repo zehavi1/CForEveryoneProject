@@ -15,14 +15,14 @@ int main() {
     //string program = lexer.readFileToString("programExample.txt");
 	//string program = "print(3 + ++a*2+(a-b));";
 	//string program = "print(3+5);";
-    /*string program = R"(
+    string program_mini = R"(
         int x = 10;
         print(x);
         if (x > 5) {
             print("x is greater than 5");
         }
         return 0;
-    )";*/
+    )";
     string program_print = R"(
             print("x is greater than"+x+y*3);
     )";
@@ -45,7 +45,17 @@ int main() {
         var b = TRUE;
         char c = 'F';
     )";
-	string program = program_if;
+    string program_for= R"(
+       for(int i=0;i<100;i++)
+{
+print(i);
+}
+    )";
+    string program_while = R"(
+       while(x<5){print(i);}  )";
+    string program_collection = R"(
+       foreach(int item in x){print(i);}  )";
+	string program = program_collection;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
