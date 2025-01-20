@@ -326,11 +326,13 @@ shared_ptr<ASTNode> SyntacticAnalysis::variable_list(Pattern typeVariable) {
 shared_ptr<ASTNode> SyntacticAnalysis::variable(Pattern typeVariable) {
 	shared_ptr<ParentNode> variableNode = make_shared<ParentNode>("variable");
 	variableNode->addChild(match(TOK_ID)); // ניתוח מזהה המשתנה
-
+	Token t = currentToken().typeToken;
+	/*if(t.typeToken==TOK_LEFT_ARRAY)
+		array_declaretion()*/
 	// בדיקה אם יש השמה
 	if (currentToken().typeToken == TOK_ASSIGN|| typeVariable==TOK_VAR) {
 		
-		variableNode->addChild(match(TOK_ASSIGN)); // לעבור על סימן ההשמה
+		variableNode->addChild(match(TOK_ASSIGN,"var variable must be assigned")); // לעבור על סימן ההשמה
 		if (typeVariable == TOK_STRING_TYPE)
 		{
 			variableNode->addChild(expr_print()); // ניתוח הביטוי המוקצה

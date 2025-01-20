@@ -1,7 +1,26 @@
+//all for expression
 <expr> ::= <term> (TOK_PLUS <term> | TOK_MINUS <term>)*
 <term> ::= <factor> (TOK_ASTERISK <factor> | TOK_SLASH <factor> | TOK_PERCENT <factor>)*
 <factor> ::= TOK_ID | <number>  | TOK_OPEN_PAREN <expr> TOK_CLOSE_PAREN | TOK_INCREMENT TOK_ID | TOK_DECREMENT TOK_ID | TOK_ID TOK_INCREMENT | TOK_ID TOK_DECREMENT
 <number> ::= TOK_INT | TOK_DOUBLE | TOK_FLOAT | TOK_CHAR
+
+//basic
+<assignment> ::= (<type>|TOK_VAR) TOK_ID ((TOK_PLUS | TOK_MINUS | TOK_ASTERISK | TOK_SLASH)  TOK_ASSIGN <expr>) | (TOK_INCREMENT | TOK_DECREMENT) (TOK_ASSIGN <expr>)? TOK_SEMICOLON
+<type> ::=TOK_DOUBLE_TYPE | TOK_INT_TYPE | TOK_CHAR_TYPE |
+                 TOK_BOOL_TYPE | TOK_FLOAT_TYPE | TOK_STRING_TYPE | TOK_LONG_TYPE
+<print_statement> ::= TOK_PRINT TOK_OPEN_PAREN <expr_print> TOK_CLOSE_PAREN TOK_SEMICOLON
+<expr_print>::=(<expr>|TOK_STRING) TOK_PLUS ((<expr>|TOK_STRING))*
+
+
+//declare variables
+<declaration> ::= (<type> | TOK_VAR) <variable_list> TOK_SEMICOLON
+<variable_list> ::=<variable> (TOK_COMMA <variable>)*
+<variable> ::= TOK_ID (TOK_ASSIGN <expression>)?     //if is var must be assignment
+<array_declaretion>::= TOK_ID   TOK_ASSIGN <full_array>
+<full_array>::= TOK_LEFT_ARRAY (<expr> (TOK_COMMA <expr>)*)? TOK_RIGHT_ARRAY
+<static_array>::= TOK_ID  TOK_LEFT_ARRAY <number> TOK_RIGHT_ARRAY
+
+
 
 <comparison_operator> ::= TOK_EQUAL | TOK_NOT_EQUAL | TOK_LESS | TOK_GREATER | TOK_LESS_EQUAL | TOK_GREATER_EQUAL
 <logical_operator> ::= TOK_AND | TOK_OR
@@ -18,7 +37,7 @@
 <for_loop> ::= TOK_FOR TOK_OPEN_PAREN <assignment> TOK_SEMICOLON <condition> TOK_SEMICOLON <assignment> TOK_CLOSE_PAREN <block>
 <while_loop> ::= TOK_WHILE TOK_OPEN_PAREN <condition> TOK_CLOSE_PAREN <block>
 <foreach_loop> ::= TOK_FOREACH TOK_OPEN_PAREN TOK_ID TOK_IN <collection> TOK_CLOSE_PAREN <block>
-<collection> ::= TOK_ID | TOK_LEFT_ARRAY (<expr> (TOK_COMMA <expr>)*)? TOK_RIGHT_ARRAY
+<collection> ::= TOK_ID | <full_array>
 
 <block> ::= TOK_OPEN_CURLY <statement>* TOK_CLOSE_CURLY
 <statement> ::= <if_statement> 
@@ -29,11 +48,6 @@
               | <print_statement> 
               | TOK_RETURN <expr> TOK_SEMICOLON
 
-<assignment> ::= (<type>|TOK_VAR) TOK_ID ((TOK_PLUS | TOK_MINUS | TOK_ASTERISK | TOK_SLASH)  TOK_ASSIGN <expr>) | (TOK_INCREMENT | TOK_DECREMENT) (TOK_ASSIGN <expr>)? TOK_SEMICOLON
-<type> ::=TOK_DOUBLE_TYPE | TOK_INT_TYPE | TOK_CHAR_TYPE |
-                 TOK_BOOL_TYPE | TOK_FLOAT_TYPE | TOK_STRING_TYPE | TOK_LONG_TYPE
-<print_statement> ::= TOK_PRINT TOK_OPEN_PAREN <expr_print> TOK_CLOSE_PAREN TOK_SEMICOLON
-<expr_print>::=(<expr>|TOK_STRING) TOK_PLUS ((<expr>|TOK_STRING))*
 
 <parameter_list> ::= (<type> TOK_ID (TOK_COMMA <type> TOK_ID)*)?
 <function_definition> ::= (<type>|TOK_VOID) TOK_ID TOK_OPEN_PAREN <parameter_list> TOK_CLOSE_PAREN <block>

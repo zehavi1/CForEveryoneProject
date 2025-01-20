@@ -54,7 +54,7 @@ print(i);
     string program_while = R"(
        while(x<5){print(i);}  )";
     string program_collection = R"(
-       foreach(int item in x){print(i);}  )";
+       foreach(int item in [x,y,z]){print(i);}  )";
 	string program = program_collection;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
