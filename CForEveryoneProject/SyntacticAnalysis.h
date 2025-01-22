@@ -50,7 +50,7 @@ public:
 	shared_ptr<ASTNode> parameter_list(); // ניתוח רשימת פרמטרים
 	
 	shared_ptr<ASTNode> return_statement(); // ניתוח פקודת return
-	vector<shared_ptr<ASTNode>> parse();
+	shared_ptr<ASTNode> parse();
 	//void printAST(const shared_ptr<ASTNode>& node, int depth = 0);
 	void printASTNodes(const shared_ptr<ASTNode>& node);
 

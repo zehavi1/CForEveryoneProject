@@ -584,6 +584,8 @@ shared_ptr<ASTNode> SyntacticAnalysis::statement() {
 		return declaration();
 	case TOK_ID:
 		return assignment();
+	case TOK_OPEN_CURLY:
+		return block();
 	default:
 		throw runtime_error("Unexpected token in statement");
 	}
@@ -591,12 +593,12 @@ shared_ptr<ASTNode> SyntacticAnalysis::statement() {
 
 // ניתוח השמה-assignment--לא לשכוח לעשות גם לאתחול משתנים
 
-vector<shared_ptr<ASTNode>> SyntacticAnalysis::parse() 
+shared_ptr<ASTNode> SyntacticAnalysis::parse() 
 {
-	vector<shared_ptr<ASTNode>> ast;
+	shared_ptr<ParentNode> ast = make_shared<ParentNode>("program");
 	try {
 		while (currentTokenIndex < tokens.size() - 1) {
-			ast.push_back(statement());
+			ast->addChild(statement());
 		}
 		return ast;
 	}

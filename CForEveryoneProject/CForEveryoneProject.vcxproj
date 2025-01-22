@@ -133,6 +133,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="ParserLex-try.cpp" />
+    <ClCompile Include="SemanticAnalyzer.cpp" />
     <ClCompile Include="SyntacticAnalysis.cpp" />
     <ClCompile Include="Token.cpp" />
     <ClCompile Include="trySyntax.cpp" />
@@ -142,6 +143,7 @@
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="ASTNode.h" />
+    <ClInclude Include="SemanticAnalyzer.h" />
     <ClInclude Include="SyntacticAnalysis.h" />
     <ClInclude Include="Token.h" />
   </ItemGroup>

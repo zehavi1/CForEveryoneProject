@@ -139,7 +139,7 @@ const std::map<std::string, Pattern> mapAlphaTokens = {
     {"print", TOK_PRINT},
     {"new", TOK_NEW},
     {"long", TOK_LONG_TYPE},
-    {"int", TOK_LONG_TYPE},
+    {"int", TOK_INT_TYPE},
     {"ifrange", TOK_IFRANGE},
     {"if", TOK_IF},
     {"for", TOK_FOR},

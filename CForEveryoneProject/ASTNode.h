@@ -3,11 +3,13 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include "Token.h"
 using namespace std;
 // מחלקת בסיס לכל הצמתים
 struct ASTNode {
    virtual void printASTNode(int depth=0) = 0;
     virtual ~ASTNode() {}
+	
 };
 inline void printTabsDepth(int depth) {
 	for (int i = 0; i < depth; ++i) {
@@ -23,6 +25,7 @@ inline void printTabsDepth(int depth) {
 //	}
 //};
 struct TokenNode:ASTNode{
+public:
 	Token token;
 	TokenNode(Token token) :token(token) {}
 	void printASTNode(int depth=0) {
@@ -31,6 +34,7 @@ struct TokenNode:ASTNode{
 	}
 };
 struct ParentNode :ASTNode {
+public:
 	string name;
 	vector<shared_ptr<ASTNode>> children;
 	ParentNode(const string& name, vector<shared_ptr<ASTNode>> children) :name(name), children(children) {}
@@ -51,6 +55,7 @@ public:
 
 // צומת עבור ביטויים בינאריים
 struct BinaryOpNode : ASTNode {
+public:
     Token op;
     shared_ptr<ASTNode> left;
     shared_ptr<ASTNode> right;

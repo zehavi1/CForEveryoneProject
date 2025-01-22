@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Lexer.h"
 #include "SyntacticAnalysis.h"
+#include "SemanticAnalyzer.h"
 
 int main() {
     //Graph g;
@@ -55,7 +56,12 @@ print(i);
        while(x<5){print(i);}  )";
     string program_collection = R"(
        foreach(int item in [x,y,z]){print(i);}  )";
-	string program = program_collection;
+    string program_samentic= R"(
+{
+        int x=7;
+        print(x);
+        print(y);})";
+	string program = program_samentic;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
@@ -64,10 +70,10 @@ print(i);
     auto tokens = lexer.tokenize(program);
     lexer.printTokens(tokens);
     SyntacticAnalysis parser(tokens);
-    vector<shared_ptr<ASTNode>> ast = parser.parse();
+    shared_ptr<ASTNode> ast = parser.parse();
     cout << "Abstract Syntax Tree:" << endl;
-    for (const auto& node : ast) {
-        parser.printASTNodes(node);
-    }
+    ast->printASTNode();
+    SemanticAnalyzer semantic;
+    semantic.analyze(ast);
     return 0;
 }
