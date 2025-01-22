@@ -61,7 +61,7 @@ print(i);
         int x=7;
         print(x);
         print(y);})";
-	string program = program_samentic;
+	string program = program_collection;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
