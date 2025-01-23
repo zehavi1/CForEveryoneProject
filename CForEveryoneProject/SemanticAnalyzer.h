@@ -27,6 +27,8 @@ private:
 
 public:
 	void enterScope() {
+		if(!scopes.empty())
+			scopes.back() = variableScope;
 		scopes.push_back(variableScope); // כניסה לטווח חדש
 	}
 
@@ -83,6 +85,7 @@ public:
 			throw s;
 		}
 		variableScope[name] = Variable(name, type);
+		
 	}
 
 
@@ -125,11 +128,11 @@ public:
 				useVariable(varNode->token.value);
 			}
 					   break;
-			case TOK_OPEN_CURLY:
+			/*case TOK_OPEN_CURLY:
 			{ enterScope(); }
 			break;
 			case TOK_CLOSE_CURLY: { exitScope(); }
-								break;
+								break;*/
 			default:
 				break;
 			}
@@ -145,17 +148,27 @@ public:
 					enterScope();
 					if (parentNode->name == "foreach")
 						declareVariableInForeach(parentNode);
+					int count = 0;
+					for (auto& child : parentNode->children) {
+						if (count < 5)
+							count++;
+						else
+							analyze(child); // ניתוח ילד
+					}
+					exitScope();
+				}
+				else if (parentNode->name == "block")
+				{
+					enterScope();
 					for (auto& child : parentNode->children) {
 						analyze(child); // ניתוח ילד
 					}
 					exitScope();
 				}
-
-
-
-			for (auto& child : parentNode->children) {
-				analyze(child); // ניתוח ילד
-			}
+				else
+					for (auto& child : parentNode->children) {
+						analyze(child); // ניתוח ילד
+					}
 
 		}
 	}
