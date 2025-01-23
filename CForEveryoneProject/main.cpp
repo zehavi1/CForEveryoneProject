@@ -59,9 +59,15 @@ print(i);
     string program_samentic= R"(
 {
         int x=7;
+        if(x>5){ var y=9;
+                    y+=2;
+        foreach(int z in [1,2,3])
+        {print(x);
+        print(y);}
+        }
         print(x);
         print(y);})";
-	string program = program_collection;
+	string program = program_samentic;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
@@ -74,6 +80,8 @@ print(i);
     cout << "Abstract Syntax Tree:" << endl;
     ast->printASTNode();
     SemanticAnalyzer semantic;
-    semantic.analyze(ast);
+    try{ semantic.analyze(ast); }
+    catch (string s) { cout << s; };
+    
     return 0;
 }

@@ -1,6 +1,7 @@
 #include "SyntacticAnalysis.h"
 #include <iostream>
 using namespace std;
+
 SyntacticAnalysis::SyntacticAnalysis() {
 }
 SyntacticAnalysis::SyntacticAnalysis(vector<Token> tokens) : tokens(tokens) {
