@@ -35,7 +35,7 @@ public:
 	void exitScope() {
 		if (!scopes.empty()) {
 			scopes.pop_back(); // חזרה לטווח הקודם
-			variableScope = scopes.back(); // החזרת משתנים מהטווח הקודם
+            variableScope = scopes.empty() ? map<string, Variable>() : scopes.back(); // החזרת משתנים מהטווח הקודם
 		}
 	}
 	void declareVariable(shared_ptr<ParentNode> node)
@@ -67,10 +67,44 @@ public:
 		shared_ptr<TokenNode> typeVar;
 
 		typeVar = dynamic_pointer_cast<TokenNode>(node->children[2]);
-		if (typeVar->token.typeToken == TOK_ID)
-			return;
-		var = dynamic_pointer_cast<TokenNode>(node->children[3]);
-		defineVariable(var->token.value, typeVar->token.typeToken);
+		if (typeVar->token.typeToken != TOK_ID)
+		{
+			var = dynamic_pointer_cast<TokenNode>(node->children[3]);
+			defineVariable(var->token.value, typeVar->token.typeToken);
+		}
+		compareTypesInForeach(node, typeVar);
+	}
+	bool compareTypesInForeach(shared_ptr<ParentNode> node,shared_ptr<TokenNode> typeVar)
+	{
+		//   יש לבדוק מהו הסוג של המערך
+		auto collectionNode = node->children[3];
+		Pattern collectionType;
+
+		// השגת סוג המערך
+		if (auto idNode = dynamic_pointer_cast<TokenNode>(collectionNode)) {
+			// אם המערך הוא משתנה
+			string arrayName = idNode->token.value;
+			collectionType = variableScope[arrayName].type; // קבלת סוג המערך
+		}
+		else if (auto arrayNode = dynamic_pointer_cast<ParentNode>(collectionNode)) {
+			// אם המערך הוא מערך מורכב
+			collectionType = analyzeArrayType(arrayNode); // נניח שיש פונקציה לניתוח סוג המערך
+		}
+
+		// בדוק אם הסוג של המשתנה תואם לסוג של המערך
+		auto declaredVarType = variableScope[typeVar->token.value].type; // קבלת סוג המשתנה שהוגדר
+		if (declaredVarType != collectionType) {
+			string s = "Type mismatch: variable type" + tokenNames[declaredVarType] + "does not match the collection type" + tokenNames[collectionType];
+			throw s;
+		}
+	}
+	Pattern analyzeArrayType(shared_ptr<ParentNode> arrayNode) {
+		// ניתוח סוג המערך - יש להחזיר את סוג התאים במערך
+		// נניח שהמערך מכיל ביטויים, נבצע ניתוח של הביטויים כדי לקבוע את סוג התאים
+		// זהו רק דוגמה, יש לכתוב את הלוגיקה המתאימה בהתאם למבנה שלך
+
+		// דוגמה פשוטה להחזרת סוג
+		return TOK_INT; // החזרת סוג לדוגמה
 	}
 	//void defineVariable1(const string& name) {
 	//	if (variableScope.find(name) != variableScope.end()) {
@@ -121,56 +155,67 @@ public:
 	//    }
 	//}
 	void analyze(shared_ptr<ASTNode> node) {
-		if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
-			switch (varNode->token.typeToken)
-			{
-			case TOK_ID: {
-				useVariable(varNode->token.value);
-			}
-					   break;
-			/*case TOK_OPEN_CURLY:
-			{ enterScope(); }
-			break;
-			case TOK_CLOSE_CURLY: { exitScope(); }
-								break;*/
-			default:
-				break;
-			}
+		try {
+			if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
+				switch (varNode->token.typeToken)
+				{
+				case TOK_ID: {
+					useVariable(varNode->token.value);
+				}
+						   break;
+						   /*case TOK_OPEN_CURLY:
+						   { enterScope(); }
+						   break;
+						   case TOK_CLOSE_CURLY: { exitScope(); }
+											   break;*/
+				default:
+					break;
+				}
 
-		}
-		else if (auto parentNode = dynamic_pointer_cast<ParentNode>(node)) {
-			// ניתוח צומת אב רגיל
-			if (parentNode->name == "declaration")
-				declareVariable(parentNode);
-			else
-				if (parentNode->name == "for" || parentNode->name == "foreach" || parentNode->name == "while")
-				{
-					enterScope();
-					if (parentNode->name == "foreach")
-						declareVariableInForeach(parentNode);
-					int count = 0;
-					for (auto& child : parentNode->children) {
-						if (count < 5)
-							count++;
-						else
-							analyze(child); // ניתוח ילד
-					}
-					exitScope();
-				}
-				else if (parentNode->name == "block")
-				{
-					enterScope();
-					for (auto& child : parentNode->children) {
-						analyze(child); // ניתוח ילד
-					}
-					exitScope();
-				}
+			}
+			else if (auto parentNode = dynamic_pointer_cast<ParentNode>(node)) {
+				// ניתוח צומת אב רגיל
+				if (parentNode->name == "declaration")
+					declareVariable(parentNode);
 				else
-					for (auto& child : parentNode->children) {
-						analyze(child); // ניתוח ילד
+					if (parentNode->name == "for" || parentNode->name == "foreach" || parentNode->name == "while")
+					{
+						enterScope();
+						if (parentNode->name == "foreach")
+							declareVariableInForeach(parentNode);
+						int count = 0;
+						for (auto& child : parentNode->children) {
+							if (count < 5)
+								count++;
+							else
+								analyze(child); // ניתוח ילד
+						}
+						exitScope();
 					}
-
+					else if (parentNode->name == "block")
+					{
+						enterScope();
+						for (auto& child : parentNode->children) {
+							analyze(child); // ניתוח ילד
+						}
+						exitScope();
+					}
+					else
+						for (auto& child : parentNode->children) {
+							analyze(child); // ניתוח ילד
+						}
+			}
 		}
-	}
+		catch(string s){
+			if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
+				cout << "line " << varNode->token.lineNumber << ":" << s;
+			}
+			else
+				cout<< s;
+		}
+		
+
+    }
+	
 
 };

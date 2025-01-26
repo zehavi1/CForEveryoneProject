@@ -58,7 +58,8 @@ print(i);
        foreach(int item in [x,y,z]){print(i);}  )";
     string program_samentic= R"(
 {
-        int x=7;
+        int x;
+        x=7;
         if(x>5){ var y=9;
                     y+=2;
         foreach(int z in [1,2,3])
@@ -80,8 +81,7 @@ print(i);
     cout << "Abstract Syntax Tree:" << endl;
     ast->printASTNode();
     SemanticAnalyzer semantic;
-    try{ semantic.analyze(ast); }
-    catch (string s) { cout << s; };
+    semantic.analyze(ast); 
     
     return 0;
 }
