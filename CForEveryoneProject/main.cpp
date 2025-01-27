@@ -68,7 +68,7 @@ print(i);
         }
         print(x);
         print(y);})";
-	string program = program_samentic;
+	string program = program_if;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;

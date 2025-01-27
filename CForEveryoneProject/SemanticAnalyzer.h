@@ -77,8 +77,8 @@ public:
 	bool compareTypesInForeach(shared_ptr<ParentNode> node,shared_ptr<TokenNode> typeVar)
 	{
 		//   יש לבדוק מהו הסוג של המערך
-		auto collectionNode = node->children[3];
-		Pattern collectionType;
+		auto collectionNode = node->children[5];
+		Pattern collectionType=TOK_ERROR;
 
 		// השגת סוג המערך
 		if (auto idNode = dynamic_pointer_cast<TokenNode>(collectionNode)) {
@@ -92,19 +92,16 @@ public:
 		}
 
 		// בדוק אם הסוג של המשתנה תואם לסוג של המערך
-		auto declaredVarType = variableScope[typeVar->token.value].type; // קבלת סוג המשתנה שהוגדר
-		if (declaredVarType != collectionType) {
+		Pattern declaredVarType = typeVar->token.typeToken; // קבלת סוג המשתנה שהוגדר
+		auto it = mapTypes.find(declaredVarType);
+		if (it != mapTypes.end() && it->second != collectionType) {
 			string s = "Type mismatch: variable type" + tokenNames[declaredVarType] + "does not match the collection type" + tokenNames[collectionType];
 			throw s;
 		}
 	}
 	Pattern analyzeArrayType(shared_ptr<ParentNode> arrayNode) {
-		// ניתוח סוג המערך - יש להחזיר את סוג התאים במערך
-		// נניח שהמערך מכיל ביטויים, נבצע ניתוח של הביטויים כדי לקבוע את סוג התאים
-		// זהו רק דוגמה, יש לכתוב את הלוגיקה המתאימה בהתאם למבנה שלך
-
-		// דוגמה פשוטה להחזרת סוג
-		return TOK_INT; // החזרת סוג לדוגמה
+		shared_ptr<TokenNode> t = dynamic_pointer_cast<TokenNode>(arrayNode->children[1]);
+		return t->token.typeToken;
 	}
 	//void defineVariable1(const string& name) {
 	//	if (variableScope.find(name) != variableScope.end()) {

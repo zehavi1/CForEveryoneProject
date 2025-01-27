@@ -60,8 +60,15 @@ public:
 	//פקודות if
 	shared_ptr<ASTNode> if_else_statement(); // ניתוח פקודות if-else
 	shared_ptr<ASTNode> elif_statement(); // ניתוח פקודות if-else-if
-	shared_ptr<ASTNode> conditions(); // ניתוח תנאים
-	shared_ptr<ASTNode> condition(); // ניתוח תנאי
+	shared_ptr<ASTNode> logical_condition();
+	shared_ptr<ASTNode> logical_condition_inner();
+	shared_ptr<ASTNode> math_condition();
+	shared_ptr<ASTNode> if_else_statement2();
+	Token peekNextToken();
+	shared_ptr<ASTNode> conditions();
+	shared_ptr<ASTNode> conditions_inner();
+	shared_ptr<ASTNode> conditions2(); // ניתוח תנאים
+	shared_ptr<ASTNode> condition2(); // ניתוח תנאי
 	shared_ptr<ASTNode> comparison_operator(); // ניתוח אופרטורים להשוואה
 	shared_ptr<ASTNode> logical_operator(); // ניתוח אופרטורים לוגיים
 	shared_ptr<ASTNode> block(); // ניתוח בלוקים

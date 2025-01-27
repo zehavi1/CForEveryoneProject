@@ -185,16 +185,137 @@ shared_ptr<ASTNode> SyntacticAnalysis::expr_print() {
 }
 //פונקציות לניתוח תנאים-עובדות טוב אבל יש באג
 //אם יש סוגריים של ביטויים זה לא עובד
+shared_ptr<ASTNode> SyntacticAnalysis::logical_condition() {
+	shared_ptr<ParentNode> logicalNode = make_shared<ParentNode>("logical_condition");
+
+	// ניתוח החלק הראשון של התנאי הלוגי
+	logicalNode->addChild(logical_condition_inner());
+
+	// ניתוח אופרטורים לוגיים מסוג OR (||)
+	while (currentToken().typeToken == TOK_OR) {
+		logicalNode->addChild(match(currentToken().typeToken, "Expected '||/'&&' between conditions"));
+		logicalNode->addChild(logical_condition_inner());
+	}
+
+	return logicalNode;
+}
+
+
+
+shared_ptr<ASTNode> SyntacticAnalysis::logical_condition_inner() {
+	shared_ptr<ParentNode> logicalInnerNode = make_shared<ParentNode>("logical_condition_inner");
+	
+	// ניתוח התנאי הראשון (יכול להיות תנאי מתמטי או תנאי עם סוגריים)
+	logicalInnerNode->addChild(math_condition());
+
+	// ניתוח אופרטורים לוגיים מסוג AND (&&)
+	while (currentToken().typeToken == TOK_AND) {
+		logicalInnerNode->addChild(match(TOK_AND, "Expected '&&' between conditions"));
+		logicalInnerNode->addChild(math_condition());
+	}
+
+	return logicalInnerNode;
+}
+
+
+shared_ptr<ASTNode> SyntacticAnalysis::math_condition() {
+	shared_ptr<ParentNode> mathNode = make_shared<ParentNode>("math_condition");
+
+	if (currentToken().typeToken == TOK_OPEN_PAREN) {
+		// תנאי לוגי או מתמטי עטוף בסוגריים
+		mathNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' at the start of condition"));
+		mathNode->addChild(logical_condition());
+		mathNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' at the end of condition"));
+	}
+	else {
+		// תנאי מתמטי פשוט
+		mathNode->addChild(expression());
+		mathNode->addChild(comparison_operator());
+		mathNode->addChild(expression());
+	}
+
+	return mathNode;
+}
+
+
+
 shared_ptr<ASTNode> SyntacticAnalysis::conditions() {
+	return logical_condition();
+}
+
+shared_ptr<ASTNode> SyntacticAnalysis::conditions_inner() {
+	shared_ptr<ParentNode> conditionsInnerNode = make_shared<ParentNode>("conditions_inner");
+
+	// ניתוח הביטוי הראשון (יכול להיות תנאי לוגי או מתמטי)
+	if (currentToken().typeToken == TOK_OPEN_PAREN) {
+		conditionsInnerNode->addChild(logical_condition()); // תנאי מקונן
+	}
+	else {
+		conditionsInnerNode->addChild(math_condition()); // ביטוי מתמטי
+	}
+
+	// ניתוח אופרטורים לוגיים אם קיימים
+	while (currentToken().typeToken == TOK_AND || currentToken().typeToken == TOK_OR) {
+		conditionsInnerNode->addChild(match(currentToken().typeToken, "Expected logical operator (&& or ||)"));
+
+		// ניתוח הביטוי הבא
+		if (currentToken().typeToken == TOK_OPEN_PAREN) {
+			conditionsInnerNode->addChild(logical_condition()); // תנאי מקונן
+		}
+		else {
+			conditionsInnerNode->addChild(math_condition()); // ביטוי מתמטי
+		}
+	}
+
+	return conditionsInnerNode;
+}
+
+
+Token SyntacticAnalysis::peekNextToken() {
+	if (currentTokenIndex + 1 >= tokens.size()) {
+		throw runtime_error("Unexpected end of input while peeking next token");
+	}
+	return tokens[currentTokenIndex + 1];
+}
+shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement() {
+	shared_ptr<ParentNode> ifElseNode = make_shared<ParentNode>("if_else");
+
+	ifElseNode->addChild(match(TOK_IF, "Expected 'if' keyword"));
+	ifElseNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after 'if'"));
+
+	// ניתוח התנאי
+	ifElseNode->addChild(conditions());
+
+	ifElseNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after conditions"));
+
+	// ניתוח בלוק התחביר
+	ifElseNode->addChild(block());
+
+	// בדיקת elseif
+	while (currentToken().typeToken == TOK_ELIF) {
+		ifElseNode->addChild(elif_statement());
+	}
+
+	// בדיקת else
+	if (currentToken().typeToken == TOK_ELSE) {
+		ifElseNode->addChild(match(TOK_ELSE, "Expected 'else' keyword"));
+		ifElseNode->addChild(block());
+	}
+
+	return ifElseNode;
+}
+
+
+shared_ptr<ASTNode> SyntacticAnalysis::conditions2() {
 	shared_ptr<ParentNode> conditionNode = make_shared<ParentNode>("conditions");
-	conditionNode->addChild(condition()); // ניתוח הביטוי הראשון
+	conditionNode->addChild(condition2()); // ניתוח הביטוי הראשון
 	while (currentToken().typeToken == TOK_AND || currentToken().typeToken == TOK_OR) {
 		conditionNode->addChild(logical_operator()); // ניתוח אופרטור לוגי
-		conditionNode->addChild(condition());
+		conditionNode->addChild(condition2());
 	}
 	return conditionNode; // החזרת צומת תנאי
 }
-shared_ptr<ASTNode> SyntacticAnalysis::condition() {
+shared_ptr<ASTNode> SyntacticAnalysis::condition2() {
 	shared_ptr<ParentNode> conditionNode = make_shared<ParentNode>("condition");
 	int current = currentTokenIndex;
 	Pattern p;
@@ -255,12 +376,12 @@ shared_ptr<ASTNode> SyntacticAnalysis::elif_statement() {
 	shared_ptr<ParentNode> ifElseIfNode = make_shared<ParentNode>("elif");
 	ifElseIfNode->addChild(match(TOK_ELIF));
 	ifElseIfNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after elif"));
-	ifElseIfNode->addChild(condition());
+	ifElseIfNode->addChild(conditions());
 	ifElseIfNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
 	ifElseIfNode->addChild(block());
 	return ifElseIfNode;
 }
-shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement() {
+shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement2() {
 	shared_ptr<ParentNode> ifElseNode = make_shared<ParentNode>("if_else");
 	ifElseNode->addChild(match(TOK_IF));
 	ifElseNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after if"));
@@ -462,7 +583,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::for_loop() {
 	forNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after for"));
 	forNode->addChild(assignment());
 	//forNode->addChild((match(TOK_SEMICOLON, "Expected ';' after assignment")));
-	forNode->addChild(condition());
+	forNode->addChild(conditions());
 	forNode->addChild(match(TOK_SEMICOLON, "Expected ';' after condition"));
 	forNode->addChild(assignment1());
 	forNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after for loop"));
@@ -473,7 +594,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::while_loop() {
 	shared_ptr<ParentNode> whileNode = make_shared<ParentNode>("while");
 	whileNode->addChild(match(TOK_WHILE));
 	whileNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after while"));
-	whileNode->addChild(condition());
+	whileNode->addChild(conditions());
 	whileNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
 	whileNode->addChild(block());
 	return whileNode;
