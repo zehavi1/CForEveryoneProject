@@ -28,7 +28,7 @@ int main() {
             print("x is greater than"+x+y*3);
     )";
 	string program_if = R"(
-        if ((x > 10 && y < 5) || (z == 20)) {
+        if ((x > 10 && y < 5) || (z == 20)&&(x+9)<35) {
             print("x is greater than 10 and y is less than 5 or z is equal to 20");
          }
     elif(x<8)
@@ -68,7 +68,7 @@ print(i);
         }
         print(x);
         print(y);})";
-	string program = program_if;
+	string program = program_samentic;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;

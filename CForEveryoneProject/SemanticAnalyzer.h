@@ -77,8 +77,8 @@ public:
 	bool compareTypesInForeach(shared_ptr<ParentNode> node,shared_ptr<TokenNode> typeVar)
 	{
 		//   יש לבדוק מהו הסוג של המערך
-		auto collectionNode = node->children[5];
-		Pattern collectionType=TOK_ERROR;
+		auto collectionNode = node->children[3];
+		Pattern collectionType;
 
 		// השגת סוג המערך
 		if (auto idNode = dynamic_pointer_cast<TokenNode>(collectionNode)) {
@@ -92,16 +92,22 @@ public:
 		}
 
 		// בדוק אם הסוג של המשתנה תואם לסוג של המערך
-		Pattern declaredVarType = typeVar->token.typeToken; // קבלת סוג המשתנה שהוגדר
-		auto it = mapTypes.find(declaredVarType);
-		if (it != mapTypes.end() && it->second != collectionType) {
+		auto declaredVarType = typeVar->token.typeToken; // קבלת סוג המשתנה שהוגדר
+		if (declaredVarType != collectionType) {
 			string s = "Type mismatch: variable type" + tokenNames[declaredVarType] + "does not match the collection type" + tokenNames[collectionType];
 			throw s;
 		}
 	}
 	Pattern analyzeArrayType(shared_ptr<ParentNode> arrayNode) {
-		shared_ptr<TokenNode> t = dynamic_pointer_cast<TokenNode>(arrayNode->children[1]);
-		return t->token.typeToken;
+
+		shared_ptr<TokenNode> p = dynamic_pointer_cast<TokenNode>(arrayNode->children[1]);
+		Pattern key = p->token.typeToken; // קח את סוג הפטרן מתוך TokenNode
+		Pattern p1;
+		// בדוק אם המפתח קיים במפה
+		auto it = mapTypes.find(key);
+		if (it != mapTypes.end()) 
+			 p1 = it->second; // קבל את הערך המתאים מהמפה
+		return p1; // החזרת סוג 
 	}
 	//void defineVariable1(const string& name) {
 	//	if (variableScope.find(name) != variableScope.end()) {

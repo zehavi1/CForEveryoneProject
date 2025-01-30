@@ -216,7 +216,10 @@ shared_ptr<ASTNode> SyntacticAnalysis::logical_condition_inner() {
 
 	return logicalInnerNode;
 }
-
+shared_ptr<ASTNode> SyntacticAnalysis::choose_condition() {
+	int iTokens = currentTokenIndex;
+	
+}
 
 shared_ptr<ASTNode> SyntacticAnalysis::math_condition() {
 	shared_ptr<ParentNode> mathNode = make_shared<ParentNode>("math_condition");
@@ -224,6 +227,17 @@ shared_ptr<ASTNode> SyntacticAnalysis::math_condition() {
 	if (currentToken().typeToken == TOK_OPEN_PAREN) {
 		// תנאי לוגי או מתמטי עטוף בסוגריים
 		mathNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' at the start of condition"));
+		// בדוק מה הטוקן הבא
+		Token nextToken = peekNextToken();
+		if (nextToken.typeToken == TOK_ID || nextToken.typeToken == TOK_INT) {
+			// אם הטוקן הבא הוא מזהה או מספר, נניח שזה ביטוי מתמטי
+			mathNode->addChild(math_condition());
+		}
+		else {
+			// אם הטוקן הבא הוא טוקן לוגי, נניח שזה ביטוי לוגי
+			mathNode->addChild(logical_condition());
+		}
+
 		mathNode->addChild(logical_condition());
 		mathNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' at the end of condition"));
 	}

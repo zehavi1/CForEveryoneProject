@@ -61,6 +61,7 @@ public:
 	shared_ptr<ASTNode> if_else_statement(); // ניתוח פקודות if-else
 	shared_ptr<ASTNode> elif_statement(); // ניתוח פקודות if-else-if
 	shared_ptr<ASTNode> logical_condition();
+	shared_ptr<ASTNode> choose_condition();
 	shared_ptr<ASTNode> logical_condition_inner();
 	shared_ptr<ASTNode> math_condition();
 	shared_ptr<ASTNode> if_else_statement2();
