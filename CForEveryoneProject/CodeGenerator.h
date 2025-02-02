@@ -108,8 +108,11 @@ public:
 			if(auto exprNode = dynamic_pointer_cast<BinaryOpNode>(x)){
 				if (exprNode->name == "expressionInPrint")
 				{
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%f", t.lineNumber)));
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_COMMA, ",", t.lineNumber)));
+					string s = exprNode->printOriginalCode();
+					printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%lf", t.lineNumber)));
+					Token t2(TOK_DOUBLE, s, t.lineNumber);
+					v.push_back(Variable(t2));
+					//hear i need insert code to put all expr node as a variable to push the vector.
 				}
 			}
 			else
@@ -136,7 +139,7 @@ public:
 				case TOK_FLOAT:
 				case TOK_DOUBLE:
 				{
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%s", t.lineNumber)));
+                    printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, typesPrint[p], t.lineNumber)));
 					v.push_back(Variable(tokNode->token));
 					break;
 				}

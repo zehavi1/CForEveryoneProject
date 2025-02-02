@@ -26,7 +26,7 @@ int main() {
         return 0;
     )";
     string program_print = R"(
-            print("x is greater than"+x+y*3+"and y="+y);
+            print("x is greater than "+x+y*3+" and y="+y);
     )";
 	string program_if = R"(
         if ((x > 10 && y < 5) || (z == 20)&&(x+9)<35) {
@@ -87,5 +87,6 @@ print(i);
     generator.generateCode(ast);
     shared_ptr<ASTNode> astNew= generator.getNewAst();
     astNew->printASTNode();
+    cout<<astNew->printOriginalCode();
     return 0;
 }

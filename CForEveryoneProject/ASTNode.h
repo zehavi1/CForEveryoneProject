@@ -11,6 +11,7 @@ struct ASTNode {
 	
    virtual void printASTNode(int depth=0) = 0;
     virtual ~ASTNode() {}
+	virtual string printOriginalCode() const = 0;
 	
 };
 inline void printTabsDepth(int depth) {
@@ -31,6 +32,9 @@ public:
 		printTabsDepth(depth);
 		cout << "TokenNode: " << token.value << endl;
 	}
+	string printOriginalCode() const override {
+		return token.value;
+	}
 };
 struct ParentNode :ASTNode {
 public:
@@ -47,6 +51,13 @@ public:
 			child->printASTNode(depth+1);
 		}
 	}
+	 string printOriginalCode() const override {
+		 string s="";
+		for (const auto& child : children) {
+			s+=child->printOriginalCode();
+		}
+		return s;
+	}
 	void addChild(shared_ptr<ASTNode> child) {
 		children.push_back(child);
 	}
@@ -54,6 +65,7 @@ public:
 	{
 		children[index] = child;
 	}
+	
 };
 
 // צומת עבור ביטויים בינאריים
@@ -68,6 +80,13 @@ public:
 	}
 	BinaryOpNode(string name, const Token& op, shared_ptr<ASTNode> left, shared_ptr<ASTNode> right)
 		:name(name), op(op), left(left), right(right) {
+	}
+	string printOriginalCode() const override {
+		string s;
+		s=left->printOriginalCode();
+		s+=op.value;
+		s+=right->printOriginalCode();
+		return s;
 	}
 	void printASTNode(int depth = 0) {
 		printTabsDepth(depth + 1);
