@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Lexer.h"
 #include "SyntacticAnalysis.h"
-#include "SemanticAnalyzer.h"
+#include "CodeGenerator.h"
 
 int main() {
     //Graph g;
@@ -25,7 +25,7 @@ int main() {
         return 0;
     )";
     string program_print = R"(
-            print("x is greater than"+x+y*3);
+            print("x is greater than"+x+y*3+"and y="+y);
     )";
 	string program_if = R"(
         if ((x > 10 && y < 5) || (z == 20)&&(x+9)<35) {
@@ -68,7 +68,7 @@ print(i);
         }
         print(x);
         print(y);})";
-	string program = program_samentic;
+	string program = program_print;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
@@ -82,6 +82,10 @@ print(i);
     ast->printASTNode();
     SemanticAnalyzer semantic;
     semantic.analyze(ast); 
-    
+    auto scopesFinal=semantic.getScopesFinal();
+    CodeGenerator generator(ast,scopesFinal);
+    generator.generateCode(ast);
+    shared_ptr<ASTNode> astNew= generator.getNewAst();
+    astNew->printASTNode();
     return 0;
 }

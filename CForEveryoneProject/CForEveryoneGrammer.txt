@@ -24,6 +24,9 @@
 
 <comparison_operator> ::= TOK_EQUAL | TOK_NOT_EQUAL | TOK_LESS | TOK_GREATER | TOK_LESS_EQUAL | TOK_GREATER_EQUAL
 <logical_operator> ::= TOK_AND | TOK_OR
+//<conditions1>::=TOK_OPEN_PAREN (<base_condition>| <condition1>) TOK_CLOSE_PAREN
+//<base_condition>::=<expr>| <logic_condition>//check next token
+//<logic_condition>::=
 <conditions> ::= <condition> (logical_operator <condition>)*
 <condition>::=(<expr> comparison_operator <expr>) (^same^ comparison_operator <expr>)--<range_condition>
 //<range_condition> ::= <expr> TOK_LESS <expr> TOK_LESS <expr> | <expr> TOK_GREATER <expr> TOK_GREATER <expr>

@@ -54,6 +54,7 @@ public:
 	shared_ptr<ASTNode> print_statement();
 	shared_ptr<ASTNode> variable_declaration(); // ניתוח הצהרות משתנים
 	shared_ptr<ASTNode> expr_print();
+	shared_ptr<ASTNode> expressionInPrint();
 	shared_ptr<ASTNode> assignment(); // ניתוח השמות
 	shared_ptr<ASTNode> assignment1();
 	shared_ptr<ASTNode> statement(); // ניתוח פקודות

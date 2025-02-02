@@ -129,6 +129,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CForEveryoneProject.cpp" />
+    <ClCompile Include="CodeGenerator.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Parser.cpp" />
@@ -139,6 +140,7 @@
     <ClCompile Include="trySyntax.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CodeGenerator.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Parser.h" />

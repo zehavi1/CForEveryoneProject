@@ -3,6 +3,7 @@
 enum Pattern {
 	// מילים שמורות
 	//סוגי משתנים
+    TOK_TYPE_PRINT,
     TOK_DOUBLE_TYPE,
     TOK_INT_TYPE,
 	TOK_CHAR_TYPE,
@@ -18,6 +19,7 @@ enum Pattern {
     TOK_TRUE,
     TOK_RETURN,
     TOK_PRINT,
+    TOK_PRINTF,
     TOK_NEW,
     TOK_LONG,
     TOK_INT,
@@ -67,6 +69,7 @@ enum Pattern {
 	TOK_DECREMENT
 };
 const std::string tokenNames[] = {
+    "TOK_TYPE_PRINT",
 	"TOK_DOUBLE_TYPE",
 	"TOK_INT_TYPE",
 	"TOK_CHAR_TYPE",
@@ -81,6 +84,7 @@ const std::string tokenNames[] = {
     "TOK_TRUE",
     "TOK_RETURN",
     "TOK_PRINT",
+    "TOK_PRINTF",
     "TOK_NEW",
     "TOK_LONG",
     "TOK_INT",
@@ -137,6 +141,7 @@ const std::map<std::string, Pattern> mapAlphaTokens = {
     {"string", TOK_STRING_TYPE},
     {"return", TOK_RETURN},
     {"print", TOK_PRINT},
+    {"printf",TOK_PRINTF},
     {"new", TOK_NEW},
     {"long", TOK_LONG_TYPE},
     {"int", TOK_INT_TYPE},

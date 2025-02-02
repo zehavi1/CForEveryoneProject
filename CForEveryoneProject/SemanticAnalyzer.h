@@ -22,10 +22,15 @@ class SemanticAnalyzer
 private:
 	map<string, Variable> variableScope;
 	vector<map<string, Variable>> scopes;
-	//map<string, int> variableScope; // טווח משתנים
-	//vector<map<string, int>> scopes; // רשימה של טווחים
+	static vector<map<string, Variable>> scopesFinal;
+
 
 public:
+	friend class codeGenerator;
+	static vector<map<string, Variable>>& getScopesFinal()
+	{
+		return scopesFinal;
+	}
 	void enterScope() {
 		if(!scopes.empty())
 			scopes.back() = variableScope;
@@ -34,8 +39,17 @@ public:
 
 	void exitScope() {
 		if (!scopes.empty()) {
+			scopesFinal.push_back(scopes.back());
 			scopes.pop_back(); // חזרה לטווח הקודם
             variableScope = scopes.empty() ? map<string, Variable>() : scopes.back(); // החזרת משתנים מהטווח הקודם
+		}
+	}
+	void exitScope(shared_ptr<ParentNode> node ) {
+		if (!scopes.empty()) {
+			node->variableScope = scopes.back();
+			//scopesFinal.push_back(scopes.back());
+			scopes.pop_back(); // חזרה לטווח הקודם
+			variableScope = scopes.empty() ? map<string, Variable>() : scopes.back(); // החזרת משתנים מהטווח הקודם
 		}
 	}
 	void declareVariable(shared_ptr<ParentNode> node)
@@ -102,7 +116,7 @@ public:
 
 		shared_ptr<TokenNode> p = dynamic_pointer_cast<TokenNode>(arrayNode->children[1]);
 		Pattern key = p->token.typeToken; // קח את סוג הפטרן מתוך TokenNode
-		Pattern p1;
+		Pattern p1 = TOK_ERROR;
 		// בדוק אם המפתח קיים במפה
 		auto it = mapTypes.find(key);
 		if (it != mapTypes.end()) 
@@ -193,7 +207,8 @@ public:
 							else
 								analyze(child); // ניתוח ילד
 						}
-						exitScope();
+						//exitScope();
+						exitScope(parentNode);
 					}
 					else if (parentNode->name == "block")
 					{
@@ -201,7 +216,7 @@ public:
 						for (auto& child : parentNode->children) {
 							analyze(child); // ניתוח ילד
 						}
-						exitScope();
+						exitScope(parentNode);
 					}
 					else
 						for (auto& child : parentNode->children) {

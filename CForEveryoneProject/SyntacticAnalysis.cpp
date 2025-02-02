@@ -165,7 +165,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::expr_print() {
 		exprNode->addChild(match(TOK_STRING_LITERAL, "Expected string literal"));
 	}
 	else {
-		exprNode->addChild(expression()); // ניתוח ביטוי
+		exprNode->addChild(expressionInPrint()); // ניתוח ביטוי
 	}
 
 	// חיבור עם '+' למחרוזות נוספות או ביטויים
@@ -177,11 +177,25 @@ shared_ptr<ASTNode> SyntacticAnalysis::expr_print() {
 			exprNode->addChild(match(TOK_STRING_LITERAL, "Expected string literal"));
 		}
 		else {
-			exprNode->addChild(expression()); // ניתוח ביטוי נוסף
+			exprNode->addChild(expressionInPrint()); // ניתוח ביטוי נוסף
 		}
 	}
 
 	return exprNode; // החזרת צומת הביטוי להדפסה
+}
+shared_ptr<ASTNode> SyntacticAnalysis::expressionInPrint() {
+	shared_ptr<ASTNode> left = term();
+	while (currentToken().typeToken == TOK_PLUS || currentToken().typeToken == TOK_MINUS) {
+		if (currentToken().typeToken == TOK_PLUS&&peekNextToken().typeToken == TOK_STRING_LITERAL)
+		{
+			return left;
+		}
+		Token op = currentToken();
+		nextToken();
+		shared_ptr<ASTNode> right = term();
+		left = make_shared<BinaryOpNode>("expressionInPrint", op, left, right);
+	}
+	return left;
 }
 //פונקציות לניתוח תנאים-עובדות טוב אבל יש באג
 //אם יש סוגריים של ביטויים זה לא עובד
@@ -216,9 +230,11 @@ shared_ptr<ASTNode> SyntacticAnalysis::logical_condition_inner() {
 
 	return logicalInnerNode;
 }
+//not good!!!!!!!!!!!!!
 shared_ptr<ASTNode> SyntacticAnalysis::choose_condition() {
 	int iTokens = currentTokenIndex;
-	
+	shared_ptr<ParentNode> mathNode = make_shared<ParentNode>("math_condition");
+	return mathNode;
 }
 
 shared_ptr<ASTNode> SyntacticAnalysis::math_condition() {
