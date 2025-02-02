@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <string>
 enum Pattern {
 	// מילים שמורות
 	//סוגי משתנים
@@ -194,3 +195,12 @@ const std::map<Pattern, Pattern> mapTypes = {
     {TOK_INT_TYPE, TOK_INT},
     {TOK_LONG_TYPE, TOK_LONG},
     {TOK_STRING_TYPE, TOK_STRING}};
+std::map<Pattern, std::string> typsPrint = {
+    {TOK_INT,"%d"},
+    {TOK_CHAR,"%c"},
+    {TOK_BOOL,"%s"},
+    {TOK_DOUBLE,"%lf"},
+    {TOK_FLOAT,"%f"},
+    {TOK_LONG,"%ld"},
+    {TOK_STRING,"%s"}
+};

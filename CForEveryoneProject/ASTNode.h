@@ -4,6 +4,7 @@
 #include <memory>
 #include <iostream>
 #include "Token.h"
+#include "Variable.h"
 using namespace std;
 // מחלקת בסיס לכל הצמתים
 struct ASTNode {
@@ -21,6 +22,7 @@ struct TokenNode:ASTNode{
 public:
 	Token token;
 	TokenNode(Token token) :token(token) {}
+	TokenNode(Token &token) :token(token) {}
 	void printASTNode(int depth=0) {
 		printTabsDepth(depth);
 		cout << "TokenNode: " << token.value << endl;

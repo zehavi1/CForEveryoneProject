@@ -4,17 +4,9 @@
 #include <vector>
 #include <stdexcept>
 #include "ASTNode.h"
+#include "Variable.h"
 
-using namespace std;
-struct Variable {
-	string name;
-	Pattern type;
-	bool initialized;
-	Variable() {};
-	Variable(const string& name, Pattern type, bool initialized = false)
-		: name(name), type(type), initialized(initialized) {
-	}
-};
+
 
 // מחלקת ניתוח סמנטי
 class SemanticAnalyzer
@@ -67,7 +59,7 @@ public:
 			if (auto varNode2 = dynamic_pointer_cast<ParentNode>(children[i])) {
 				auto children2 = varNode2->children;
 				if (auto varNode3 = dynamic_pointer_cast<TokenNode>(children2[0])) {
-					defineVariable(varNode3->token.value, typeVar->token.typeToken);
+					defineVariable(varNode3->token);
 				}
 			}
 		}
@@ -84,7 +76,7 @@ public:
 		if (typeVar->token.typeToken != TOK_ID)
 		{
 			var = dynamic_pointer_cast<TokenNode>(node->children[3]);
-			defineVariable(var->token.value, typeVar->token.typeToken);
+			defineVariable(var->token);
 		}
 		compareTypesInForeach(node, typeVar);
 	}
@@ -98,7 +90,7 @@ public:
 		if (auto idNode = dynamic_pointer_cast<TokenNode>(collectionNode)) {
 			// אם המערך הוא משתנה
 			string arrayName = idNode->token.value;
-			collectionType = variableScope[arrayName].type; // קבלת סוג המערך
+			collectionType = variableScope[arrayName].token.typeToken; // קבלת סוג המערך
 		}
 		else if (auto arrayNode = dynamic_pointer_cast<ParentNode>(collectionNode)) {
 			// אם המערך הוא מערך מורכב
@@ -129,13 +121,13 @@ public:
 	//	}
 	//	//variableScope[name] = 0; // הוספת משתנה לטווח
 	//}
-	void defineVariable(const string& name, Pattern type)
+	void defineVariable(Token token)
 	{
-		if (variableScope.find(name) != variableScope.end()) {
-			string s = "Variable " + name + " already defined in this scope";
+		if (variableScope.find(token.value) != variableScope.end()) {
+			string s = "Variable " + token.value + " already defined in this scope";
 			throw s;
 		}
-		variableScope[name] = Variable(name, type);
+		variableScope[token.value] = Variable(token);
 		
 	}
 

@@ -138,6 +138,7 @@
     <ClCompile Include="SyntacticAnalysis.cpp" />
     <ClCompile Include="Token.cpp" />
     <ClCompile Include="trySyntax.cpp" />
+    <ClCompile Include="Variable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CodeGenerator.h" />
@@ -148,6 +149,7 @@
     <ClInclude Include="SemanticAnalyzer.h" />
     <ClInclude Include="SyntacticAnalysis.h" />
     <ClInclude Include="Token.h" />
+    <ClInclude Include="Variable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

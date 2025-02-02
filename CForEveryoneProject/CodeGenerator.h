@@ -3,11 +3,12 @@
 class CodeGenerator
 {
 	shared_ptr<ASTNode> ast;
-	vector<map<string, Variable>> scopesFinal;
-	vector<map<string, Variable>> scopes;
+	//vector<map<string, Variable>> scopesFinal;
+	//vector<map<string, Variable>> scopes;
+	map<string, Variable> currentScope;
 	int indexScope=0;
 public:
-	CodeGenerator(shared_ptr<ASTNode>& ast, vector<map<string, Variable>> scopesFinal) :ast(ast),scopesFinal(scopesFinal) {};
+	CodeGenerator(shared_ptr<ASTNode>& ast, vector<map<string, Variable>> scopesFinal) :ast(ast){};
 	shared_ptr<ASTNode>& getNewAst() { return ast; }
 	void generateCode(shared_ptr<ASTNode> node) {
 		try {
@@ -38,7 +39,9 @@ public:
 				else
 					if (parentNode->name == "for" || parentNode->name == "foreach" || parentNode->name == "while")
 					{
-						indexScope++;
+						auto prevScope = currentScope;
+						currentScope = parentNode->variableScope;
+						//indexScope++;
 						if (parentNode->name == "foreach"){}
 							//declareVariableInForeach(parentNode);
 						int count = 0;
@@ -48,15 +51,18 @@ public:
 							else
 								generateCode(child); // ניתוח ילד
 						}
-						indexScope--;
+						currentScope = prevScope;
+						//indexScope--;
 					}
 					else if (parentNode->name == "block")
 					{
-						indexScope++;
+						auto prevScope = currentScope;
+						//indexScope++;
 						for (auto& child : parentNode->children) {
 							generateCode(child); // ניתוח ילד
 						}
-						indexScope--;
+						currentScope = prevScope;
+						//indexScope--;
 					}
 					else
 						for (auto& child : parentNode->children) {
@@ -83,6 +89,8 @@ public:
 		print_node->changeChild(make_shared<TokenNode>(Token( TOK_PRINTF,"printf",t.lineNumber)),0);
 		//printf_node->addChild(make_shared<TokenNode>(Token( TOK_PRINTF,"printf",t.lineNumber)));
 		//printf_node->addChild(print_node->children[1]);
+		string s = "\"";
+		printf_node->addChild(make_shared<TokenNode>(Token(TOK_STRING_LITERAL, s, t.lineNumber)));
 		vector<Variable> v;
 		for (auto x : exprPrint_node->children)
 		{
@@ -102,44 +110,29 @@ public:
 				{
 				case TOK_ID:
 				{
-					p = scopesFinal[indexScope][tokNode->token.value].type;
+					p = currentScope[tokNode->token.value].token.typeToken;
+					if (p == TOK_STRING)
+					{
+						printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%s", t.lineNumber)));
+						//printf_node->addChild(make_shared<TokenNode>(Token(TOK_COMMA, ",", t.lineNumber)));
+						v.push_back(Variable(tokNode->token));
+						break;
+					}
 
 				}
 				case TOK_INT:
+				case TOK_CHAR:
+				case TOK_LONG:
+				case TOK_FLOAT:
+				case TOK_DOUBLE:
 				{
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%d", t.lineNumber)));
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_COMMA, ",", t.lineNumber)));
+					printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%s", t.lineNumber)));
+					v.push_back(Variable(tokNode->token));
 					break;
 				}
 				case TOK_STRING:
 				{
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%s", t.lineNumber)));
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_COMMA, ",", t.lineNumber)));
-					break;
-				}
-				case TOK_CHAR:
-				{
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%c", t.lineNumber)));
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_COMMA, ",", t.lineNumber)));
-					break;
-				}
-				case TOK_LONG:
-				{
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%ld", t.lineNumber)));
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_COMMA, ",", t.lineNumber)));
-					break;
-				}
-				case TOK_FLOAT:
-				{
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%f", t.lineNumber)));
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_COMMA, ",", t.lineNumber)));
-					break;
-				}
-				case TOK_DOUBLE:
-				{
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%c", t.lineNumber)));
-					printf_node->addChild(make_shared<TokenNode>(Token(TOK_COMMA, ",", t.lineNumber)));
-					break;
+					printf_node->addChild(tokNode);
 				}
 				default:
 					break;
@@ -147,16 +140,17 @@ public:
 			}
 			
 		}
-		//printf_node->addChild(print_node->children[2]);
+		printf_node->addChild(make_shared<TokenNode>(Token(TOK_STRING_LITERAL, s, t.lineNumber)));
 
-		for (auto x : exprPrint_node->children)
+
+		//printf_node->addChild(make_shared<TokenNode>(TOK_STRING_LITERAL,s,t.lineNumber));
+
+		for (auto x : v)
 		{
-			if (auto tokNode = dynamic_pointer_cast<TokenNode>(x))
-			{
-				if(tokNode->token.typeToken!=TOK_PLUS&& tokNode->token.typeToken != TOK_STRING_LITERAL)
-					printf_node->addChild(x);
-			}
+			printf_node->addChild(make_shared<TokenNode>(Token(TOK_COMMA, ",", t.lineNumber)));
+			printf_node->addChild(make_shared<TokenNode>(x));
 		}
+		//printf_node->addChild(make_shared<TokenNode>(TOK_STRING_LITERAL, s, t.lineNumber));
 		print_node->changeChild(printf_node, 2);
 
 	}
