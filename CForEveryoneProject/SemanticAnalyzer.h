@@ -53,9 +53,11 @@ public:
 			auto varNode2 = dynamic_pointer_cast<ParentNode>(list->children[0]);
 			auto varNode3 = dynamic_pointer_cast<TokenNode>(varNode2->children[2]);
 			Pattern typeVar2 = varNode3->token.typeToken;
+			Pattern typeVar3;
 			if (typeVar2 == TOK_ID)
 			{
 				typeVar2 = variableScope[varNode3->token.value].token.typeToken;
+
 			}
 			else {
 				typeVar2 = mapTypes1.at(typeVar2);
@@ -65,6 +67,9 @@ public:
 				if (auto varNode2 = dynamic_pointer_cast<ParentNode>(list->children[i])) {
 					auto children2 = varNode2->children;
 					if (auto varNode3 = dynamic_pointer_cast<TokenNode>(children2[0])) {
+						auto varNode4 = dynamic_pointer_cast<TokenNode>(children2[2]);
+						typeVar3 = variableScope[varNode4->token.value].token.typeToken;
+
 						varNode3->token.typeToken = typeVar2;
 						defineVariable(varNode3->token);
 					}
@@ -72,6 +77,20 @@ public:
 
 			}
 		}
+		else {
+			for (size_t i = 0; i < list->children.size(); i += 2)
+			{
+				if (auto varNode2 = dynamic_pointer_cast<ParentNode>(list->children[i])) {
+					auto children2 = varNode2->children;
+					if (auto varNode3 = dynamic_pointer_cast<TokenNode>(children2[0])) {
+						varNode3->token.typeToken = typeVar->token.typeToken;
+						defineVariable(varNode3->token);
+					}
+				}
+
+			}
+		}
+		
 	}
 	void declareVariableInForeach(shared_ptr<ParentNode> node)
 	{
