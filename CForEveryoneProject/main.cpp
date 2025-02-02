@@ -27,7 +27,7 @@ int main() {
     )";
     string program_print = R"(
           {
-            int x,y;
+            var x=9,y=0;
             print("x is greater than "+x+y*3+" and y="+y);}
     )";
 	string program_if = R"(

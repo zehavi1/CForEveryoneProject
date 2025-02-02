@@ -195,3 +195,4 @@ const std::map<Pattern, Pattern> mapTypes = {
     {TOK_INT_TYPE, TOK_INT},
     {TOK_LONG_TYPE, TOK_LONG},
     {TOK_STRING_TYPE, TOK_STRING}};
+

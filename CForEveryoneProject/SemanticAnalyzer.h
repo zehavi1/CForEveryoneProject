@@ -38,23 +38,40 @@ public:
 		//auto children = node->children;
 		shared_ptr<ParentNode> list;
 		shared_ptr<TokenNode> typeVar;
-
+		const std::map<Pattern, Pattern> mapTypes1 = {
+{TOK_BOOL, TOK_BOOL_TYPE},
+{TOK_CHAR, TOK_CHAR_TYPE},
+{TOK_DOUBLE, TOK_DOUBLE_TYPE},
+{TOK_FLOAT, TOK_FLOAT_TYPE},
+{TOK_INT, TOK_INT_TYPE},
+{TOK_LONG, TOK_LONG_TYPE},
+{TOK_STRING, TOK_STRING_TYPE} };
 		typeVar = dynamic_pointer_cast<TokenNode>(node->children[0]);
 		list = dynamic_pointer_cast<ParentNode>(node->children[1]);
-
-		auto children = list->children;
-		for (size_t i = 0; i < children.size(); i += 2)
+		if (typeVar->token.typeToken == TOK_VAR)
 		{
-			if (auto varNode2 = dynamic_pointer_cast<ParentNode>(children[i])) {
-				auto children2 = varNode2->children;
-				if (auto varNode3 = dynamic_pointer_cast<TokenNode>(children2[0])) {
-					varNode3->token.typeToken = typeVar->token.typeToken;
-					defineVariable(varNode3->token);
+			auto varNode2 = dynamic_pointer_cast<ParentNode>(list->children[0]);
+			auto varNode3 = dynamic_pointer_cast<TokenNode>(varNode2->children[2]);
+			Pattern typeVar2 = varNode3->token.typeToken;
+			if (typeVar2 == TOK_ID)
+			{
+				typeVar2 = variableScope[varNode3->token.value].token.typeToken;
+			}
+			else {
+				typeVar2 = mapTypes1.at(typeVar2);
+			}
+			for (size_t i = 0; i < list->children.size(); i += 2)
+			{
+				if (auto varNode2 = dynamic_pointer_cast<ParentNode>(list->children[i])) {
+					auto children2 = varNode2->children;
+					if (auto varNode3 = dynamic_pointer_cast<TokenNode>(children2[0])) {
+						varNode3->token.typeToken = typeVar2;
+						defineVariable(varNode3->token);
+					}
 				}
+
 			}
 		}
-
-
 	}
 	void declareVariableInForeach(shared_ptr<ParentNode> node)
 	{
