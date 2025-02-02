@@ -26,7 +26,9 @@ int main() {
         return 0;
     )";
     string program_print = R"(
-            print("x is greater than "+x+y*3+" and y="+y);
+          {
+            int x,y;
+            print("x is greater than "+x+y*3+" and y="+y);}
     )";
 	string program_if = R"(
         if ((x > 10 && y < 5) || (z == 20)&&(x+9)<35) {

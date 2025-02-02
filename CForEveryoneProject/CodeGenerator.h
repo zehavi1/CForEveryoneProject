@@ -36,6 +36,11 @@ public:
 				{
 					generate_print_statement(parentNode);
 				}
+				else
+					if (parentNode->name == "declaration")
+					{
+						
+					}
 				//declareVariable(parentNode);
 				else
 					if (parentNode->name == "for" || parentNode->name == "foreach" || parentNode->name == "while")
@@ -58,6 +63,7 @@ public:
 					else if (parentNode->name == "block")
 					{
 						auto prevScope = currentScope;
+						currentScope = parentNode->variableScope;
 						//indexScope++;
 						for (auto& child : parentNode->children) {
 							generateCode(child); // ניתוח ילד
@@ -90,7 +96,14 @@ public:
 	{TOK_DOUBLE,"%lf"},
 	{TOK_FLOAT,"%f"},
 	{TOK_LONG,"%ld"},
-	{TOK_STRING,"%s"}
+	{TOK_STRING,"%s"},
+	{TOK_INT_TYPE,"%d"},
+	{TOK_CHAR_TYPE,"%c"},
+	{TOK_BOOL_TYPE,"%s"},
+	{TOK_DOUBLE_TYPE,"%lf"},
+	{TOK_FLOAT_TYPE,"%f"},
+	{TOK_LONG_TYPE,"%ld"},
+	{TOK_STRING_TYPE,"%s"}
 		};
 		shared_ptr<ParentNode> print_node = dynamic_pointer_cast<ParentNode>(node);
 		shared_ptr<ParentNode> exprPrint_node = dynamic_pointer_cast<ParentNode>(print_node->children[2]);
@@ -124,15 +137,21 @@ public:
 				case TOK_ID:
 				{
 					p = currentScope[tokNode->token.value].token.typeToken;
-					if (p == TOK_STRING)
-					{
-						printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%s", t.lineNumber)));
-						//printf_node->addChild(make_shared<TokenNode>(Token(TOK_COMMA, ",", t.lineNumber)));
-						v.push_back(Variable(tokNode->token));
-						break;
-					}
+					//if (p == TOK_STRING_TYPE)
+					//{
+					//	printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%s", t.lineNumber)));
+					//	//printf_node->addChild(make_shared<TokenNode>(Token(TOK_COMMA, ",", t.lineNumber)));
+					//	v.push_back(Variable(tokNode->token));
+					//	break;
+					//}
 
 				}
+				case TOK_STRING_TYPE:
+				case TOK_INT_TYPE:
+				case TOK_CHAR_TYPE:
+				case TOK_LONG_TYPE:
+				case TOK_FLOAT_TYPE:
+				case TOK_DOUBLE_TYPE:
 				case TOK_INT:
 				case TOK_CHAR:
 				case TOK_LONG:
@@ -169,11 +188,13 @@ public:
 
 	}
 
-	shared_ptr<ASTNode> generate_number();
-	shared_ptr<ASTNode> generate_type(); // ניתוח סוגי משתנים
-
+	
 	//משתנים
-	shared_ptr<ASTNode> declaration();
+	shared_ptr<ASTNode> generate_declaration(shared_ptr<ASTNode> node)
+	{
+		shared_ptr<ParentNode> print_node = dynamic_pointer_cast<ParentNode>(node);
+		shared_ptr<TokenNode> type_node = dynamic_pointer_cast<TokenNode>(node);
+	}
 	shared_ptr<ASTNode> declaration1();
 	shared_ptr<ASTNode> variable(Pattern typeVariable); // ניתוח משתנה
 	shared_ptr<ASTNode> variable_list(Pattern typeVariable); // ניתוח מזהה

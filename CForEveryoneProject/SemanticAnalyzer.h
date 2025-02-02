@@ -27,7 +27,7 @@ public:
 
 	void exitScope(shared_ptr<ParentNode> node ) {
 		if (!scopes.empty()) {
-			node->variableScope = scopes.back();
+			node->variableScope = variableScope;
 			//scopesFinal.push_back(scopes.back());
 			scopes.pop_back(); // חזרה לטווח הקודם
 			variableScope = scopes.empty() ? map<string, Variable>() : scopes.back(); // החזרת משתנים מהטווח הקודם
@@ -48,6 +48,7 @@ public:
 			if (auto varNode2 = dynamic_pointer_cast<ParentNode>(children[i])) {
 				auto children2 = varNode2->children;
 				if (auto varNode3 = dynamic_pointer_cast<TokenNode>(children2[0])) {
+					varNode3->token.typeToken = typeVar->token.typeToken;
 					defineVariable(varNode3->token);
 				}
 			}
