@@ -1,5 +1,6 @@
 #pragma once
 #include "SemanticAnalyzer.h"
+
 class CodeGenerator
 {
 	shared_ptr<ASTNode> ast;
@@ -8,7 +9,7 @@ class CodeGenerator
 	map<string, Variable> currentScope;
 	int indexScope=0;
 public:
-	CodeGenerator(shared_ptr<ASTNode>& ast, vector<map<string, Variable>> scopesFinal) :ast(ast){};
+	CodeGenerator(shared_ptr<ASTNode>& ast) :ast(ast){};
 	shared_ptr<ASTNode>& getNewAst() { return ast; }
 	void generateCode(shared_ptr<ASTNode> node) {
 		try {
@@ -82,6 +83,15 @@ public:
 	}
 	void generate_print_statement(shared_ptr<ASTNode> node)
 	{
+		std::map<Pattern, std::string> typesPrint = {
+	{TOK_INT,"%d"},
+	{TOK_CHAR,"%c"},
+	{TOK_BOOL,"%s"},
+	{TOK_DOUBLE,"%lf"},
+	{TOK_FLOAT,"%f"},
+	{TOK_LONG,"%ld"},
+	{TOK_STRING,"%s"}
+		};
 		shared_ptr<ParentNode> print_node = dynamic_pointer_cast<ParentNode>(node);
 		shared_ptr<ParentNode> exprPrint_node = dynamic_pointer_cast<ParentNode>(print_node->children[2]);
 		shared_ptr<ParentNode> printf_node= make_shared<ParentNode>("printf_expr_statement");
@@ -133,6 +143,7 @@ public:
 				case TOK_STRING:
 				{
 					printf_node->addChild(tokNode);
+					break;
 				}
 				default:
 					break;
@@ -145,10 +156,10 @@ public:
 
 		//printf_node->addChild(make_shared<TokenNode>(TOK_STRING_LITERAL,s,t.lineNumber));
 
-		for (auto x : v)
+		for (Variable& x : v)
 		{
 			printf_node->addChild(make_shared<TokenNode>(Token(TOK_COMMA, ",", t.lineNumber)));
-			printf_node->addChild(make_shared<TokenNode>(x));
+			printf_node->addChild(make_shared<TokenNode>(x.token));
 		}
 		//printf_node->addChild(make_shared<TokenNode>(TOK_STRING_LITERAL, s, t.lineNumber));
 		print_node->changeChild(printf_node, 2);

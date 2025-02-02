@@ -21,8 +21,12 @@ inline void printTabsDepth(int depth) {
 struct TokenNode:ASTNode{
 public:
 	Token token;
-	TokenNode(Token token) :token(token) {}
-	TokenNode(Token &token) :token(token) {}
+	TokenNode() {}
+	TokenNode(Variable v)  {
+		token = v.token;
+	}
+	/*TokenNode(Token token) :token(token) {}*/
+	TokenNode(const Token &token) :token(token) {}
 	void printASTNode(int depth=0) {
 		printTabsDepth(depth);
 		cout << "TokenNode: " << token.value << endl;

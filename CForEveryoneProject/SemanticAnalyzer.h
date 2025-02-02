@@ -14,28 +14,17 @@ class SemanticAnalyzer
 private:
 	map<string, Variable> variableScope;
 	vector<map<string, Variable>> scopes;
-	static vector<map<string, Variable>> scopesFinal;
+	//static vector<map<string, Variable>> scopesFinal;
 
 
 public:
 	friend class codeGenerator;
-	static vector<map<string, Variable>>& getScopesFinal()
-	{
-		return scopesFinal;
-	}
 	void enterScope() {
 		if(!scopes.empty())
 			scopes.back() = variableScope;
 		scopes.push_back(variableScope); // כניסה לטווח חדש
 	}
 
-	void exitScope() {
-		if (!scopes.empty()) {
-			scopesFinal.push_back(scopes.back());
-			scopes.pop_back(); // חזרה לטווח הקודם
-            variableScope = scopes.empty() ? map<string, Variable>() : scopes.back(); // החזרת משתנים מהטווח הקודם
-		}
-	}
 	void exitScope(shared_ptr<ParentNode> node ) {
 		if (!scopes.empty()) {
 			node->variableScope = scopes.back();

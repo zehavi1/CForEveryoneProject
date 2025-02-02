@@ -77,16 +77,15 @@ print(i);
     program += ' ';
     auto tokens = lexer.tokenize(program);
     lexer.printTokens(tokens);
-    /*SyntacticAnalysis parser(tokens);
+    SyntacticAnalysis parser(tokens);
     shared_ptr<ASTNode> ast = parser.parse();
     cout << "Abstract Syntax Tree:" << endl;
-    ast->printASTNode();*/
-    /*SemanticAnalyzer semantic;
+    ast->printASTNode();
+    SemanticAnalyzer semantic;
     semantic.analyze(ast); 
-    auto scopesFinal=semantic.getScopesFinal();*/
-    /*CodeGenerator generator(ast,scopesFinal);
+    CodeGenerator generator(ast);
     generator.generateCode(ast);
     shared_ptr<ASTNode> astNew= generator.getNewAst();
-    astNew->printASTNode();*/
+    astNew->printASTNode();
     return 0;
 }

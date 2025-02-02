@@ -9,7 +9,7 @@ public:
 	Token token;
 		bool initialized;
 		Variable() {};
-		Variable(Token token, bool initialized = false)
+		Variable(Token& token, bool initialized = false)
 			: token(token), initialized(initialized) {
 		}
 };
