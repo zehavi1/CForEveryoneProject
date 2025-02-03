@@ -70,7 +70,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::factor() {
 	case TOK_OPEN_PAREN:
 	{
 		factorNode->addChild(match(TOK_OPEN_PAREN));
-		factorNode->addChild(expression());
+		factorNode->addChild(expression2());
 		factorNode->addChild(match(TOK_CLOSE_PAREN, "Expected closing parenthesis"));
 		return factorNode;
 	}
@@ -197,6 +197,66 @@ shared_ptr<ASTNode> SyntacticAnalysis::expressionInPrint() {
 	}
 	return left;
 }
+shared_ptr<ASTNode> SyntacticAnalysis::expression2() {
+	// כעת ביטוי מתחיל מהגרסה החדשה
+	return exprOr();
+}
+
+// <expr_or> ::= <expr_and> (TOK_OR <expr_and>)*
+shared_ptr<ASTNode> SyntacticAnalysis::exprOr() {
+	shared_ptr<ASTNode> left = exprAnd();
+	while (currentToken().typeToken == TOK_OR) {
+		Token op = currentToken();
+		nextToken();
+		shared_ptr<ASTNode> right = exprAnd();
+		left = make_shared<BinaryOpNode>(op, left, right);
+	}
+	return left;
+}
+
+// <expr_and> ::= <expr_comparison> (TOK_AND <expr_comparison>)*
+shared_ptr<ASTNode> SyntacticAnalysis::exprAnd() {
+	shared_ptr<ASTNode> left = exprComparison();
+	while (currentToken().typeToken == TOK_AND) {
+		Token op = currentToken();
+		nextToken();
+		shared_ptr<ASTNode> right = exprComparison();
+		left = make_shared<BinaryOpNode>(op, left, right);
+	}
+	return left;
+}
+
+// <expr_comparison> ::= <expr_arithmetic> ((TOK_EQUAL | TOK_NOT_EQUAL | TOK_GREATER | TOK_LESS | TOK_GREATER_EQUAL | TOK_LESS_EQUAL) <expr_arithmetic>)*
+shared_ptr<ASTNode> SyntacticAnalysis::exprComparison() {
+	shared_ptr<ASTNode> left = exprArithmetic();
+	while (currentToken().typeToken == TOK_EQUAL ||
+		currentToken().typeToken == TOK_NOT_EQUAL ||
+		currentToken().typeToken == TOK_GREATER ||
+		currentToken().typeToken == TOK_LESS ||
+		currentToken().typeToken == TOK_GREATER_EQUAL ||
+		currentToken().typeToken == TOK_LESS_EQUAL) {
+		Token op = currentToken();
+		nextToken();
+		shared_ptr<ASTNode> right = exprArithmetic();
+		left = make_shared<BinaryOpNode>(op, left, right);
+	}
+	return left;
+}
+
+// <expr_arithmetic> ::= <term> ((TOK_PLUS | TOK_MINUS) <term>)*
+shared_ptr<ASTNode> SyntacticAnalysis::exprArithmetic() {
+	shared_ptr<ASTNode> left = term();
+	while (currentToken().typeToken == TOK_PLUS || currentToken().typeToken == TOK_MINUS) {
+		Token op = currentToken();
+		nextToken();
+		shared_ptr<ASTNode> right = term();
+		left = make_shared<BinaryOpNode>(op, left, right);
+	}
+	return left;
+}
+
+// term() ו־factor() נשארות כפי שהוגדרו אצלך
+
 //פונקציות לניתוח תנאים-עובדות טוב אבל יש באג
 //אם יש סוגריים של ביטויים זה לא עובד
 shared_ptr<ASTNode> SyntacticAnalysis::logical_condition() {
@@ -334,6 +394,33 @@ shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement() {
 
 	return ifElseNode;
 }
+shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement2() {
+	shared_ptr<ParentNode> ifElseNode = make_shared<ParentNode>("if_else");
+
+	ifElseNode->addChild(match(TOK_IF, "Expected 'if' keyword"));
+	ifElseNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after 'if'"));
+
+	// ניתוח התנאי
+	ifElseNode->addChild(expression2());
+
+	ifElseNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after conditions"));
+
+	// ניתוח בלוק התחביר
+	ifElseNode->addChild(block());
+
+	// בדיקת elseif
+	while (currentToken().typeToken == TOK_ELIF) {
+		ifElseNode->addChild(elif_statement());
+	}
+
+	// בדיקת else
+	if (currentToken().typeToken == TOK_ELSE) {
+		ifElseNode->addChild(match(TOK_ELSE, "Expected 'else' keyword"));
+		ifElseNode->addChild(block());
+	}
+
+	return ifElseNode;
+}
 
 
 shared_ptr<ASTNode> SyntacticAnalysis::conditions2() {
@@ -411,11 +498,20 @@ shared_ptr<ASTNode> SyntacticAnalysis::elif_statement() {
 	ifElseIfNode->addChild(block());
 	return ifElseIfNode;
 }
-shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement2() {
+shared_ptr<ASTNode> SyntacticAnalysis::elif_statement2() {
+	shared_ptr<ParentNode> ifElseIfNode = make_shared<ParentNode>("elif");
+	ifElseIfNode->addChild(match(TOK_ELIF));
+	ifElseIfNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after elif"));
+	ifElseIfNode->addChild(expression2());
+	ifElseIfNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
+	ifElseIfNode->addChild(block());
+	return ifElseIfNode;
+}
+shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement3() {
 	shared_ptr<ParentNode> ifElseNode = make_shared<ParentNode>("if_else");
 	ifElseNode->addChild(match(TOK_IF));
 	ifElseNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after if"));
-	ifElseNode->addChild(conditions());
+	ifElseNode->addChild(expression2());
 	ifElseNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
 	ifElseNode->addChild(block());
 	while (currentToken().typeToken == TOK_ELIF)
@@ -426,7 +522,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement2() {
 		ifElseNode->addChild(match(TOK_ELSE));
 		if (currentToken().typeToken == TOK_IF)
 		{
-			ifElseNode->addChild(if_else_statement());
+			ifElseNode->addChild(if_else_statement3());
 		}
 		else
 		{
@@ -566,46 +662,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::assignment1() {
 	return startNode;
 }
 
-//shared_ptr<ASTNode> SyntacticAnalysis::statement() {
-	//	Pattern p = currentToken().typeToken;
-	//	switch (p)
-	//	{
-	//	case TOK_DOUBLE_TYPE:
-	//		break;
-	//	case TOK_INT_TYPE:
-	//		break;
-	//	case TOK_CHAR_TYPE:
-	//		break;
-	//	case TOK_BOOL_TYPE:
-	//		break;
-	//	case TOK_FLOAT_TYPE:
-	//		break;
-	//	case TOK_STRING_TYPE:
-	//		break;
-	//	case TOK_LONG_TYPE:
-	//		break;
-	//	case TOK_VOID:
-	//		break;
-	//	case TOK_INCLUDE:
-	//		break;
-	//	case TOK_VAR:
-	//		break;
-	//	case TOK_PRINT:
-	//		return print_statement();
-	//		break;
-	//	case TOK_ID:
-	//		return assignment();
-	//		break;
-	//	case TOK_INT:
-	//	{
-	//		Token t = currentToken();
-	//		nextToken();
-	//		return make_shared<TokenNode>(t);
-	//	}
-	//	default:
-	//		break;
-	//	}
-	//}
 // הוספת פונקציות לניתוח לולאות
 shared_ptr<ASTNode> SyntacticAnalysis::for_loop() {
 	shared_ptr<ParentNode> forNode = make_shared<ParentNode>("for");
@@ -712,7 +768,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::statement() {
 	Pattern p = currentToken().typeToken;
 	switch (p) {
 	case TOK_IF:
-		return if_else_statement();
+		return if_else_statement3();
 	/*case TOK_IFRANGE:
 		return if_range_statement();*/
 	case TOK_FOR:

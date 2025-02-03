@@ -67,6 +67,15 @@ public:
 	shared_ptr<ASTNode> math_condition();
 	shared_ptr<ASTNode> if_else_statement2();
 	Token peekNextToken();
+	//תנאים חדש
+	shared_ptr<ASTNode> expression2();
+	shared_ptr<ASTNode> exprOr();
+	shared_ptr<ASTNode> exprAnd();
+	shared_ptr<ASTNode> exprComparison();
+	shared_ptr<ASTNode> exprArithmetic();
+	shared_ptr<ASTNode> if_else_statement3();
+	shared_ptr<ASTNode> elif_statement2();
+	//תנאים ישן
 	shared_ptr<ASTNode> conditions();
 	shared_ptr<ASTNode> conditions_inner();
 	shared_ptr<ASTNode> conditions2(); // ניתוח תנאים
