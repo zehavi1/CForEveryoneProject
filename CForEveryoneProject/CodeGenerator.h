@@ -4,8 +4,6 @@
 class CodeGenerator
 {
 	shared_ptr<ASTNode> ast;
-	//vector<map<string, Variable>> scopesFinal;
-	//vector<map<string, Variable>> scopes;
 	map<string, Variable> currentScope;
 	int indexScope = 0;
 public:
@@ -63,23 +61,10 @@ public:
 
 				if (auto binOpNode = dynamic_pointer_cast<BinaryOpNode>(node))
 				{
-					if (auto binOpNodeleft = dynamic_pointer_cast<BinaryOpNode>(binOpNode->left))
+					if (binOpNode->name == "range")
 					{
-						if (binOpNodeleft->name == "range")
-						{
-							generate_ifrange(binOpNodeleft);
+						generate_ifrange(binOpNode);
 
-						}
-						binOpNode->left = binOpNodeleft;
-					}
-					if (auto binOpNoderight = dynamic_pointer_cast<BinaryOpNode>(binOpNode->right))
-					{
-						if (binOpNoderight->name == "range")
-						{
-							generate_ifrange(binOpNoderight);
-
-						}
-						binOpNode->right = binOpNoderight;
 					}
 					generateCode(binOpNode->left);
 					generateCode(binOpNode->right);
@@ -104,8 +89,10 @@ public:
 		Token op = node->op;
 		shared_ptr<BinaryOpNode> new_node_second = make_shared<BinaryOpNode>("less", op, exp, second);
 		Token andToken(TOK_AND, "&&", op.lineNumber);
-		shared_ptr<BinaryOpNode> new_node = make_shared<BinaryOpNode>("and", andToken, first, new_node_second);
-		node = new_node;
+		node->name = "and";
+		node->op = andToken;
+		node->changeChild(first, 0);
+		node->changeChild(new_node_second, 1);
 	}
 	void generate_print_statement(shared_ptr<ParentNode>& node)
 	{

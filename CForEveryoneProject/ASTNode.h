@@ -8,10 +8,10 @@
 using namespace std;
 // מחלקת בסיס לכל הצמתים
 struct ASTNode {
-	
    virtual void printASTNode(int depth=0) = 0;
     virtual ~ASTNode() {}
 	virtual string printOriginalCode() const = 0;
+	virtual void changeChild(shared_ptr<ASTNode> child, int index) = 0;
 	
 };
 inline void printTabsDepth(int depth) {
@@ -35,6 +35,7 @@ public:
 	string printOriginalCode() const override {
 		return token.value;
 	}
+	void changeChild(shared_ptr<ASTNode> child, int index) override {};
 };
 struct ParentNode :ASTNode {
 public:
@@ -99,5 +100,12 @@ public:
 		printTabsDepth(depth + 1);
 		cout << "Right: " << endl;
 		right->printASTNode(depth + 1);
+	}
+	void changeChild(shared_ptr<ASTNode> child, int index)
+	{
+		if (index == 0)
+			left = child;
+		else
+			right = child;
 	}
 };
