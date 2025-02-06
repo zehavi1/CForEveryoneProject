@@ -43,6 +43,14 @@ int main() {
 }
 
     )";
+    string program_ifrange = R"(
+       { int x=0;
+        if(x<9&&5<x<10){print("x is "+x);}
+}
+    
+}
+
+    )";
 	string program_declaration = R"(
         int x = 10,y=40;
         double y = 3.14;
@@ -72,7 +80,7 @@ print(i);
         }
         print(x);
         print(y);})";
-	string program = program_samentic;
+	string program = program_ifrange;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
@@ -88,7 +96,7 @@ print(i);
     semantic.analyze(ast); 
     CodeGenerator generator(ast);
     generator.generateCode(ast);
-    shared_ptr<ASTNode> astNew= generator.getNewAst();
+    shared_ptr<ASTNode> &astNew= generator.getNewAst();
     astNew->printASTNode();
     cout << program_print<<endl;
     cout<<astNew->printOriginalCode();

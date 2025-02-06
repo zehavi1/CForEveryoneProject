@@ -229,18 +229,48 @@ shared_ptr<ASTNode> SyntacticAnalysis::exprAnd() {
 // <expr_comparison> ::= <expr_arithmetic> ((TOK_EQUAL | TOK_NOT_EQUAL | TOK_GREATER | TOK_LESS | TOK_GREATER_EQUAL | TOK_LESS_EQUAL) <expr_arithmetic>)*
 shared_ptr<ASTNode> SyntacticAnalysis::exprComparison() {
 	shared_ptr<ASTNode> left = exprArithmetic();
-	while (currentToken().typeToken == TOK_EQUAL ||
-		currentToken().typeToken == TOK_NOT_EQUAL ||
-		currentToken().typeToken == TOK_GREATER ||
-		currentToken().typeToken == TOK_LESS ||
-		currentToken().typeToken == TOK_GREATER_EQUAL ||
-		currentToken().typeToken == TOK_LESS_EQUAL) {
-		Token op = currentToken();
-		nextToken();
-		shared_ptr<ASTNode> right = exprArithmetic();
-		left = make_shared<BinaryOpNode>(op, left, right);
-	}
-	return left;
+	Pattern p = currentToken().typeToken;
+	//// בדיקה עבור range_condition
+	//if (p == TOK_LESS||p==TOK_GREATER_EQUAL||p==TOK_LESS_EQUAL || p == TOK_GREATER) {
+	//	// שמירה על האופרטור הנוכחי
+	//	Token op = currentToken();
+	//	nextToken(); // לעבור לטוקן הבא
+	//	shared_ptr<ASTNode> middle = exprArithmetic();
+
+	//	// לבדוק אם יש טוקן נוסף מהסוג הנכון
+	//	if (currentToken().typeToken == p) {
+	//		op = currentToken();
+	//		nextToken(); // לעבור לטוקן הבא
+	//		shared_ptr<ASTNode> right = exprArithmetic();
+	//		// אם יש טוקן נוסף באותו סוג, ניצור Node עבור תנאי הטווח
+
+	//		left = make_shared<BinaryOpNode>( op,left, middle);
+	//		left = make_shared<BinaryOpNode>("range", op, left, right);
+	//	}
+	//}
+	p=currentToken().typeToken;
+		while (p == TOK_EQUAL ||
+			p == TOK_NOT_EQUAL ||
+			p == TOK_GREATER ||
+			p == TOK_LESS ||
+			p == TOK_GREATER_EQUAL ||
+			p == TOK_LESS_EQUAL) {
+			Token op = currentToken();
+			nextToken();
+			shared_ptr<ASTNode> right = exprArithmetic();
+			left = make_shared<BinaryOpNode>(op, left, right);
+			// לבדוק אם יש טוקן נוסף מהסוג הנכון
+			auto p1 = currentToken().typeToken;
+			if (p1 == p) {
+				op = currentToken();
+				nextToken(); // לעבור לטוקן הבא
+				shared_ptr<ASTNode> right = exprArithmetic();
+				// אם יש טוקן נוסף באותו סוג, ניצור Node עבור תנאי הטווח
+				left = make_shared<BinaryOpNode>("range", op, left, right);
+			}
+			p = currentToken().typeToken;
+		}
+		return left;
 }
 
 // <expr_arithmetic> ::= <term> ((TOK_PLUS | TOK_MINUS) <term>)*

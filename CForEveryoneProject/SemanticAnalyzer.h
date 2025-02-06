@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include "ASTNode.h"
 #include "Variable.h"
+#include "stack"
 
 
 
@@ -13,7 +14,8 @@ class SemanticAnalyzer
 {
 private:
 	map<string, Variable> variableScope;
-	vector<map<string, Variable>> scopes;
+	//vector<map<string, Variable>> scopes;
+	stack<map<string, Variable>> scopes;
 	//static vector<map<string, Variable>> scopesFinal;
 
 
@@ -21,16 +23,16 @@ public:
 	friend class codeGenerator;
 	void enterScope() {
 		if(!scopes.empty())
-			scopes.back() = variableScope;
-		scopes.push_back(variableScope); // כניסה לטווח חדש
+			scopes.top() = variableScope;
+		scopes.push(variableScope); // כניסה לטווח חדש
 	}
 
 	void exitScope(shared_ptr<ParentNode> node ) {
 		if (!scopes.empty()) {
 			node->variableScope = variableScope;
 			//scopesFinal.push_back(scopes.back());
-			scopes.pop_back(); // חזרה לטווח הקודם
-			variableScope = scopes.empty() ? map<string, Variable>() : scopes.back(); // החזרת משתנים מהטווח הקודם
+			scopes.pop(); // חזרה לטווח הקודם
+			variableScope = scopes.empty() ? map<string, Variable>() : scopes.top(); // החזרת משתנים מהטווח הקודם
 		}
 	}
 	void declareVariable(shared_ptr<ParentNode> node)
