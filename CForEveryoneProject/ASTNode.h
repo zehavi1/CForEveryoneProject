@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <list>
 #include <memory>
 #include <iostream>
 #include "Token.h"
@@ -10,7 +11,7 @@ using namespace std;
 struct ASTNode {
    virtual void printASTNode(int depth=0) = 0;
     virtual ~ASTNode() {}
-	virtual string printOriginalCode() const = 0;
+	virtual string printOriginalCode(int tabs) const = 0;
 	virtual void changeChild(shared_ptr<ASTNode> child, int index) = 0;
 	
 };
@@ -32,8 +33,18 @@ public:
 		printTabsDepth(depth);
 		cout << "TokenNode: " << token.value << endl;
 	}
-	string printOriginalCode() const override {
-		return token.value;
+	string printOriginalCode(int tabs) const override {
+		string s(tabs,' ');
+		if (token.typeToken == TOK_SEMICOLON)
+			return token.value + "\n" + s;
+		else if (token.typeToken == TOK_OPEN_CURLY)
+			return "\n" + s + token.value + "\n" + s + " ";
+		else if (token.typeToken == TOK_CLOSE_CURLY)
+			return "\n" + s + token.value + "\n" + s;
+		else if (mapAlphaTokens.find(token.value) != mapAlphaTokens.end())
+			return token.value + " ";
+		else
+			return token.value;
 	}
 	void changeChild(shared_ptr<ASTNode> child, int index) override {};
 };
@@ -52,10 +63,12 @@ public:
 			child->printASTNode(depth+1);
 		}
 	}
-	 string printOriginalCode() const override {
+	 string printOriginalCode(int tabs) const override {
 		 string s="";
+		 if (name == "block")
+			 tabs++;
 		for (const auto& child : children) {
-			s+=child->printOriginalCode();
+			s+=child->printOriginalCode(tabs);
 		}
 		return s;
 	}
@@ -66,7 +79,17 @@ public:
 	{
 		children[index] = child;
 	}
-	
+	void insertChild(shared_ptr<ASTNode> child, size_t index) {
+		// בדוק אם האינדקס בתווך החוקי
+		if (index <= children.size()) {
+			// הוסף את הילד לאינדקס i
+			children.insert(children.begin() + index, child);
+		}
+		else {
+			throw out_of_range("Index is out of range");
+		}
+	}
+
 };
 
 // צומת עבור ביטויים בינאריים
@@ -82,11 +105,11 @@ public:
 	BinaryOpNode(string name, const Token& op, shared_ptr<ASTNode> left, shared_ptr<ASTNode> right)
 		:name(name), op(op), left(left), right(right) {
 	}
-	string printOriginalCode() const override {
+	string printOriginalCode(int tabs) const override {
 		string s;
-		s=left->printOriginalCode();
+		s=left->printOriginalCode(tabs);
 		s+=op.value;
-		s+=right->printOriginalCode();
+		s+=right->printOriginalCode(tabs);
 		return s;
 	}
 	void printASTNode(int depth = 0) {

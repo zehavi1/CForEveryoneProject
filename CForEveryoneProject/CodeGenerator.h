@@ -23,7 +23,11 @@ public:
 					{
 						generate_declaration(parentNode);
 					}
-
+					else
+						if (parentNode->name == "elif")
+						{
+							generate_elif(parentNode);
+						}
 
 					else
 						if (parentNode->name == "for" || parentNode->name == "foreach" || parentNode->name == "while")
@@ -81,6 +85,22 @@ public:
 
 
 	}
+	void generate_elif(shared_ptr<ParentNode>& node)
+	{
+		shared_ptr<TokenNode> elseToken = make_shared<TokenNode>(Token(TOK_ELSE, "else",1));
+		shared_ptr<TokenNode> ifToken = make_shared<TokenNode>(Token(TOK_IF, "if", 1));
+		shared_ptr<ParentNode> elseifNode = make_shared<ParentNode>("else-if");
+		elseifNode->addChild(elseToken);
+		elseifNode->addChild(ifToken);
+		node->changeChild(elseifNode, 0);
+	}
+	shared_ptr<ParentNode>& insertAfter(shared_ptr<ASTNode>& node, shared_ptr<ASTNode>& nodeToInsert)
+	{
+		shared_ptr<ParentNode> newNode = make_shared<ParentNode>("together");
+		newNode->addChild(node);
+		newNode->addChild(nodeToInsert);
+		return newNode;
+	}
 	void generate_ifrange(shared_ptr<BinaryOpNode>& node)
 	{
 		auto first = dynamic_pointer_cast<BinaryOpNode>(node->left);
@@ -128,7 +148,7 @@ public:
 			if (auto exprNode = dynamic_pointer_cast<BinaryOpNode>(x)) {
 				if (exprNode->name == "expressionInPrint")
 				{
-					string s = exprNode->printOriginalCode();
+					string s = exprNode->printOriginalCode(0);
 					printf_node->addChild(make_shared<TokenNode>(Token(TOK_TYPE_PRINT, "%lf", t.lineNumber)));
 					Token t2(TOK_DOUBLE, s, t.lineNumber);
 					v.push_back(Variable(t2));

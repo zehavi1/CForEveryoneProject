@@ -80,7 +80,7 @@ print(i);
         }
         print(x);
         print(y);})";
-	string program = program_ifrange;
+	string program = program_if;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
@@ -99,6 +99,6 @@ print(i);
     shared_ptr<ASTNode> &astNew= generator.getNewAst();
     astNew->printASTNode();
     cout << program_print<<endl;
-    cout<<astNew->printOriginalCode();
+    cout<<astNew->printOriginalCode(0);
     return 0;
 }
