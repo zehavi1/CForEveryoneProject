@@ -138,7 +138,7 @@ const std::map<std::string, Pattern> mapAlphaTokens = {
 	{"include", TOK_INCLUDE},
 	{"double", TOK_DOUBLE_TYPE},
     {"var", TOK_VAR},
-    {"true", TOK_TRUE},
+   // {"true", TOK_TRUE},
     {"string", TOK_STRING_TYPE},
     {"return", TOK_RETURN},
     {"print", TOK_PRINT},
@@ -153,11 +153,13 @@ const std::map<std::string, Pattern> mapAlphaTokens = {
 	{"foreach", TOK_FOREACH},
 	{"in", TOK_IN},
     {"float", TOK_FLOAT_TYPE},
-    {"false", TOK_FALSE},
+    //{"false", TOK_FALSE},
     {"else", TOK_ELSE},
     {"elif", TOK_ELIF},
     {"char", TOK_CHAR_TYPE},
     {"bool", TOK_BOOL_TYPE},
+    {"true", TOK_BOOL},
+    {"false", TOK_BOOL}
 
 };
 const std::map<std::string, Pattern> mapNonAlphaTokens = {

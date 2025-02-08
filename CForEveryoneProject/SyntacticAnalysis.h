@@ -46,7 +46,7 @@ public:
 
 	//משתנים
 	shared_ptr<ASTNode> declaration();
-	shared_ptr<ASTNode> declaration1();
+	shared_ptr<ASTNode> declaration1(bool canBeFunction=1);
 	shared_ptr<ASTNode> variable(Pattern typeVariable); // ניתוח משתנה
 	shared_ptr<ASTNode> variable_list(Pattern typeVariable); // ניתוח מזהה
 
@@ -61,35 +61,25 @@ public:
 	//פקודות if
 	shared_ptr<ASTNode> if_else_statement(); // ניתוח פקודות if-else
 	shared_ptr<ASTNode> elif_statement(); // ניתוח פקודות if-else-if
-	shared_ptr<ASTNode> logical_condition();
-	shared_ptr<ASTNode> choose_condition();
-	shared_ptr<ASTNode> logical_condition_inner();
-	shared_ptr<ASTNode> math_condition();
-	shared_ptr<ASTNode> if_else_statement2();
 	Token peekNextToken();
 	//תנאים חדש
-	shared_ptr<ASTNode> expression2();
 	shared_ptr<ASTNode> exprOr();
 	shared_ptr<ASTNode> exprAnd();
 	shared_ptr<ASTNode> exprComparison();
 	shared_ptr<ASTNode> exprArithmetic();
-	shared_ptr<ASTNode> if_else_statement3();
-	shared_ptr<ASTNode> elif_statement2();
-	//תנאים ישן
-	shared_ptr<ASTNode> conditions();
-	shared_ptr<ASTNode> conditions_inner();
-	shared_ptr<ASTNode> conditions2(); // ניתוח תנאים
-	shared_ptr<ASTNode> condition2(); // ניתוח תנאי
 	shared_ptr<ASTNode> comparison_operator(); // ניתוח אופרטורים להשוואה
-	shared_ptr<ASTNode> logical_operator(); // ניתוח אופרטורים לוגיים
 	shared_ptr<ASTNode> block(); // ניתוח בלוקים
 	
 	//לולאות
 	shared_ptr<ASTNode> for_loop(); // ניתוח לולאות for
 	shared_ptr<ASTNode> while_loop(); // ניתוח לולאות while
 	shared_ptr<ASTNode> foreach_loop(); // ניתוח לולאות foreach
-	shared_ptr<ASTNode> function_definition(); // ניתוח הגדרות פונקציות
+	shared_ptr<ASTNode> function_definition(shared_ptr<ParentNode> p = nullptr); // ניתוח הגדרות פונקציות
 	shared_ptr<ASTNode> collection(); // ניתוח אוספים
+	shared_ptr<ASTNode> parameter_list(); // ניתוח רשימת פרמטרים
+	//מערכים
+	shared_ptr<ASTNode> full_array(); // ניתוח רשימת פרמטרים
+	shared_ptr<ASTNode> parameter_list(); // ניתוח רשימת פרמטרים
 	shared_ptr<ASTNode> parameter_list(); // ניתוח רשימת פרמטרים
 	
 	shared_ptr<ASTNode> return_statement(); // ניתוח פקודת return

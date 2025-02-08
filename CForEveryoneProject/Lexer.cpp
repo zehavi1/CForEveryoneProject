@@ -93,6 +93,9 @@ vector<Token> Lexer::tokenize(const string& input) {
                 break;
             case ALPHA:
             {
+                if (isdigit(c))
+                    lexState = IDENTITY;
+                else
                 if (!(isalpha(c) || c == '_'))
                     lexState = CHECK;
                 else
@@ -101,6 +104,17 @@ vector<Token> Lexer::tokenize(const string& input) {
                     i++;
                 }
                break;
+            }
+            case IDENTITY:
+            {
+                if (!(isalpha(c) || c == '_' || isdigit(c)))
+                    lexState = CHECK;
+                else
+                {
+                    currentTokenValue += c;
+                    i++;
+                }
+                break;
             }
             case CHECK:
             {
@@ -112,6 +126,7 @@ vector<Token> Lexer::tokenize(const string& input) {
                     }
                     if (pattern == TOK_ERROR)
                     {
+                       
                         if (regex_match(currentTokenValue, valid_var_regex))
                             pattern = TOK_ID;
                         else

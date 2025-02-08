@@ -169,28 +169,7 @@ public:
 		}
 	}
 
-	//void analyze(shared_ptr<ASTNode> node) {
-	//    if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
-	//        try
-	//        {
-	//            if (varNode->token.typeToken == TOK_ID && variableScope.find(varNode->token.value) == variableScope.end()) {
-	//                throw new string("Variable " + varNode->token.value + " is used before it is defined");
-	//            }
-	//        }
-	//        catch (string msg)
-	//        {
-	//            cout << msg;
-	//        }
-	//        
-	//    }
-	//    else if (auto parentNode = dynamic_pointer_cast<ParentNode>(node)) {
-	//        enterScope(); // כניסה לטווח חדש
-	//        for (auto& child : parentNode->children) {
-	//            analyze(child); // ניתוח ילד
-	//        }
-	//        exitScope(); // חזרה לטווח הקודם
-	//    }
-	//}
+	
 	void analyze(shared_ptr<ASTNode> node) {
 		try {
 			if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
@@ -200,11 +179,6 @@ public:
 					useVariable(varNode->token.value);
 				}
 						   break;
-						   /*case TOK_OPEN_CURLY:
-						   { enterScope(); }
-						   break;
-						   case TOK_CLOSE_CURLY: { exitScope(); }
-											   break;*/
 				default:
 					break;
 				}

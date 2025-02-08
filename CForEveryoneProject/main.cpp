@@ -52,11 +52,14 @@ int main() {
 
     )";
 	string program_declaration = R"(
-        int x = 10,y=40;
+    int main(){
+        int x = 10,y1=40,z1=x+y;
         double y = 3.14;
         string z = "hello";
-        var b = TRUE;
+        var b = true;
         char c = 'F';
+return 0;
+        }
     )";
     string program_for= R"(
        for(int i=0;i<100;i++)
@@ -80,7 +83,7 @@ print(i);
         }
         print(x);
         print(y);})";
-	string program = program_if;
+	string program = program_declaration;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
@@ -94,11 +97,12 @@ print(i);
     ast->printASTNode();
     SemanticAnalyzer semantic;
     semantic.analyze(ast); 
-    CodeGenerator generator(ast);
-    generator.generateCode(ast);
+    CodeGenerator generator(ast, tokens);
+    generator.CodeGenerator_main();
+    //generator.generateCode(ast);
     shared_ptr<ASTNode> &astNew= generator.getNewAst();
     astNew->printASTNode();
-    cout << program_print<<endl;
-    cout<<astNew->printOriginalCode(0);
+    cout <<"base program:"<<endl << program << endl;
+    cout<<"profram in c:"<<endl << astNew->printOriginalCode(0);
     return 0;
 }

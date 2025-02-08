@@ -26,73 +26,11 @@ shared_ptr<TokenNode> SyntacticAnalysis::match(Pattern pattern, string msg) {
 	nextToken();
 	return make_shared<TokenNode>(t); // ליצור ולהחזיר צומת חדש
 }
-shared_ptr<ASTNode> SyntacticAnalysis::expression() {
-	shared_ptr<ASTNode> left = term();
-	while (currentToken().typeToken == TOK_PLUS || currentToken().typeToken == TOK_MINUS) {
-		Token op = currentToken();
-		nextToken();
-		shared_ptr<ASTNode> right = term();
-		left = make_shared<BinaryOpNode>(op, left, right);
-	}
-	return left;
-}
-shared_ptr<ASTNode> SyntacticAnalysis::term() {
-	shared_ptr<ASTNode> left = factor();
-	while (currentToken().typeToken == TOK_ASTERISK || currentToken().typeToken == TOK_SLASH || currentToken().typeToken == TOK_PERCENT) {
-		Token op = currentToken();
-		nextToken();
-		shared_ptr<ASTNode> right = factor();
-		left = make_shared<BinaryOpNode>(op, left, right);
-	}
-	return left;
-}
-//נבדק בהצלחה
-shared_ptr<ASTNode> SyntacticAnalysis::factor() {
-	shared_ptr<ParentNode> factorNode = make_shared<ParentNode>("factor");
-	Pattern pattern = currentToken().typeToken;
-	switch (pattern) {
-	case TOK_ID:{
-		shared_ptr<ASTNode> node=match(TOK_ID);
-		return node;
-	}
-	case TOK_BOOL:
-	case TOK_CHAR:
-	case TOK_DOUBLE:
-	case TOK_INT:
-	case TOK_FLOAT:
-	case TOK_LONG:
-	{
-		
-		shared_ptr<ASTNode> node = number();
-		
-		return node;
-	}
-	case TOK_OPEN_PAREN:
-	{
-		factorNode->addChild(match(TOK_OPEN_PAREN));
-		factorNode->addChild(expression2());
-		factorNode->addChild(match(TOK_CLOSE_PAREN, "Expected closing parenthesis"));
-		return factorNode;
-	}
-	break;
-	case TOK_INCREMENT:
-	case TOK_DECREMENT:
-	{
-		factorNode->addChild(make_shared<TokenNode>(currentToken()));
-		nextToken();
-		factorNode->addChild(match(TOK_ID, "Expected identifier after increment/decrement"));
-		return factorNode;
-	}
-	break;
-	default:
-		match(TOK_EOF, "Unexpected token in parseFactor");
-	}
-}
+
 // פונקציה לניתוח מספרים
-//נבדק בהצלחה
 shared_ptr<ASTNode> SyntacticAnalysis::number() {
 	Pattern p = currentToken().typeToken;
-	if (p == TOK_INT || p == TOK_DOUBLE || p == TOK_FLOAT || p == TOK_LONG || p == TOK_CHAR) {
+	if (p == TOK_INT || p == TOK_DOUBLE || p == TOK_FLOAT || p == TOK_LONG || p == TOK_CHAR||p==TOK_BOOL) {
 		Token t = currentToken();
 		nextToken();
 		return make_shared<TokenNode>(t);
@@ -102,8 +40,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::number() {
 	}
 	return nullptr;
 }
-// הוספת פונקציה לניתוח בלוקים
-
+//  פונקציה לניתוח בלוקים
 shared_ptr<ASTNode> SyntacticAnalysis::block()
 {
 	shared_ptr<ParentNode> blockNode = make_shared<ParentNode>("block");
@@ -144,7 +81,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::type()
 	}
 }
 // פונקציה לניתוח פקודת הדפסה
-//נבדק בהצלחה
 shared_ptr<ASTNode> SyntacticAnalysis::print_statement() {
 	shared_ptr<ParentNode> printNode = make_shared<ParentNode>("print");
 	printNode->addChild(match(TOK_PRINT)); // להתאים את הטוקן הנוכחי לפונקציה
@@ -155,7 +91,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::print_statement() {
 	return printNode; // החזרת צומת הדפסה
 }
 // פונקציה לניתוח הביטויים להדפסה
-//נבדק בהצלחה
 shared_ptr<ASTNode> SyntacticAnalysis::expr_print() {
 	shared_ptr<ParentNode> exprNode = make_shared<ParentNode>("expr_print");
 	// ניתוח הביטוי הראשון או המחרוזת
@@ -197,11 +132,10 @@ shared_ptr<ASTNode> SyntacticAnalysis::expressionInPrint() {
 	}
 	return left;
 }
-shared_ptr<ASTNode> SyntacticAnalysis::expression2() {
+shared_ptr<ASTNode> SyntacticAnalysis::expression() {
 	// כעת ביטוי מתחיל מהגרסה החדשה
 	return exprOr();
 }
-
 // <expr_or> ::= <expr_and> (TOK_OR <expr_and>)*
 shared_ptr<ASTNode> SyntacticAnalysis::exprOr() {
 	shared_ptr<ASTNode> left = exprAnd();
@@ -213,7 +147,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::exprOr() {
 	}
 	return left;
 }
-
 // <expr_and> ::= <expr_comparison> (TOK_AND <expr_comparison>)*
 shared_ptr<ASTNode> SyntacticAnalysis::exprAnd() {
 	shared_ptr<ASTNode> left = exprComparison();
@@ -225,7 +158,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::exprAnd() {
 	}
 	return left;
 }
-
 // <expr_comparison> ::= <expr_arithmetic> ((TOK_EQUAL | TOK_NOT_EQUAL | TOK_GREATER | TOK_LESS | TOK_GREATER_EQUAL | TOK_LESS_EQUAL) <expr_arithmetic>)*
 shared_ptr<ASTNode> SyntacticAnalysis::exprComparison() {
 	shared_ptr<ASTNode> left = exprArithmetic();
@@ -272,7 +204,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::exprComparison() {
 		}
 		return left;
 }
-
 // <expr_arithmetic> ::= <term> ((TOK_PLUS | TOK_MINUS) <term>)*
 shared_ptr<ASTNode> SyntacticAnalysis::exprArithmetic() {
 	shared_ptr<ASTNode> left = term();
@@ -284,212 +215,65 @@ shared_ptr<ASTNode> SyntacticAnalysis::exprArithmetic() {
 	}
 	return left;
 }
-
-// term() ו־factor() נשארות כפי שהוגדרו אצלך
-
-//פונקציות לניתוח תנאים-עובדות טוב אבל יש באג
-//אם יש סוגריים של ביטויים זה לא עובד
-shared_ptr<ASTNode> SyntacticAnalysis::logical_condition() {
-	shared_ptr<ParentNode> logicalNode = make_shared<ParentNode>("logical_condition");
-
-	// ניתוח החלק הראשון של התנאי הלוגי
-	logicalNode->addChild(logical_condition_inner());
-
-	// ניתוח אופרטורים לוגיים מסוג OR (||)
-	while (currentToken().typeToken == TOK_OR) {
-		logicalNode->addChild(match(currentToken().typeToken, "Expected '||/'&&' between conditions"));
-		logicalNode->addChild(logical_condition_inner());
+shared_ptr<ASTNode> SyntacticAnalysis::term() {
+	shared_ptr<ASTNode> left = factor();
+	while (currentToken().typeToken == TOK_ASTERISK || currentToken().typeToken == TOK_SLASH || currentToken().typeToken == TOK_PERCENT) {
+		Token op = currentToken();
+		nextToken();
+		shared_ptr<ASTNode> right = factor();
+		left = make_shared<BinaryOpNode>(op, left, right);
 	}
-
-	return logicalNode;
+	return left;
 }
-
-
-
-shared_ptr<ASTNode> SyntacticAnalysis::logical_condition_inner() {
-	shared_ptr<ParentNode> logicalInnerNode = make_shared<ParentNode>("logical_condition_inner");
-	
-	// ניתוח התנאי הראשון (יכול להיות תנאי מתמטי או תנאי עם סוגריים)
-	logicalInnerNode->addChild(math_condition());
-
-	// ניתוח אופרטורים לוגיים מסוג AND (&&)
-	while (currentToken().typeToken == TOK_AND) {
-		logicalInnerNode->addChild(match(TOK_AND, "Expected '&&' between conditions"));
-		logicalInnerNode->addChild(math_condition());
+shared_ptr<ASTNode> SyntacticAnalysis::factor() {
+	shared_ptr<ParentNode> factorNode = make_shared<ParentNode>("factor");
+	Pattern pattern = currentToken().typeToken;
+	switch (pattern) {
+	case TOK_ID: {
+		shared_ptr<ASTNode> node = match(TOK_ID);
+		return node;
 	}
+	case TOK_BOOL:
+	case TOK_CHAR:
+	case TOK_DOUBLE:
+	case TOK_INT:
+	case TOK_FLOAT:
+	case TOK_LONG:
+	{
 
-	return logicalInnerNode;
+		shared_ptr<ASTNode> node = number();
+
+		return node;
+	}
+	case TOK_OPEN_PAREN:
+	{
+		factorNode->addChild(match(TOK_OPEN_PAREN));
+		factorNode->addChild(expression());
+		factorNode->addChild(match(TOK_CLOSE_PAREN, "Expected closing parenthesis"));
+		return factorNode;
+	}
+	break;
+	case TOK_INCREMENT:
+	case TOK_DECREMENT:
+	{
+		factorNode->addChild(make_shared<TokenNode>(currentToken()));
+		nextToken();
+		factorNode->addChild(match(TOK_ID, "Expected identifier after increment/decrement"));
+		return factorNode;
+	}
+	break;
+	default:
+		match(TOK_EOF, "Unexpected token in parseFactor");
+	}
 }
-//not good!!!!!!!!!!!!!
-shared_ptr<ASTNode> SyntacticAnalysis::choose_condition() {
-	int iTokens = currentTokenIndex;
-	shared_ptr<ParentNode> mathNode = make_shared<ParentNode>("math_condition");
-	return mathNode;
-}
-
-shared_ptr<ASTNode> SyntacticAnalysis::math_condition() {
-	shared_ptr<ParentNode> mathNode = make_shared<ParentNode>("math_condition");
-
-	if (currentToken().typeToken == TOK_OPEN_PAREN) {
-		// תנאי לוגי או מתמטי עטוף בסוגריים
-		mathNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' at the start of condition"));
-		// בדוק מה הטוקן הבא
-		Token nextToken = peekNextToken();
-		if (nextToken.typeToken == TOK_ID || nextToken.typeToken == TOK_INT) {
-			// אם הטוקן הבא הוא מזהה או מספר, נניח שזה ביטוי מתמטי
-			mathNode->addChild(math_condition());
-		}
-		else {
-			// אם הטוקן הבא הוא טוקן לוגי, נניח שזה ביטוי לוגי
-			mathNode->addChild(logical_condition());
-		}
-
-		mathNode->addChild(logical_condition());
-		mathNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' at the end of condition"));
-	}
-	else {
-		// תנאי מתמטי פשוט
-		mathNode->addChild(expression());
-		mathNode->addChild(comparison_operator());
-		mathNode->addChild(expression());
-	}
-
-	return mathNode;
-}
-
-
-
-shared_ptr<ASTNode> SyntacticAnalysis::conditions() {
-	return logical_condition();
-}
-
-shared_ptr<ASTNode> SyntacticAnalysis::conditions_inner() {
-	shared_ptr<ParentNode> conditionsInnerNode = make_shared<ParentNode>("conditions_inner");
-
-	// ניתוח הביטוי הראשון (יכול להיות תנאי לוגי או מתמטי)
-	if (currentToken().typeToken == TOK_OPEN_PAREN) {
-		conditionsInnerNode->addChild(logical_condition()); // תנאי מקונן
-	}
-	else {
-		conditionsInnerNode->addChild(math_condition()); // ביטוי מתמטי
-	}
-
-	// ניתוח אופרטורים לוגיים אם קיימים
-	while (currentToken().typeToken == TOK_AND || currentToken().typeToken == TOK_OR) {
-		conditionsInnerNode->addChild(match(currentToken().typeToken, "Expected logical operator (&& or ||)"));
-
-		// ניתוח הביטוי הבא
-		if (currentToken().typeToken == TOK_OPEN_PAREN) {
-			conditionsInnerNode->addChild(logical_condition()); // תנאי מקונן
-		}
-		else {
-			conditionsInnerNode->addChild(math_condition()); // ביטוי מתמטי
-		}
-	}
-
-	return conditionsInnerNode;
-}
-
-
+//get next token
 Token SyntacticAnalysis::peekNextToken() {
 	if (currentTokenIndex + 1 >= tokens.size()) {
 		throw runtime_error("Unexpected end of input while peeking next token");
 	}
 	return tokens[currentTokenIndex + 1];
 }
-shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement() {
-	shared_ptr<ParentNode> ifElseNode = make_shared<ParentNode>("if_else");
 
-	ifElseNode->addChild(match(TOK_IF, "Expected 'if' keyword"));
-	ifElseNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after 'if'"));
-
-	// ניתוח התנאי
-	ifElseNode->addChild(conditions());
-
-	ifElseNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after conditions"));
-
-	// ניתוח בלוק התחביר
-	ifElseNode->addChild(block());
-
-	// בדיקת elseif
-	while (currentToken().typeToken == TOK_ELIF) {
-		ifElseNode->addChild(elif_statement());
-	}
-
-	// בדיקת else
-	if (currentToken().typeToken == TOK_ELSE) {
-		ifElseNode->addChild(match(TOK_ELSE, "Expected 'else' keyword"));
-		ifElseNode->addChild(block());
-	}
-
-	return ifElseNode;
-}
-shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement2() {
-	shared_ptr<ParentNode> ifElseNode = make_shared<ParentNode>("if_else");
-
-	ifElseNode->addChild(match(TOK_IF, "Expected 'if' keyword"));
-	ifElseNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after 'if'"));
-
-	// ניתוח התנאי
-	ifElseNode->addChild(expression2());
-
-	ifElseNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after conditions"));
-
-	// ניתוח בלוק התחביר
-	ifElseNode->addChild(block());
-
-	// בדיקת elseif
-	while (currentToken().typeToken == TOK_ELIF) {
-		ifElseNode->addChild(elif_statement());
-	}
-
-	// בדיקת else
-	if (currentToken().typeToken == TOK_ELSE) {
-		ifElseNode->addChild(match(TOK_ELSE, "Expected 'else' keyword"));
-		ifElseNode->addChild(block());
-	}
-
-	return ifElseNode;
-}
-
-
-shared_ptr<ASTNode> SyntacticAnalysis::conditions2() {
-	shared_ptr<ParentNode> conditionNode = make_shared<ParentNode>("conditions");
-	conditionNode->addChild(condition2()); // ניתוח הביטוי הראשון
-	while (currentToken().typeToken == TOK_AND || currentToken().typeToken == TOK_OR) {
-		conditionNode->addChild(logical_operator()); // ניתוח אופרטור לוגי
-		conditionNode->addChild(condition2());
-	}
-	return conditionNode; // החזרת צומת תנאי
-}
-shared_ptr<ASTNode> SyntacticAnalysis::condition2() {
-	shared_ptr<ParentNode> conditionNode = make_shared<ParentNode>("condition");
-	int current = currentTokenIndex;
-	Pattern p;
-	if (currentToken().typeToken == TOK_OPEN_PAREN)
-	{
-		conditionNode->addChild(match(TOK_OPEN_PAREN));
-		conditionNode->addChild(conditions());
-		conditionNode->addChild(match(TOK_CLOSE_PAREN));
-	}
-	else
-	{
-		conditionNode->addChild(expression()); // ניתוח הביטוי הראשון
-		p = currentToken().typeToken;
-		conditionNode->addChild(comparison_operator()); // ניתוח אופרטור השוואה
-		conditionNode->addChild(expression()); // ניתוח הביטוי השני
-
-		if (currentToken().typeToken == p)
-		{
-			conditionNode->name = "condition-range";
-			conditionNode->addChild(comparison_operator()); // ניתוח אופרטור השוואה
-			conditionNode->addChild(expression()); // ניתוח הביטוי השני
-		}
-	}
-	
-	
-	return conditionNode; // החזרת צומת תנאי
-}
 shared_ptr<ASTNode> SyntacticAnalysis::comparison_operator() {
 	Pattern p = currentToken().typeToken;
 	switch (p)
@@ -510,38 +294,21 @@ shared_ptr<ASTNode> SyntacticAnalysis::comparison_operator() {
 		break;
 	}
 }
-shared_ptr<ASTNode> SyntacticAnalysis::logical_operator() {
-	Pattern p = currentToken().typeToken;
-	if (p == TOK_AND || p == TOK_OR) {
-		return match(p);
-	}
-	else {
-		match(TOK_EOF, "Expected logical operator");
-	}
-}
+
 shared_ptr<ASTNode> SyntacticAnalysis::elif_statement() {
 	shared_ptr<ParentNode> ifElseIfNode = make_shared<ParentNode>("elif");
 	ifElseIfNode->addChild(match(TOK_ELIF));
 	ifElseIfNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after elif"));
-	ifElseIfNode->addChild(conditions());
+	ifElseIfNode->addChild(expression());
 	ifElseIfNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
 	ifElseIfNode->addChild(block());
 	return ifElseIfNode;
 }
-shared_ptr<ASTNode> SyntacticAnalysis::elif_statement2() {
-	shared_ptr<ParentNode> ifElseIfNode = make_shared<ParentNode>("elif");
-	ifElseIfNode->addChild(match(TOK_ELIF));
-	ifElseIfNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after elif"));
-	ifElseIfNode->addChild(expression2());
-	ifElseIfNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
-	ifElseIfNode->addChild(block());
-	return ifElseIfNode;
-}
-shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement3() {
+shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement() {
 	shared_ptr<ParentNode> ifElseNode = make_shared<ParentNode>("if_else");
 	ifElseNode->addChild(match(TOK_IF));
 	ifElseNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after if"));
-	ifElseNode->addChild(expression2());
+	ifElseNode->addChild(expression());
 	ifElseNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
 	ifElseNode->addChild(block());
 	while (currentToken().typeToken == TOK_ELIF)
@@ -552,7 +319,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement3() {
 		ifElseNode->addChild(match(TOK_ELSE));
 		if (currentToken().typeToken == TOK_IF)
 		{
-			ifElseNode->addChild(if_else_statement3());
+			ifElseNode->addChild(if_else_statement());
 		}
 		else
 		{
@@ -566,10 +333,12 @@ shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement3() {
 shared_ptr<ASTNode> SyntacticAnalysis::declaration()
 {
     shared_ptr<ParentNode> declarationNode = dynamic_pointer_cast<ParentNode>(declaration1());
+	if (declarationNode->name == "function")
+		return declarationNode;
 	declarationNode->addChild(match(TOK_SEMICOLON, "Expected ';' after variable declaration")); // לבדוק אם יש נקודה-פסיק
 	return declarationNode;
 }
-shared_ptr<ASTNode> SyntacticAnalysis::declaration1() {
+shared_ptr<ASTNode> SyntacticAnalysis::declaration1(bool canBeFunction) {
 	shared_ptr<ParentNode> declarationNode = make_shared<ParentNode>("declaration");
 	Pattern typeVariable = currentToken().typeToken;
 	if (currentToken().typeToken == TOK_VAR)
@@ -580,7 +349,16 @@ shared_ptr<ASTNode> SyntacticAnalysis::declaration1() {
 	{
 		declarationNode->addChild(type()); // ניתוח סוג המשתנה 
 	}
-	
+	auto next = peekNextToken();
+	if (canBeFunction && next.typeToken == TOK_OPEN_PAREN)
+	{
+		return function_definition(declarationNode);
+	}
+	else
+		if (next.typeToken == TOK_LEFT_ARRAY)
+			return collection();
+		
+	else
 	declarationNode->addChild(variable_list(typeVariable)); // ניתוח רשימת המשתנים
 	//declarationNode->addChild(match(TOK_SEMICOLON, "Expected ';' after variable declaration")); // לבדוק אם יש נקודה-פסיק
 
@@ -653,7 +431,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::assignment() {
 shared_ptr<ASTNode> SyntacticAnalysis::assignment1() {
 	shared_ptr<ParentNode> startNode = make_shared<ParentNode>("assignment");
 	if (currentToken().typeToken != TOK_ID)
-		return declaration1();
+		return declaration1(false);
 	startNode->addChild(match(TOK_ID, "Expected identifier"));
 	Pattern p = currentToken().typeToken;
 	switch (p)
@@ -692,14 +470,14 @@ shared_ptr<ASTNode> SyntacticAnalysis::assignment1() {
 	return startNode;
 }
 
-// הוספת פונקציות לניתוח לולאות
+//  פונקציות לניתוח לולאות
 shared_ptr<ASTNode> SyntacticAnalysis::for_loop() {
 	shared_ptr<ParentNode> forNode = make_shared<ParentNode>("for");
 	forNode->addChild(match(TOK_FOR));
 	forNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after for"));
 	forNode->addChild(assignment());
 	//forNode->addChild((match(TOK_SEMICOLON, "Expected ';' after assignment")));
-	forNode->addChild(conditions());
+	forNode->addChild(expression());
 	forNode->addChild(match(TOK_SEMICOLON, "Expected ';' after condition"));
 	forNode->addChild(assignment1());
 	forNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after for loop"));
@@ -710,7 +488,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::while_loop() {
 	shared_ptr<ParentNode> whileNode = make_shared<ParentNode>("while");
 	whileNode->addChild(match(TOK_WHILE));
 	whileNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after while"));
-	whileNode->addChild(conditions());
+	whileNode->addChild(expression());
 	whileNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after condition"));
 	whileNode->addChild(block());
 	return whileNode;
@@ -755,18 +533,28 @@ shared_ptr<ASTNode> SyntacticAnalysis::foreach_loop() {
 	return foreachNode;
 }
 // הוספת פונקציה לניתוח הגדרות פונקציות
-shared_ptr<ASTNode> SyntacticAnalysis::function_definition() {
+shared_ptr<ASTNode> SyntacticAnalysis::function_definition(shared_ptr<ParentNode> p) {
 	shared_ptr<ParentNode> funcNode = make_shared<ParentNode>("function");
-	Pattern returnType = currentToken().typeToken;
-	if (returnType == TOK_VOID) {
-		funcNode->addChild(match(TOK_VOID));
+	Pattern returnType;
+	if (p != nullptr)
+	{
+		returnType =dynamic_pointer_cast<TokenNode>(p->children[0])->token.typeToken;
+		funcNode->addChild(p->children[0]);
 	}
-	else 
-		funcNode->addChild(type());
+	else {
+		returnType = currentToken().typeToken;
+		if (returnType == TOK_VOID) {
+			funcNode->addChild(match(TOK_VOID));
+		}
+		else
+			funcNode->addChild(type());
+		
+	}
+	
 	funcNode->addChild(match(TOK_ID, "Expected function name"));
-	match(TOK_OPEN_PAREN, "Expected '(' after function name");
+	funcNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after function name"));
 	funcNode->addChild(parameter_list());
-	match(TOK_CLOSE_PAREN, "Expected ')' after parameter list");
+	funcNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after parameter list"));
 	funcNode->addChild(block());
 	return funcNode;
 }
@@ -798,7 +586,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::statement() {
 	Pattern p = currentToken().typeToken;
 	switch (p) {
 	case TOK_IF:
-		return if_else_statement3();
+		return if_else_statement();
 	/*case TOK_IFRANGE:
 		return if_range_statement();*/
 	case TOK_FOR:
@@ -820,6 +608,8 @@ shared_ptr<ASTNode> SyntacticAnalysis::statement() {
 	case TOK_STRING_TYPE:
 	case TOK_LONG_TYPE:
 		return declaration();
+	case TOK_VOID:
+		return function_definition();
 	case TOK_ID:
 		return assignment();
 	case TOK_OPEN_CURLY:

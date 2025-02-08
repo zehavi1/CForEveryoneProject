@@ -132,3 +132,17 @@ public:
 			right = child;
 	}
 };
+struct SentenceNode:ASTNode
+{
+	string content;
+	SentenceNode(string content) :content(content) {};
+	void printASTNode(int depth = 0) {
+		printTabsDepth(depth);
+		cout << "SentenceNode: " << content << endl;
+	}
+	string printOriginalCode(int tabs) const override {
+		string s(tabs, ' ');
+		return content;
+	}
+	void changeChild(shared_ptr<ASTNode> child, int index) override {};
+};
