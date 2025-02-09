@@ -56,9 +56,7 @@ int main() {
         int x = 10,y1=40,z1=x+y;
         double y = 3.14;
         string z = "hello";
-        var b = true;
-        char c = 'F';
-return 0;
+        return 0;
         }
     )";
     string program_for= R"(
@@ -91,7 +89,7 @@ void main(){
         string s="abcd";
 }
          )";
-	string program = program_if;
+	string program = program_array;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;

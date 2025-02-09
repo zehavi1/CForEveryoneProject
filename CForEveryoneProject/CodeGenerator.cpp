@@ -1,5 +1,12 @@
 #include "CodeGenerator.h"
-
+const map<Pattern, string> mapsPetternTypes = {
+{TOK_BOOL_TYPE, "bool"},
+{TOK_CHAR_TYPE, "char"},
+{TOK_DOUBLE_TYPE, "double"},
+{TOK_FLOAT_TYPE, "float"},
+{TOK_INT_TYPE, "int"},
+{TOK_LONG_TYPE, "long"},
+{TOK_STRING_TYPE, "string"} };
 void CodeGenerator:: generateCode(shared_ptr<ASTNode>& node) {
 	try {
 
@@ -16,6 +23,9 @@ void CodeGenerator:: generateCode(shared_ptr<ASTNode>& node) {
 				generate_declaration(parentNode);
 				break;
 			}
+			case DYNAMIC_ARRAY_DECLARATION:
+				generate_dynamic_array(parentNode);
+				break;
 			case ELIF_STATEMENT:
 				generate_elif(parentNode);
 				break;
@@ -91,82 +101,7 @@ void CodeGenerator:: generateCode(shared_ptr<ASTNode>& node) {
 
 
 }
-void CodeGenerator::generateCode1(shared_ptr<ASTNode>& node) {
-	try {
 
-		if (auto parentNode = dynamic_pointer_cast<ParentNode>(node)) {
-
-			if (parentNode->name == "print")
-			{
-				generate_print_statement(parentNode);
-			}
-			else
-				if (parentNode->name == "declaration")
-				{
-					generate_declaration(parentNode);
-				}
-				else
-					if (parentNode->name == "elif")
-					{
-						generate_elif(parentNode);
-					}
-
-					else
-						if (parentNode->name == "for" || parentNode->name == "foreach" || parentNode->name == "while")
-						{
-							auto prevScope = currentScope;
-							currentScope = parentNode->variableScope;
-
-							if (parentNode->name == "foreach") {}
-							//declareVariableInForeach(parentNode);
-							int count = 0;
-							for (auto& child : parentNode->children) {
-								if (count < 5)
-									count++;
-								else
-									generateCode(child); // ניתוח ילד
-							}
-							currentScope = prevScope;
-						}
-						else if (parentNode->name == "block")
-						{
-							auto prevScope = currentScope;
-							currentScope = parentNode->variableScope;
-							for (auto& child : parentNode->children) {
-								generateCode(child); // ניתוח ילד
-							}
-							currentScope = prevScope;
-						}
-						else
-							for (auto& child : parentNode->children) {
-								generateCode(child); // ניתוח ילד
-							}
-		}
-
-		else
-
-			if (auto binOpNode = dynamic_pointer_cast<BinaryOpNode>(node))
-			{
-				if (binOpNode->name == "range")
-				{
-					generate_ifrange(binOpNode);
-
-				}
-				generateCode(binOpNode->left);
-				generateCode(binOpNode->right);
-			}
-
-	}
-	catch (string s) {
-		if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
-			cout << "line " << varNode->token.lineNumber << ":" << s;
-		}
-		else
-			cout << s;
-	}
-
-
-}
 void CodeGenerator::generate_elif(shared_ptr<ParentNode>& node)
 {
 	shared_ptr<TokenNode> elseToken = make_shared<TokenNode>(Token(TOK_ELSE, "else", 1));
@@ -302,14 +237,7 @@ void CodeGenerator::generate_print_statement(shared_ptr<ParentNode>& node)
 //in the middle---
 void CodeGenerator::generate_declaration(shared_ptr<ParentNode>& node)
 {
-	const map<Pattern, string> mapsPetternTypes = {
-{TOK_BOOL_TYPE, "bool"},
-{TOK_CHAR_TYPE, "char"},
-{TOK_DOUBLE_TYPE, "double"},
-{TOK_FLOAT_TYPE, "float"},
-{TOK_INT_TYPE, "int"},
-{TOK_LONG_TYPE, "long"},
-{TOK_STRING_TYPE, "string"} };
+	
 
 	shared_ptr<ParentNode> dec_node = dynamic_pointer_cast<ParentNode>(node);
 	shared_ptr<TokenNode> type_node = dynamic_pointer_cast<TokenNode>(dec_node->children[0]);
@@ -322,4 +250,8 @@ void CodeGenerator::generate_declaration(shared_ptr<ParentNode>& node)
 		type_node->token.typeToken = typeReal;
 		type_node->token.value = mapsPetternTypes.at(typeReal);
 	}
+	auto varList = dynamic_pointer_cast<ParentNode>(node->children[1])->children;
+	for (auto& child : varList)
+		if(child->nodeType==DYNAMIC_ARRAY_DECLARATION)
+			generateCode(child);
 }

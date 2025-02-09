@@ -131,6 +131,7 @@
     <ClCompile Include="CForEveryoneProject.cpp" />
     <ClCompile Include="CodeGenerator.cpp" />
     <ClCompile Include="enums.cpp" />
+    <ClCompile Include="Function.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Parser.cpp" />
@@ -144,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="CodeGenerator.h" />
     <ClInclude Include="enums.h" />
+    <ClInclude Include="Function.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="ASTNode.h" />

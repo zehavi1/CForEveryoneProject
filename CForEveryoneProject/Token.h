@@ -10,7 +10,7 @@ public:
 	// הערך של הטוקן (כמו שם המשתנה או המילה שמורה)
 	int lineNumber;
 
-	Token(Pattern typeToken, string value,int lineNumber):typeToken(typeToken),value(value),lineNumber(lineNumber){}
+	Token(Pattern typeToken, string value,int lineNumber=0):typeToken(typeToken),value(value),lineNumber(lineNumber){}
 	Token(Pattern typeToken):typeToken(typeToken) {};
 	Token() {};
 	/*void setType(string type) { this->type = type; }*/

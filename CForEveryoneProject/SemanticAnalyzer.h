@@ -6,6 +6,7 @@
 #include "ASTNode.h"
 #include "Variable.h"
 #include "stack"
+#include "Function.h"
 
 
 
@@ -16,7 +17,7 @@ private:
 	map<string, Variable> variableScope;
 	//vector<map<string, Variable>> scopes;
 	stack<map<string, Variable>> scopes;
-	//map<string, Function> functions;
+	map<string, Function> functions;
 	//static vector<map<string, Variable>> scopesFinal;
 
 
@@ -27,7 +28,7 @@ public:
 			scopes.top() = variableScope;
 		scopes.push(variableScope); // כניסה לטווח חדש
 	}
-
+	map<string, Function>& getFunctions() { return functions; }
 	void exitScope(shared_ptr<ParentNode> node) {
 		if (!scopes.empty()) {
 			node->variableScope = variableScope;
@@ -85,10 +86,14 @@ public:
 			{
 				if (auto varNode2 = dynamic_pointer_cast<ParentNode>(list->children[i])) {
 					auto children2 = varNode2->children;
-					if (auto varNode3 = dynamic_pointer_cast<TokenNode>(children2[0])) {
-						varNode3->token.typeToken = typeVar->token.typeToken;
-						defineVariable(varNode3->token);
-					}
+					shared_ptr<TokenNode> varNode3;
+					i = 0;
+					do {
+						 varNode3 = dynamic_pointer_cast<TokenNode>(children2[i]);
+						i++;
+					} while (!varNode3 || varNode3->token.typeToken != TOK_ID);
+					varNode3->token.typeToken = typeVar->token.typeToken;
+					defineVariable(varNode3->token);
 				}
 
 			}
@@ -150,7 +155,7 @@ public:
 	//	}
 	//	//variableScope[name] = 0; // הוספת משתנה לטווח
 	//}
-	void defineVariable(Token token)
+	void defineVariable(Token& token)
 	{
 		if (variableScope.find(token.value) != variableScope.end()) {
 			string s = "Variable " + token.value + " already defined in this scope";
@@ -164,12 +169,40 @@ public:
 	void useVariable(const string& name)
 	{
 		auto varScope = variableScope.find(name);
-		if (varScope == variableScope.end()) {
+		auto func = functions.find(name);
+		if (varScope == variableScope.end()&&func==functions.end()) {
 			string s = "Variable " + name + " is used before it is defined\n";
 			throw s;
 		}
 	}
-
+	void analyzeStringDeclaration(shared_ptr<ParentNode> node) {
+		Pattern type = dynamic_pointer_cast<TokenNode>(node->children[0])->token.typeToken;
+		string name = dynamic_pointer_cast<TokenNode>(node->children[1])->token.value;
+		Token t(type, name, 1);
+		defineVariable(t);
+	}
+	void analyzeFunction(shared_ptr<ParentNode> node)
+	{
+		Pattern typeReturn = dynamic_pointer_cast<TokenNode>(node->children[0])->token.typeToken;
+		string nameFunction = dynamic_pointer_cast<TokenNode>(node->children[1])->token.value;
+		Function func(nameFunction,typeReturn);
+		auto it = std::find_if(node->children.begin()+2, node->children.end(), [](auto child) {
+			return child->nodeType == PARAMETER_LIST; 
+			});
+		auto params = dynamic_pointer_cast<ParentNode>(*it);
+		for (size_t i = 0; i < params->children.size(); i+=3)
+		{
+			auto typeVar = dynamic_pointer_cast<TokenNode>(params->children[i])->token.typeToken;
+			auto nameVar = dynamic_pointer_cast<TokenNode>(params->children[i+1])->token.value;
+			Token t(typeVar, nameVar, 1);
+			defineVariable(t);
+			Variable v(t);
+			func.addParameter(v);
+		}
+		functions[nameFunction]= func;
+		auto block = node->children.back();
+		analyze(block);
+	}
 	void analyze(shared_ptr<ASTNode> node) 
 	{
 		try 
@@ -194,6 +227,9 @@ public:
 					declareVariable(parentNode);
 					break;
 				}
+				case STRING_DECLARATION:
+					analyzeStringDeclaration(parentNode);
+					break;
 				case FOREACH_LOOP:
 					declareVariableInForeach(parentNode);
 				case FOR_LOOP:
@@ -213,15 +249,10 @@ public:
 				case FUNCTION_DEFINITION:
 				{
 					enterScope();
-					for (auto& child : parentNode->children) {
-						analyze(child); // ניתוח ילד
-					}
+					analyzeFunction(parentNode);
 					exitScope(parentNode);
 					break;
 				}
-				case PARAMETER_LIST:
-					//////////
-					break;
 				case BLOCK:
 				{
 					enterScope();
