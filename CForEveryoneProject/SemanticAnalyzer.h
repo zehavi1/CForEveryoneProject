@@ -22,12 +22,12 @@ private:
 public:
 	friend class codeGenerator;
 	void enterScope() {
-		if(!scopes.empty())
+		if (!scopes.empty())
 			scopes.top() = variableScope;
 		scopes.push(variableScope); // כניסה לטווח חדש
 	}
 
-	void exitScope(shared_ptr<ParentNode> node ) {
+	void exitScope(shared_ptr<ParentNode> node) {
 		if (!scopes.empty()) {
 			node->variableScope = variableScope;
 			//scopesFinal.push_back(scopes.back());
@@ -92,7 +92,7 @@ public:
 
 			}
 		}
-		
+
 	}
 	void declareVariableInForeach(shared_ptr<ParentNode> node)
 	{
@@ -108,7 +108,7 @@ public:
 		}
 		compareTypesInForeach(node, typeVar);
 	}
-	bool compareTypesInForeach(shared_ptr<ParentNode> node,shared_ptr<TokenNode> typeVar)
+	bool compareTypesInForeach(shared_ptr<ParentNode> node, shared_ptr<TokenNode> typeVar)
 	{
 		//   יש לבדוק מהו הסוג של המערך
 		auto collectionNode = node->children[3];
@@ -139,8 +139,8 @@ public:
 		Pattern p1 = TOK_ERROR;
 		// בדוק אם המפתח קיים במפה
 		auto it = mapTypes.find(key);
-		if (it != mapTypes.end()) 
-			 p1 = it->second; // קבל את הערך המתאים מהמפה
+		if (it != mapTypes.end())
+			p1 = it->second; // קבל את הערך המתאים מהמפה
 		return p1; // החזרת סוג 
 	}
 	//void defineVariable1(const string& name) {
@@ -156,7 +156,7 @@ public:
 			throw s;
 		}
 		variableScope[token.value] = Variable(token);
-		
+
 	}
 
 
@@ -169,7 +169,7 @@ public:
 		}
 	}
 
-	
+
 	void analyze(shared_ptr<ASTNode> node) {
 		try {
 			if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
@@ -184,7 +184,8 @@ public:
 				}
 
 			}
-			else if (auto parentNode = dynamic_pointer_cast<ParentNode>(node)) {
+			else if (auto parentNode = dynamic_pointer_cast<ParentNode>(node))
+			{
 				// ניתוח צומת אב רגיל
 				if (parentNode->name == "declaration")
 					declareVariable(parentNode);
@@ -204,30 +205,42 @@ public:
 						//exitScope();
 						exitScope(parentNode);
 					}
-					else if (parentNode->name == "block")
-					{
-						enterScope();
-						for (auto& child : parentNode->children) {
-							analyze(child); // ניתוח ילד
-						}
-						exitScope(parentNode);
-					}
 					else
-						for (auto& child : parentNode->children) {
-							analyze(child); // ניתוח ילד
+						if (parentNode->name == "function")
+						{
+							enterScope();
+							for (auto& child : parentNode->children) {
+								analyze(child); // ניתוח ילד
+							}
+							exitScope(parentNode);
 						}
+						else
+                		if (parentNode->name == "parameters")
+								analyze(parentNode);
+							else if (parentNode->name == "block")
+							{
+								enterScope();
+								for (auto& child : parentNode->children) {
+									analyze(child); // ניתוח ילד
+								}
+								exitScope(parentNode);
+							}
+							else
+								for (auto& child : parentNode->children) {
+									analyze(child); // ניתוח ילד
+								}
 			}
 		}
-		catch(string s){
+		catch (string s) {
 			if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
 				cout << "line " << varNode->token.lineNumber << ":" << s;
 			}
 			else
-				cout<< s;
+				cout << s;
 		}
-		
 
-    }
-	
+
+	}
+
 
 };

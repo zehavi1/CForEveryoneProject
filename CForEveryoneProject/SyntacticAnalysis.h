@@ -79,9 +79,6 @@ public:
 	shared_ptr<ASTNode> parameter_list(); // ניתוח רשימת פרמטרים
 	//מערכים
 	shared_ptr<ASTNode> full_array(); // ניתוח רשימת פרמטרים
-	shared_ptr<ASTNode> parameter_list(); // ניתוח רשימת פרמטרים
-	shared_ptr<ASTNode> parameter_list(); // ניתוח רשימת פרמטרים
-	
 	shared_ptr<ASTNode> return_statement(); // ניתוח פקודת return
 	shared_ptr<ASTNode> parse();
 	//void printAST(const shared_ptr<ASTNode>& node, int depth = 0);

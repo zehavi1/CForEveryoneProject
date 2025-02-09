@@ -52,7 +52,7 @@ int main() {
 
     )";
 	string program_declaration = R"(
-    int main(){
+    int main(int a,int b){
         int x = 10,y1=40,z1=x+y;
         double y = 3.14;
         string z = "hello";
