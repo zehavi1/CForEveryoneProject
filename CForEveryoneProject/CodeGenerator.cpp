@@ -101,7 +101,52 @@ void CodeGenerator:: generateCode(shared_ptr<ASTNode>& node) {
 
 
 }
+void CodeGenerator::addDefineBoolAndIncludes()
+{
+	bool isBool = false, isIO = false;
+	shared_ptr<ParentNode> basic = make_shared<ParentNode>("add code before");
+	shared_ptr<SentenceNode> crt = make_shared<SentenceNode>("#define _CRT_SECURE_NO_WARNINGS\n");
+	//shared_ptr<SentenceNode> forStrings = make_shared<SentenceNode>("#pragma warning (disable: 4996)\n");
+	shared_ptr<SentenceNode> includeStdio = make_shared<SentenceNode>("#include <stdio.h>\n");
+	shared_ptr<SentenceNode> insludeStdlib = make_shared<SentenceNode>("#include <stdlib.h>\n");
+	shared_ptr<SentenceNode> defineBool = make_shared<SentenceNode>("define bool{false,true};\n");
+	basic->addChild(crt);
+	for (Token& t : tokens)
+	{
+		if (t.typeToken == TOK_BOOL || t.typeToken == TOK_BOOL_TYPE)
+			isBool = true;
+		else
+			if (t.typeToken == TOK_PRINTF || t.typeToken == TOK_PRINT)
+				isIO = true;
+	}
+	if (isBool)
+		basic->addChild(defineBool);
+	if (isIO)
+		basic->addChild(includeStdio);
+	auto ast2 = dynamic_pointer_cast<ParentNode>(make_shared<ParentNode>("program with all"));
+	ast2->addChild(basic);
+	ast2->addChild(ast);
+	ast = ast2;
 
+}
+void CodeGenerator::generate_dynamic_array(shared_ptr<ParentNode>& node)
+{
+	// דקדוק: <dynamic_array_declaration> ::= <type> TOK_OPEN_BRACKET TOK_CLOSE_BRACKET TOK_ID TOK_ASSIGN TOK_NEW TOK_OPEN_BRACKET <expression> TOK_CLOSE_BRACKET
+	auto nameNode = dynamic_pointer_cast<TokenNode>(node->children[2]);
+	string name = nameNode->token.value;
+	Pattern typeArr = currentScope.at(name).token.typeToken;
+	auto expr = node->children[7];
+	//node->children.clear();
+	vector<shared_ptr<ASTNode>> children;
+	children.push_back(make_shared<TokenNode>(Token(TOK_ASTERISK, "*")));
+	children.push_back(nameNode);
+	children.push_back(make_shared<TokenNode>(Token(TOK_ASSIGN, "=")));
+	children.push_back(make_shared<TokenNode>(Token(TOK_MALLOC, "malloc")));
+	children.push_back(make_shared<TokenNode>(Token(TOK_OPEN_PAREN, "(")));
+	children.push_back(expr);
+	children.push_back(make_shared<TokenNode>(Token(TOK_CLOSE_PAREN, ")")));
+	node->children = children;
+}
 void CodeGenerator::generate_elif(shared_ptr<ParentNode>& node)
 {
 	shared_ptr<TokenNode> elseToken = make_shared<TokenNode>(Token(TOK_ELSE, "else", 1));
