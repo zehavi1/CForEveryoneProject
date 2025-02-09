@@ -67,7 +67,10 @@ enum Pattern {
 	TOK_EOF,
 	TOK_UNKNOWN,
 	TOK_INCREMENT,
-	TOK_DECREMENT
+	TOK_DECREMENT,
+    TOK_MALLOC,
+    TOK_CALLOC,
+    TOK_REALLOC
 };
 const std::string tokenNames[] = {
     "TOK_TYPE_PRINT",
@@ -130,7 +133,10 @@ const std::string tokenNames[] = {
 	"TOK_EOF",
 	"TOK_UNKNOWN",
 	"TOK_INCREMENT",
-	"TOK_DECREMENT"
+	"TOK_DECREMENT",
+    "TOK_MALLOC",
+    "TOK_CALLOC",
+    "TOK_REALLOC"
 };
 const std::map<std::string, Pattern> mapAlphaTokens = {
 		//{"type", TOK_TYPE},
@@ -159,7 +165,10 @@ const std::map<std::string, Pattern> mapAlphaTokens = {
     {"char", TOK_CHAR_TYPE},
     {"bool", TOK_BOOL_TYPE},
     {"true", TOK_BOOL},
-    {"false", TOK_BOOL}
+    {"false", TOK_BOOL},
+    {"malloc",TOK_MALLOC},
+    {"calloc",TOK_CALLOC},
+    {"realloc",TOK_REALLOC}
 
 };
 const std::map<std::string, Pattern> mapNonAlphaTokens = {
@@ -197,4 +206,42 @@ const std::map<Pattern, Pattern> mapTypes = {
     {TOK_INT_TYPE, TOK_INT},
     {TOK_LONG_TYPE, TOK_LONG},
     {TOK_STRING_TYPE, TOK_STRING}};
+enum ASTNodeType {
+    EXPRESSION,
+    TERM,
+    FACTOR,
+    NUMBER,
+    TYPE,
+    DECLARATION,
+    VARIABLE,
+    VARIABLE_LIST,
+    PRINT_STATEMENT,
+    VARIABLE_DECLARATION,
+    EXPR_PRINT,
+    EXPRESSION_IN_PRINT,
+    ASSIGNMENT,
+    STATEMENT,
+    IF_ELSE_STATEMENT,
+    ELIF_STATEMENT,
+    EXPR_OR,
+    EXPR_AND,
+    EXPR_COMPARISON,
+    EXPR_ARITHMETIC,
+    COMPARISON_OPERATOR,
+    BLOCK,
+    FOR_LOOP,
+    WHILE_LOOP,
+    FOREACH_LOOP,
+    FUNCTION_DEFINITION,
+    COLLECTION,
+    PARAMETER_LIST,
+    FULL_ARRAY,
+    STATIC_ARRAY_DECLARATION,
+    DYNAMIC_ARRAY_DECLARATION,
+    POINTER_ARRAY_DECLARATION,
+    ALLOCATION_FUNCTION_CALL,
+    STRING_DECLARATION,
+    RETURN_STATEMENT
+};
+
 

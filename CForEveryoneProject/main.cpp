@@ -83,7 +83,15 @@ print(i);
         }
         print(x);
         print(y);})";
-	string program = program_declaration;
+    string program_array = R"(
+void main(){
+        int [] arr=new int[3];
+        char* arr2 = malloc(4);
+        double arr3[4]={1,2,3};
+        string s="abcd";
+}
+         )";
+	string program = program_array;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
@@ -95,14 +103,14 @@ print(i);
     shared_ptr<ASTNode> ast = parser.parse();
     cout << "Abstract Syntax Tree:" << endl;
     ast->printASTNode();
-    SemanticAnalyzer semantic;
-    semantic.analyze(ast); 
-    CodeGenerator generator(ast, tokens);
-    generator.CodeGenerator_main();
-    //generator.generateCode(ast);
-    shared_ptr<ASTNode> &astNew= generator.getNewAst();
-    astNew->printASTNode();
-    cout <<"base program:"<<endl << program << endl;
-    cout<<"profram in c:"<<endl << astNew->printOriginalCode(0);
+    //SemanticAnalyzer semantic;
+    //semantic.analyze(ast); 
+    //CodeGenerator generator(ast, tokens);
+    //generator.CodeGenerator_main();
+    ////generator.generateCode(ast);
+    //shared_ptr<ASTNode> &astNew= generator.getNewAst();
+    //astNew->printASTNode();
+    //cout <<"base program:"<<endl << program << endl;
+    //cout<<"profram in c:"<<endl << astNew->printOriginalCode(0);
     return 0;
 }

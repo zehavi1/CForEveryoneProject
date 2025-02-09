@@ -9,6 +9,7 @@
 using namespace std;
 // מחלקת בסיס לכל הצמתים
 struct ASTNode {
+
    virtual void printASTNode(int depth=0) = 0;
     virtual ~ASTNode() {}
 	virtual string printOriginalCode(int tabs) const = 0;

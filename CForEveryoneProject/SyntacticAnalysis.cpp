@@ -341,6 +341,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::declaration()
 shared_ptr<ASTNode> SyntacticAnalysis::declaration1(bool canBeFunction) {
 	shared_ptr<ParentNode> declarationNode = make_shared<ParentNode>("declaration");
 	Pattern typeVariable = currentToken().typeToken;
+	Token typeVariableToken = currentToken();
 	if (currentToken().typeToken == TOK_VAR)
 	{
 		declarationNode->addChild(match(TOK_VAR)); // לבדוק אם יש מילת מפתח var
@@ -354,9 +355,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::declaration1(bool canBeFunction) {
 	{
 		return function_definition(declarationNode);
 	}
-	else
-		if (next.typeToken == TOK_LEFT_ARRAY)
-			return collection();
 		
 	else
 	declarationNode->addChild(variable_list(typeVariable)); // ניתוח רשימת המשתנים
@@ -381,10 +379,15 @@ shared_ptr<ASTNode> SyntacticAnalysis::variable_list(Pattern typeVariable) {
 // פונקציה לניתוח משתנה
 shared_ptr<ASTNode> SyntacticAnalysis::variable(Pattern typeVariable) {
 	shared_ptr<ParentNode> variableNode = make_shared<ParentNode>("variable");
+	Token t = currentToken();
+	if (t.typeToken == TOK_LEFT_ARRAY)
+		return dynamic_array_declaration(typeVariable);
+	if (t.typeToken == TOK_ASTERISK)
+		return pointer_array_declaration();
 	variableNode->addChild(match(TOK_ID)); // ניתוח מזהה המשתנה
-	Token t = currentToken().typeToken;
-	/*if(t.typeToken==TOK_LEFT_ARRAY)
-		array_declaretion()*/
+	if (currentToken().typeToken == TOK_LEFT_ARRAY)
+		return static_array_declaration(t);
+	
 	// בדיקה אם יש השמה
 	if (currentToken().typeToken == TOK_ASSIGN|| typeVariable==TOK_VAR) {
 		
@@ -581,6 +584,118 @@ shared_ptr<ASTNode> SyntacticAnalysis::return_statement()
 	returnNode->addChild(match(TOK_SEMICOLON, "Expected ';' at the end of statement"));
 	return returnNode;
 }
+shared_ptr<ASTNode> SyntacticAnalysis::full_array() {
+	shared_ptr<ParentNode> collectionNode = make_shared<ParentNode>("full_array");
+	if (currentToken().typeToken == TOK_OPEN_CURLY) {
+		collectionNode->addChild(match(TOK_OPEN_CURLY, "expected an array"));
+		collectionNode->addChild(expression()); // ניתוח הביטוי הראשון
+		while (currentToken().typeToken == TOK_COMMA) {
+			collectionNode->addChild(match(TOK_COMMA));
+			collectionNode->addChild(expression()); // ניתוח הביטוי הבא
+		}
+		collectionNode->addChild(match(TOK_CLOSE_CURLY, "Expected closing bracket for array"));
+		return collectionNode;
+	}
+}
+shared_ptr<ASTNode> SyntacticAnalysis::static_array_declaration(Token &t) {
+	// דקדוק: <static_array_declaration> ::= <type> TOK_ID TOK_LEFT_ARRAY <number> TOK_RIGHT_ARRAY
+	shared_ptr<ParentNode> node = make_shared<ParentNode>("static_array_declaration");
+	node->addChild(make_shared<TokenNode>(t));
+	node->addChild(match(TOK_LEFT_ARRAY, "Expected '[' in array declaration"));
+	node->addChild(number());
+	node->addChild(match(TOK_RIGHT_ARRAY, "Expected ']' in array declaration"));
+	if (currentToken().typeToken == TOK_ASSIGN)
+	{
+		node->addChild(match(TOK_ASSIGN));
+		node->addChild(full_array());
+	}
+	return node;
+}
+shared_ptr<ASTNode> SyntacticAnalysis::dynamic_array_declaration(Pattern typeVariable) {
+	// דקדוק: <dynamic_array_declaration> ::= <type> TOK_OPEN_BRACKET TOK_CLOSE_BRACKET TOK_ID TOK_ASSIGN TOK_NEW TOK_OPEN_BRACKET <expression> TOK_CLOSE_BRACKET
+	shared_ptr<ParentNode> node = make_shared<ParentNode>("dynamic_array_declaration");
+	//node->addChild(make_shared<TokenNode>(typeVariable));
+	node->addChild(match(TOK_LEFT_ARRAY, "Expected '[' after type for dynamic array"));
+	node->addChild(match(TOK_RIGHT_ARRAY, "Expected ']' after '[' in dynamic array declaration"));
+	node->addChild(match(TOK_ID, "Expected array identifier"));
+	node->addChild(match(TOK_ASSIGN, "Expected '=' in dynamic array declaration"));
+	node->addChild(match(TOK_NEW, "Expected 'new' keyword in dynamic array declaration"));
+	node->addChild(match(typeVariable, "Expected type after 'new' keyword"));
+	node->addChild(match(TOK_LEFT_ARRAY, "Expected '[' after new keyword and type"));
+	node->addChild(expression());
+	node->addChild(match(TOK_RIGHT_ARRAY, "Expected ']' after array size expression"));
+	return node;
+}
+shared_ptr<ASTNode> SyntacticAnalysis::pointer_array_declaration() {
+	// דקדוק: <pointer_array_declaration> ::= <type> TOK_STAR TOK_ID TOK_ASSIGN <allocation_function_call>
+	shared_ptr<ParentNode> node = make_shared<ParentNode>("pointer_array_declaration");
+	//node->addChild(type());
+	node->addChild(match(TOK_ASTERISK, "Expected '*' for pointer declaration"));
+	node->addChild(match(TOK_ID, "Expected identifier for pointer array declaration"));
+	node->addChild(match(TOK_ASSIGN, "Expected '=' in pointer array declaration"));
+	node->addChild(allocation_function_call());
+	return node;
+}
+shared_ptr<ASTNode> SyntacticAnalysis::allocation_function_call() {
+	// דקדוק:
+	// <allocation_function_call> ::= TOK_MALLOC TOK_OPEN_PAREN <expression> TOK_CLOSE_PAREN
+	//                              | TOK_CALLOC TOK_OPEN_PAREN <expression> TOK_COMMA <expression> TOK_CLOSE_PAREN
+	//                              | TOK_REALLOC TOK_OPEN_PAREN <expression> TOK_COMMA <expression> TOK_CLOSE_PAREN
+	shared_ptr<ParentNode> node = make_shared<ParentNode>("allocation_function_call");
+	Pattern p = currentToken().typeToken;
+	if (p == TOK_MALLOC) {
+		node->addChild(match(TOK_MALLOC, "Expected 'malloc'"));
+		node->addChild(match(TOK_OPEN_PAREN, "Expected '(' after malloc"));
+		node->addChild(expression());
+		node->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after malloc argument"));
+	}
+	else if (p == TOK_CALLOC) {
+		node->addChild(match(TOK_CALLOC, "Expected 'calloc'"));
+		node->addChild(match(TOK_OPEN_PAREN, "Expected '(' after calloc"));
+		node->addChild(expression());
+		node->addChild(match(TOK_COMMA, "Expected ',' between calloc arguments"));
+		node->addChild(expression());
+		node->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after calloc arguments"));
+	}
+	else if (p == TOK_REALLOC) {
+		node->addChild(match(TOK_REALLOC, "Expected 'realloc'"));
+		node->addChild(match(TOK_OPEN_PAREN, "Expected '(' after realloc"));
+		node->addChild(expression());
+		node->addChild(match(TOK_COMMA, "Expected ',' between realloc arguments"));
+		node->addChild(expression());
+		node->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after realloc arguments"));
+	}
+	else {
+		match(TOK_ERROR,"Expected allocation function (malloc, calloc, or realloc)");
+	}
+	return node;
+}
+shared_ptr<ASTNode> SyntacticAnalysis::string_declaration() {
+	// דקדוק: <string_declaration> ::=
+	//   TOK_STRING_TYPE TOK_ID TOK_ASSIGN (TOK_STRING_LITERAL 
+	//        | (TOK_NEW TOK_STRING TOK_OPEN_PAREN TOK_STRING_LITERAL TOK_CLOSE_PAREN))
+	shared_ptr<ParentNode> node = make_shared<ParentNode>("string_declaration");
+	node->addChild(match(TOK_STRING_TYPE, "Expected string type"));
+	node->addChild(match(TOK_ID, "Expected identifier for string declaration"));
+	node->addChild(match(TOK_ASSIGN, "Expected '=' in string declaration"));
+
+	if (currentToken().typeToken == TOK_NEW) {
+		node->addChild(match(TOK_NEW, "Expected 'new' in string declaration"));
+		node->addChild(match(TOK_STRING, "Expected 'string' after new"));
+		node->addChild(match(TOK_OPEN_PAREN, "Expected '(' after new string"));
+		node->addChild(match(TOK_STRING_LITERAL, "Expected string literal"));
+		node->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after string literal"));
+	}
+	else
+	{
+		node->addChild(match(TOK_STRING_LITERAL, "Expected string literal or new string constructor in string declaration"));
+		node->addChild(match(TOK_STRING, "Excepted string after string literal"));
+		node->addChild(match(TOK_STRING_LITERAL, "Expected string literal after string"));
+	}
+	node->addChild(match(TOK_SEMICOLON, "Excepted a ; after a statement"));
+	return node;
+}
+
 // עדכון פונקציה statement
 shared_ptr<ASTNode> SyntacticAnalysis::statement() {
 	Pattern p = currentToken().typeToken;
@@ -605,9 +720,10 @@ shared_ptr<ASTNode> SyntacticAnalysis::statement() {
 	case TOK_CHAR_TYPE:
 	case TOK_BOOL_TYPE:
 	case TOK_FLOAT_TYPE:
-	case TOK_STRING_TYPE:
 	case TOK_LONG_TYPE:
 		return declaration();
+	case TOK_STRING_TYPE:
+		return string_declaration();
 	case TOK_VOID:
 		return function_definition();
 	case TOK_ID:

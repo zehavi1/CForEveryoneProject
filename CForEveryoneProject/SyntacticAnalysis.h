@@ -79,6 +79,23 @@ public:
 	shared_ptr<ASTNode> parameter_list(); // ניתוח רשימת פרמטרים
 	//מערכים
 	shared_ptr<ASTNode> full_array(); // ניתוח רשימת פרמטרים
+	// הגדרת מערך סטטי, לדוגמה: int arr[10];
+	shared_ptr<ASTNode> static_array_declaration(Token& t);
+
+	// הגדרת מערך דינאמי בסגנון C#, לדוגמה: int [] arr = new int[10];
+	shared_ptr<ASTNode> dynamic_array_declaration(Pattern typeVariable);
+
+	// הגדרת מערך באמצעות מצביע והקצאת זיכרון (malloc, calloc, realloc)
+	shared_ptr<ASTNode> pointer_array_declaration();
+
+	// ניתוח קריאת הקצאת זיכרון
+	shared_ptr<ASTNode> allocation_function_call();
+
+	// ניתוח הגדרת מחרוזת, לדוגמה:
+	//    string s = "hello";
+	// או: string s = new string("hello");
+	shared_ptr<ASTNode> string_declaration();
+
 	shared_ptr<ASTNode> return_statement(); // ניתוח פקודת return
 	shared_ptr<ASTNode> parse();
 	//void printAST(const shared_ptr<ASTNode>& node, int depth = 0);
