@@ -33,7 +33,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::number() {
 	if (p == TOK_INT || p == TOK_DOUBLE || p == TOK_FLOAT || p == TOK_LONG || p == TOK_CHAR||p==TOK_BOOL) {
 		Token t = currentToken();
 		nextToken();
-		return make_shared<TokenNode>(t);
+		return make_shared<TokenNode>(t, NUMBER);
 	}
 	else {
 		match(TOK_EOF, "Expected number");
@@ -43,7 +43,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::number() {
 //  פונקציה לניתוח בלוקים
 shared_ptr<ASTNode> SyntacticAnalysis::block()
 {
-	shared_ptr<ParentNode> blockNode = make_shared<ParentNode>("block");
+	shared_ptr<ParentNode> blockNode = make_shared<ParentNode>("block", BLOCK);
 	if (currentToken().typeToken != TOK_OPEN_CURLY)
 	{
 		blockNode->addChild(statement());
@@ -82,7 +82,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::type()
 }
 // פונקציה לניתוח פקודת הדפסה
 shared_ptr<ASTNode> SyntacticAnalysis::print_statement() {
-	shared_ptr<ParentNode> printNode = make_shared<ParentNode>("print");
+	shared_ptr<ParentNode> printNode = make_shared<ParentNode>("print", PRINT_STATEMENT);
 	printNode->addChild(match(TOK_PRINT)); // להתאים את הטוקן הנוכחי לפונקציה
 	printNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after print")); // להתאים את הטוקן הנוכחי לפונקציה
 	printNode->addChild(expr_print()); // להתאים את הביטוי להדפסה
@@ -92,7 +92,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::print_statement() {
 }
 // פונקציה לניתוח הביטויים להדפסה
 shared_ptr<ASTNode> SyntacticAnalysis::expr_print() {
-	shared_ptr<ParentNode> exprNode = make_shared<ParentNode>("expr_print");
+	shared_ptr<ParentNode> exprNode = make_shared<ParentNode>("expr_print",EXPR_PRINT);
 	// ניתוח הביטוי הראשון או המחרוזת
 	if (currentToken().typeToken == TOK_STRING_LITERAL) {
 		exprNode->addChild(match(TOK_STRING_LITERAL, "Expected string literal"));
@@ -128,7 +128,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::expressionInPrint() {
 		Token op = currentToken();
 		nextToken();
 		shared_ptr<ASTNode> right = term();
-		left = make_shared<BinaryOpNode>("expressionInPrint", op, left, right);
+		left = make_shared<BinaryOpNode>("expressionInPrint", op, left, right,EXPRESSION_IN_PRINT);
 	}
 	return left;
 }
@@ -143,7 +143,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::exprOr() {
 		Token op = currentToken();
 		nextToken();
 		shared_ptr<ASTNode> right = exprAnd();
-		left = make_shared<BinaryOpNode>(op, left, right);
+		left = make_shared<BinaryOpNode>(op, left, right,EXPR_OR);
 	}
 	return left;
 }
@@ -154,7 +154,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::exprAnd() {
 		Token op = currentToken();
 		nextToken();
 		shared_ptr<ASTNode> right = exprComparison();
-		left = make_shared<BinaryOpNode>(op, left, right);
+		left = make_shared<BinaryOpNode>(op, left, right,EXPR_AND);
 	}
 	return left;
 }
@@ -162,24 +162,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::exprAnd() {
 shared_ptr<ASTNode> SyntacticAnalysis::exprComparison() {
 	shared_ptr<ASTNode> left = exprArithmetic();
 	Pattern p = currentToken().typeToken;
-	//// בדיקה עבור range_condition
-	//if (p == TOK_LESS||p==TOK_GREATER_EQUAL||p==TOK_LESS_EQUAL || p == TOK_GREATER) {
-	//	// שמירה על האופרטור הנוכחי
-	//	Token op = currentToken();
-	//	nextToken(); // לעבור לטוקן הבא
-	//	shared_ptr<ASTNode> middle = exprArithmetic();
-
-	//	// לבדוק אם יש טוקן נוסף מהסוג הנכון
-	//	if (currentToken().typeToken == p) {
-	//		op = currentToken();
-	//		nextToken(); // לעבור לטוקן הבא
-	//		shared_ptr<ASTNode> right = exprArithmetic();
-	//		// אם יש טוקן נוסף באותו סוג, ניצור Node עבור תנאי הטווח
-
-	//		left = make_shared<BinaryOpNode>( op,left, middle);
-	//		left = make_shared<BinaryOpNode>("range", op, left, right);
-	//	}
-	//}
 	p=currentToken().typeToken;
 		while (p == TOK_EQUAL ||
 			p == TOK_NOT_EQUAL ||
@@ -190,7 +172,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::exprComparison() {
 			Token op = currentToken();
 			nextToken();
 			shared_ptr<ASTNode> right = exprArithmetic();
-			left = make_shared<BinaryOpNode>(op, left, right);
+			left = make_shared<BinaryOpNode>(op, left, right,EXPR_COMPARISON);
 			// לבדוק אם יש טוקן נוסף מהסוג הנכון
 			auto p1 = currentToken().typeToken;
 			if (p1 == p) {
@@ -198,7 +180,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::exprComparison() {
 				nextToken(); // לעבור לטוקן הבא
 				shared_ptr<ASTNode> right = exprArithmetic();
 				// אם יש טוקן נוסף באותו סוג, ניצור Node עבור תנאי הטווח
-				left = make_shared<BinaryOpNode>("range", op, left, right);
+				left = make_shared<BinaryOpNode>("range", op, left, right,RANGE);
 			}
 			p = currentToken().typeToken;
 		}
@@ -211,7 +193,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::exprArithmetic() {
 		Token op = currentToken();
 		nextToken();
 		shared_ptr<ASTNode> right = term();
-		left = make_shared<BinaryOpNode>(op, left, right);
+		left = make_shared<BinaryOpNode>(op, left, right,EXPR_ARITHMETIC);
 	}
 	return left;
 }
@@ -221,12 +203,12 @@ shared_ptr<ASTNode> SyntacticAnalysis::term() {
 		Token op = currentToken();
 		nextToken();
 		shared_ptr<ASTNode> right = factor();
-		left = make_shared<BinaryOpNode>(op, left, right);
+		left = make_shared<BinaryOpNode>(op, left, right,TERM);
 	}
 	return left;
 }
 shared_ptr<ASTNode> SyntacticAnalysis::factor() {
-	shared_ptr<ParentNode> factorNode = make_shared<ParentNode>("factor");
+	shared_ptr<ParentNode> factorNode = make_shared<ParentNode>("factor",FACTOR);
 	Pattern pattern = currentToken().typeToken;
 	switch (pattern) {
 	case TOK_ID: {
@@ -296,7 +278,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::comparison_operator() {
 }
 
 shared_ptr<ASTNode> SyntacticAnalysis::elif_statement() {
-	shared_ptr<ParentNode> ifElseIfNode = make_shared<ParentNode>("elif");
+	shared_ptr<ParentNode> ifElseIfNode = make_shared<ParentNode>("elif",ELIF_STATEMENT);
 	ifElseIfNode->addChild(match(TOK_ELIF));
 	ifElseIfNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after elif"));
 	ifElseIfNode->addChild(expression());
@@ -305,7 +287,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::elif_statement() {
 	return ifElseIfNode;
 }
 shared_ptr<ASTNode> SyntacticAnalysis::if_else_statement() {
-	shared_ptr<ParentNode> ifElseNode = make_shared<ParentNode>("if_else");
+	shared_ptr<ParentNode> ifElseNode = make_shared<ParentNode>("if_else",IF_ELSE_STATEMENT);
 	ifElseNode->addChild(match(TOK_IF));
 	ifElseNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after if"));
 	ifElseNode->addChild(expression());
@@ -339,7 +321,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::declaration()
 	return declarationNode;
 }
 shared_ptr<ASTNode> SyntacticAnalysis::declaration1(bool canBeFunction) {
-	shared_ptr<ParentNode> declarationNode = make_shared<ParentNode>("declaration");
+	shared_ptr<ParentNode> declarationNode = make_shared<ParentNode>("declaration",DECLARATION);
 	Pattern typeVariable = currentToken().typeToken;
 	Token typeVariableToken = currentToken();
 	if (currentToken().typeToken == TOK_VAR)
@@ -365,7 +347,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::declaration1(bool canBeFunction) {
 
 // פונקציה לניתוח רשימת משתנים
 shared_ptr<ASTNode> SyntacticAnalysis::variable_list(Pattern typeVariable) {
-	shared_ptr<ParentNode> variableListNode = make_shared<ParentNode>("variable_list");
+	shared_ptr<ParentNode> variableListNode = make_shared<ParentNode>("variable_list",VARIABLE_LIST);
 	variableListNode->addChild(variable(typeVariable)); // ניתוח המשתנה הראשון
 
 	// ניתוח משתנים נוספים המופרדים בפסיקים
@@ -378,7 +360,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::variable_list(Pattern typeVariable) {
 
 // פונקציה לניתוח משתנה
 shared_ptr<ASTNode> SyntacticAnalysis::variable(Pattern typeVariable) {
-	shared_ptr<ParentNode> variableNode = make_shared<ParentNode>("variable");
+	shared_ptr<ParentNode> variableNode = make_shared<ParentNode>("variable",VARIABLE);
 	Token t = currentToken();
 	if (t.typeToken == TOK_LEFT_ARRAY)
 		return dynamic_array_declaration(typeVariable);
@@ -405,7 +387,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::variable(Pattern typeVariable) {
 // הוספת פונקציה לניתוח הצהרות משתנים
 shared_ptr<ASTNode> SyntacticAnalysis::variable_declaration() {
 	bool isString = false;
-	shared_ptr<ParentNode> varDeclNode = make_shared<ParentNode>("variable_declaration");
+	shared_ptr<ParentNode> varDeclNode = make_shared<ParentNode>("variable_declaration",VARIABLE_DECLARATION);
 	if (currentToken().typeToken == TOK_VAR)
 		varDeclNode->addChild(match(TOK_VAR));
 	else
@@ -432,7 +414,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::assignment() {
 	return startNode;
 }
 shared_ptr<ASTNode> SyntacticAnalysis::assignment1() {
-	shared_ptr<ParentNode> startNode = make_shared<ParentNode>("assignment");
+	shared_ptr<ParentNode> startNode = make_shared<ParentNode>("assignment",ASSIGNMENT);
 	if (currentToken().typeToken != TOK_ID)
 		return declaration1(false);
 	startNode->addChild(match(TOK_ID, "Expected identifier"));
@@ -475,7 +457,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::assignment1() {
 
 //  פונקציות לניתוח לולאות
 shared_ptr<ASTNode> SyntacticAnalysis::for_loop() {
-	shared_ptr<ParentNode> forNode = make_shared<ParentNode>("for");
+	shared_ptr<ParentNode> forNode = make_shared<ParentNode>("for",FOR_LOOP);
 	forNode->addChild(match(TOK_FOR));
 	forNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after for"));
 	forNode->addChild(assignment());
@@ -488,7 +470,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::for_loop() {
 	return forNode;
 }
 shared_ptr<ASTNode> SyntacticAnalysis::while_loop() {
-	shared_ptr<ParentNode> whileNode = make_shared<ParentNode>("while");
+	shared_ptr<ParentNode> whileNode = make_shared<ParentNode>("while",WHILE_LOOP);
 	whileNode->addChild(match(TOK_WHILE));
 	whileNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after while"));
 	whileNode->addChild(expression());
@@ -503,7 +485,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::collection() {
 		return match(TOK_ID, "Expected identifier in collection");
 	else
 	{
-		shared_ptr<ParentNode> collectionNode = make_shared<ParentNode>("collection");
+		shared_ptr<ParentNode> collectionNode = make_shared<ParentNode>("collection",COLLECTION);
 		if (currentToken().typeToken == TOK_LEFT_ARRAY) {
 			collectionNode->addChild(match(TOK_LEFT_ARRAY, "expected an array"));
 			collectionNode->addChild(expression()); // ניתוח הביטוי הראשון
@@ -517,7 +499,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::collection() {
 	}
 }
 shared_ptr<ASTNode> SyntacticAnalysis::foreach_loop() {
-	shared_ptr<ParentNode> foreachNode = make_shared<ParentNode>("foreach");
+	shared_ptr<ParentNode> foreachNode = make_shared<ParentNode>("foreach",FOREACH_LOOP);
 	foreachNode->addChild( match(TOK_FOREACH));
 	foreachNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after foreach"));
 	try
@@ -537,7 +519,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::foreach_loop() {
 }
 // הוספת פונקציה לניתוח הגדרות פונקציות
 shared_ptr<ASTNode> SyntacticAnalysis::function_definition(shared_ptr<ParentNode> p) {
-	shared_ptr<ParentNode> funcNode = make_shared<ParentNode>("function");
+	shared_ptr<ParentNode> funcNode = make_shared<ParentNode>("function",FUNCTION_DEFINITION);
 	Pattern returnType;
 	if (p != nullptr)
 	{
@@ -563,7 +545,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::function_definition(shared_ptr<ParentNode
 }
 
 shared_ptr<ASTNode> SyntacticAnalysis::parameter_list() {
-	shared_ptr<ParentNode> paramListNode = make_shared<ParentNode>("parameters");
+	shared_ptr<ParentNode> paramListNode = make_shared<ParentNode>("parameters",PARAMETER_LIST);
 	if (currentToken().typeToken != TOK_CLOSE_PAREN) {
 		paramListNode->addChild(type()); // סוג משתנה
 		paramListNode->addChild(match(TOK_ID, "Expected identifier"));
@@ -578,14 +560,14 @@ shared_ptr<ASTNode> SyntacticAnalysis::parameter_list() {
 
 shared_ptr<ASTNode> SyntacticAnalysis::return_statement()
 {
-	shared_ptr<ParentNode> returnNode = make_shared<ParentNode>("return");
+	shared_ptr<ParentNode> returnNode = make_shared<ParentNode>("return",RETURN_STATEMENT);
 	returnNode->addChild(match(TOK_RETURN));
 	returnNode->addChild(expression());
 	returnNode->addChild(match(TOK_SEMICOLON, "Expected ';' at the end of statement"));
 	return returnNode;
 }
 shared_ptr<ASTNode> SyntacticAnalysis::full_array() {
-	shared_ptr<ParentNode> collectionNode = make_shared<ParentNode>("full_array");
+	shared_ptr<ParentNode> collectionNode = make_shared<ParentNode>("full_array",FULL_ARRAY);
 	if (currentToken().typeToken == TOK_OPEN_CURLY) {
 		collectionNode->addChild(match(TOK_OPEN_CURLY, "expected an array"));
 		collectionNode->addChild(expression()); // ניתוח הביטוי הראשון
@@ -599,7 +581,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::full_array() {
 }
 shared_ptr<ASTNode> SyntacticAnalysis::static_array_declaration(Token &t) {
 	// דקדוק: <static_array_declaration> ::= <type> TOK_ID TOK_LEFT_ARRAY <number> TOK_RIGHT_ARRAY
-	shared_ptr<ParentNode> node = make_shared<ParentNode>("static_array_declaration");
+	shared_ptr<ParentNode> node = make_shared<ParentNode>("static_array_declaration",STATIC_ARRAY_DECLARATION);
 	node->addChild(make_shared<TokenNode>(t));
 	node->addChild(match(TOK_LEFT_ARRAY, "Expected '[' in array declaration"));
 	node->addChild(number());
@@ -613,7 +595,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::static_array_declaration(Token &t) {
 }
 shared_ptr<ASTNode> SyntacticAnalysis::dynamic_array_declaration(Pattern typeVariable) {
 	// דקדוק: <dynamic_array_declaration> ::= <type> TOK_OPEN_BRACKET TOK_CLOSE_BRACKET TOK_ID TOK_ASSIGN TOK_NEW TOK_OPEN_BRACKET <expression> TOK_CLOSE_BRACKET
-	shared_ptr<ParentNode> node = make_shared<ParentNode>("dynamic_array_declaration");
+	shared_ptr<ParentNode> node = make_shared<ParentNode>("dynamic_array_declaration",DYNAMIC_ARRAY_DECLARATION);
 	//node->addChild(make_shared<TokenNode>(typeVariable));
 	node->addChild(match(TOK_LEFT_ARRAY, "Expected '[' after type for dynamic array"));
 	node->addChild(match(TOK_RIGHT_ARRAY, "Expected ']' after '[' in dynamic array declaration"));
@@ -628,7 +610,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::dynamic_array_declaration(Pattern typeVar
 }
 shared_ptr<ASTNode> SyntacticAnalysis::pointer_array_declaration() {
 	// דקדוק: <pointer_array_declaration> ::= <type> TOK_STAR TOK_ID TOK_ASSIGN <allocation_function_call>
-	shared_ptr<ParentNode> node = make_shared<ParentNode>("pointer_array_declaration");
+	shared_ptr<ParentNode> node = make_shared<ParentNode>("pointer_array_declaration",POINTER_ARRAY_DECLARATION);
 	//node->addChild(type());
 	node->addChild(match(TOK_ASTERISK, "Expected '*' for pointer declaration"));
 	node->addChild(match(TOK_ID, "Expected identifier for pointer array declaration"));
@@ -641,7 +623,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::allocation_function_call() {
 	// <allocation_function_call> ::= TOK_MALLOC TOK_OPEN_PAREN <expression> TOK_CLOSE_PAREN
 	//                              | TOK_CALLOC TOK_OPEN_PAREN <expression> TOK_COMMA <expression> TOK_CLOSE_PAREN
 	//                              | TOK_REALLOC TOK_OPEN_PAREN <expression> TOK_COMMA <expression> TOK_CLOSE_PAREN
-	shared_ptr<ParentNode> node = make_shared<ParentNode>("allocation_function_call");
+	shared_ptr<ParentNode> node = make_shared<ParentNode>("allocation_function_call",ALLOCATION_FUNCTION_CALL);
 	Pattern p = currentToken().typeToken;
 	if (p == TOK_MALLOC) {
 		node->addChild(match(TOK_MALLOC, "Expected 'malloc'"));
@@ -674,7 +656,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::string_declaration() {
 	// דקדוק: <string_declaration> ::=
 	//   TOK_STRING_TYPE TOK_ID TOK_ASSIGN (TOK_STRING_LITERAL 
 	//        | (TOK_NEW TOK_STRING TOK_OPEN_PAREN TOK_STRING_LITERAL TOK_CLOSE_PAREN))
-	shared_ptr<ParentNode> node = make_shared<ParentNode>("string_declaration");
+	shared_ptr<ParentNode> node = make_shared<ParentNode>("string_declaration",STRING_DECLARATION);
 	node->addChild(match(TOK_STRING_TYPE, "Expected string type"));
 	node->addChild(match(TOK_ID, "Expected identifier for string declaration"));
 	node->addChild(match(TOK_ASSIGN, "Expected '=' in string declaration"));
@@ -750,41 +732,7 @@ shared_ptr<ASTNode> SyntacticAnalysis::parse()
 		cerr << s << endl;
 	}
 }
-//void SyntacticAnalysis::printAST(const shared_ptr<ASTNode>& node, int depth) {
-//	if (!node) return;
-//
-//	// הדפסת רווחים בהתאם לעומק העץ
-//	for (int i = 0; i < depth; ++i) {
-//		cout << "  ";
-//	}
-//
-//	// הדפסת סוג הצומת
-//	if (auto numNode = dynamic_pointer_cast<TokenNode>(node)) {
-//		cout << "tokenNode: " << numNode->token.value << endl;
-//	}
-//
-//	/*else if (auto binOpNode = dynamic_pointer_cast<BinaryOpNode>(node)) {
-//		cout << "BinaryOpNode: " << binOpNode->op << endl;
-//		for (int i = 0; i < depth; ++i) {
-//			cout << "  ";
-//		}*/
-//		cout << "Left:" << endl;
-//		printAST(binOpNode->left, depth + 1);  // צד שמאל
-//		for (int i = 0; i < depth; ++i) {
-//			cout << "  ";
-//		}
-//		cout << "Right:" << endl;
-//		printAST(binOpNode->right, depth + 1); // צד ימין
-//	}
-//	else if (auto stmtNode = dynamic_pointer_cast<ParentNode>(node)) {
-//		cout << "ParentNode of " << stmtNode->name << ":" << endl;
-//		for (const auto& child : stmtNode->children)
-//			printAST(child, depth + 1);
-//	}
-//	else {
-//		cout << "Unknown Node" << endl;
-//	}
-//}
+
 void SyntacticAnalysis::printASTNodes(const shared_ptr<ASTNode>& node)
 {
 	node->printASTNode();

@@ -2,30 +2,7 @@
 #include "Token.h"
 #include <vector>
 #include "ASTNode.h"
-enum  StatementType {
-	IF_STATEMENT,
-	ELIF_STATEMENT,
-	ELSE_STATEMENT,
-	FOR_LOOP,
-	WHILE_LOOP,
-	FOREACH_LOOP,
-	PRINT_STATEMENT,
-	RETURN_STATEMENT,
-	VARIABLE_DECLARATION,
-	ASSIGNMENT,
-	BLOCK,
-	FUNCTION_DEFINITION,
-	EXPRESSION,
-	CONDITION,
-	COMPARISON_OPERATOR,
-	LOGICAL_OPERATOR,
-	TYPE,
-	VARIABLE_LIST,
-	VARIABLE,
-	NUMBER,
-	FACTOR,
-	// הוסף כאן את שאר סוגי המשפטים שאתה משתמש בהם
-};
+
 
 class SyntacticAnalysis
 {

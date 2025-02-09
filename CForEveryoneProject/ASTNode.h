@@ -9,7 +9,8 @@
 using namespace std;
 // מחלקת בסיס לכל הצמתים
 struct ASTNode {
-
+public:
+	ASTNodeType nodeType=ASTNODE;
    virtual void printASTNode(int depth=0) = 0;
     virtual ~ASTNode() {}
 	virtual string printOriginalCode(int tabs) const = 0;
@@ -29,7 +30,7 @@ public:
 		token = v.token;
 	}
 	/*TokenNode(Token token) :token(token) {}*/
-	TokenNode(const Token &token) :token(token) {}
+	TokenNode(const Token& token, ASTNodeType nodeType = ASTNODE) :token(token) { this->nodeType = nodeType; }
 	void printASTNode(int depth=0) {
 		printTabsDepth(depth);
 		cout << "TokenNode: " << token.value << endl;
@@ -41,7 +42,7 @@ public:
 		else if (token.typeToken == TOK_OPEN_CURLY)
 			return "\n" + s + token.value + "\n" + s + " ";
 		else if (token.typeToken == TOK_CLOSE_CURLY)
-			return "\n" + s + token.value + "\n" + s;
+			return  s + token.value + "\n" + s;
 		else if (mapAlphaTokens.find(token.value) != mapAlphaTokens.end())
 			return token.value + " ";
 		else
@@ -54,12 +55,12 @@ public:
 	string name;
 	vector<shared_ptr<ASTNode>> children;
 	map<string, Variable> variableScope;
-	ParentNode(const string& name, vector<shared_ptr<ASTNode>> children) :name(name), children(children) {}
-	ParentNode(const string& name) :name(name){}
+	ParentNode(const string& name, vector<shared_ptr<ASTNode>> children, ASTNodeType nodeType = ASTNODE) :name(name), children(children) { this->nodeType = nodeType; }
+	ParentNode(const string& name, ASTNodeType nodeType = ASTNODE) :name(name){ this->nodeType = nodeType; }
 public:
 	void printASTNode(int depth = 0) {
 		printTabsDepth(depth);
-		cout << "ParentNode: " << name << endl;
+		cout << "ParentNode: " << ASTNodeTypeNames[nodeType] << endl;
 		for (auto child : children) {
 			child->printASTNode(depth+1);
 		}
@@ -100,11 +101,13 @@ public:
 	Token op;
 	shared_ptr<ASTNode> left;
 	shared_ptr<ASTNode> right;
-	BinaryOpNode(const Token& op, shared_ptr<ASTNode> left, shared_ptr<ASTNode> right)
+	BinaryOpNode(const Token& op, shared_ptr<ASTNode> left, shared_ptr<ASTNode> right, ASTNodeType nodeType = ASTNODE)
 		: op(op), left(left), right(right) {
+		this->nodeType = nodeType;
 	}
-	BinaryOpNode(string name, const Token& op, shared_ptr<ASTNode> left, shared_ptr<ASTNode> right)
+	BinaryOpNode(string name, const Token& op, shared_ptr<ASTNode> left, shared_ptr<ASTNode> right, ASTNodeType nodeType = ASTNODE)
 		:name(name), op(op), left(left), right(right) {
+		this->nodeType = nodeType;
 	}
 	string printOriginalCode(int tabs) const override {
 		string s;
@@ -115,7 +118,7 @@ public:
 	}
 	void printASTNode(int depth = 0) {
 		printTabsDepth(depth + 1);
-		cout << name<<endl;
+		cout << ASTNodeTypeNames[nodeType] <<endl;
 		printTabsDepth(depth + 1);
 		cout << "Left: " << endl;
 		left->printASTNode(depth + 1);
@@ -136,7 +139,7 @@ public:
 struct SentenceNode:ASTNode
 {
 	string content;
-	SentenceNode(string content) :content(content) {};
+	SentenceNode(string content, ASTNodeType nodeType = ASTNODE) :content(content) { this->nodeType = nodeType; };
 	void printASTNode(int depth = 0) {
 		printTabsDepth(depth);
 		cout << "SentenceNode: " << content << endl;

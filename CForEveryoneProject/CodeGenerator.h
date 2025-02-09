@@ -16,6 +16,8 @@ public:
 	}
 	shared_ptr<ASTNode>& getNewAst() { return ast; }
 	void generateCode(shared_ptr<ASTNode>& node);
+	//remove it!!
+	void generateCode1(shared_ptr<ASTNode>& node);
 	void generate_elif(shared_ptr<ParentNode>& node);
 	shared_ptr<ParentNode>& insertAfter(shared_ptr<ASTNode>& node, shared_ptr<ASTNode>& nodeToInsert);
 	void generate_ifrange(shared_ptr<BinaryOpNode>& node);

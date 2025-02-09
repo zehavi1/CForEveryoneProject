@@ -6,7 +6,7 @@
 #include <list>
 enum Lexical
 {
-  CHAR, START,IDENTITY,ERROR1,COMMENTLINE,COMMENTLINES,ALPHA,NUMBER,CHARACTER,NEWLINE,CHECK,MAKETOKEN,STRING
+  CHAR, START,IDENTITY,ERROR1,COMMENTLINE,COMMENTLINES,ALPHA,NUMBER1,CHARACTER,NEWLINE,CHECK,MAKETOKEN,STRING
 };
 string Lexer::readFileToString(const string& filename) {
     ifstream file(filename);
@@ -79,7 +79,7 @@ vector<Token> Lexer::tokenize(const string& input) {
                     
                 if (isdigit(c))
                 {
-                    lexState = NUMBER;
+                    lexState = NUMBER1;
                     break;
                 }
                    
@@ -198,7 +198,7 @@ vector<Token> Lexer::tokenize(const string& input) {
                 i++;
                 lexState = MAKETOKEN; 
                 break; }
-            case NUMBER: {
+            case NUMBER1: {
                 if (regex_match(currentTokenValue + c,double_regex)||(regex_match(currentTokenValue, int_regex)&&c=='.'))
                 {
                     currentTokenValue += c;

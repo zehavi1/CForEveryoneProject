@@ -207,6 +207,8 @@ const std::map<Pattern, Pattern> mapTypes = {
     {TOK_LONG_TYPE, TOK_LONG},
     {TOK_STRING_TYPE, TOK_STRING}};
 enum ASTNodeType {
+    RANGE,
+    ASTNODE,
     EXPRESSION,
     TERM,
     FACTOR,
@@ -243,5 +245,7 @@ enum ASTNodeType {
     STRING_DECLARATION,
     RETURN_STATEMENT
 };
+extern std::string ASTNodeTypeNames[];
+
 
 

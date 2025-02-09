@@ -1,5 +1,97 @@
 #include "CodeGenerator.h"
+
 void CodeGenerator:: generateCode(shared_ptr<ASTNode>& node) {
+	try {
+
+		if (auto parentNode = dynamic_pointer_cast<ParentNode>(node)) {
+			switch (parentNode->nodeType)
+			{
+			case PRINT_STATEMENT:
+			{
+				generate_print_statement(parentNode);
+				break;
+			}
+			case DECLARATION:
+			{
+				generate_declaration(parentNode);
+				break;
+			}
+			case ELIF_STATEMENT:
+				generate_elif(parentNode);
+				break;
+			case FOREACH_LOOP:
+				///////////////to do
+			case FOR_LOOP:
+			case WHILE_LOOP:
+			{
+				auto prevScope = currentScope;
+				currentScope = parentNode->variableScope;
+
+				if (parentNode->name == "foreach") {}
+				//declareVariableInForeach(parentNode);
+				int count = 0;
+				for (auto& child : parentNode->children) {
+					if (count < 5)
+						count++;
+					else
+						generateCode(child); // ניתוח ילד
+				}
+				currentScope = prevScope;
+				break;
+			}
+			case FUNCTION_DEFINITION:
+			{
+				auto prevScope = currentScope;
+				currentScope = parentNode->variableScope;
+				for (auto& child : parentNode->children) {
+					generateCode(child); // ניתוח ילד
+				}
+				currentScope = prevScope;
+				break;
+			}
+			case PARAMETER_LIST:
+				//////////
+				break;
+			case BLOCK:
+			{
+				auto prevScope = currentScope;
+				currentScope = parentNode->variableScope;
+				for (auto& child : parentNode->children) {
+					generateCode(child); // ניתוח ילד
+				}
+				currentScope = prevScope;
+				break;
+			}
+			default:
+				for (auto& child : parentNode->children) {
+					generateCode(child); // ניתוח ילד
+				}
+				break;
+			}
+		}
+		else
+			if (auto binOpNode = dynamic_pointer_cast<BinaryOpNode>(node))
+			{
+				if (binOpNode->nodeType==RANGE)
+				{
+					generate_ifrange(binOpNode);
+				}
+				generateCode(binOpNode->left);
+				generateCode(binOpNode->right);
+			}
+
+	}
+	catch (string s) {
+		if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
+			cout << "line " << varNode->token.lineNumber << ":" << s;
+		}
+		else
+			cout << s;
+	}
+
+
+}
+void CodeGenerator::generateCode1(shared_ptr<ASTNode>& node) {
 	try {
 
 		if (auto parentNode = dynamic_pointer_cast<ParentNode>(node)) {
@@ -97,7 +189,7 @@ void CodeGenerator::generate_ifrange(shared_ptr<BinaryOpNode>& node)
 	shared_ptr<ASTNode>& second = node->right;
 	shared_ptr<ASTNode>& exp = first->right;
 	Token op = node->op;
-	shared_ptr<BinaryOpNode> new_node_second = make_shared<BinaryOpNode>("less", op, exp, second);
+	shared_ptr<BinaryOpNode> new_node_second = make_shared<BinaryOpNode>("and", op, exp, second,EXPR_AND);
 	Token andToken(TOK_AND, "&&", op.lineNumber);
 	node->name = "and";
 	node->op = andToken;

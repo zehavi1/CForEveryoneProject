@@ -16,6 +16,7 @@ private:
 	map<string, Variable> variableScope;
 	//vector<map<string, Variable>> scopes;
 	stack<map<string, Variable>> scopes;
+	//map<string, Function> functions;
 	//static vector<map<string, Variable>> scopesFinal;
 
 
@@ -169,8 +170,86 @@ public:
 		}
 	}
 
+	void analyze(shared_ptr<ASTNode> node) 
+	{
+		try 
+		{
+			if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
+				switch (varNode->token.typeToken)
+				{
+				case TOK_ID: {
+					useVariable(varNode->token.value);
+				}
+						   break;
+				default:
+					break;
+				}
+			}
+			else if (auto parentNode = dynamic_pointer_cast<ParentNode>(node))
+			{
+				switch (parentNode->nodeType)
+				{
+				case DECLARATION:
+				{
+					declareVariable(parentNode);
+					break;
+				}
+				case FOREACH_LOOP:
+					declareVariableInForeach(parentNode);
+				case FOR_LOOP:
+				case WHILE_LOOP:
+				{
+					enterScope();
+					int count = 0;
+					for (auto& child : parentNode->children) {
+						if (count < 5)
+							count++;
+						else
+							analyze(child); // ניתוח ילד
+					}
+					exitScope(parentNode);
+					break;
+				}
+				case FUNCTION_DEFINITION:
+				{
+					enterScope();
+					for (auto& child : parentNode->children) {
+						analyze(child); // ניתוח ילד
+					}
+					exitScope(parentNode);
+					break;
+				}
+				case PARAMETER_LIST:
+					//////////
+					break;
+				case BLOCK:
+				{
+					enterScope();
+					for (auto& child : parentNode->children) {
+						analyze(child); // ניתוח ילד
+					}
+					exitScope(parentNode);
+					break;
+				}
+				default:
+					for (auto& child : parentNode->children) {
+						analyze(child); // ניתוח ילד
+					}
+					break;
+				}
+			}
 
-	void analyze(shared_ptr<ASTNode> node) {
+
+		}
+		catch (string s) {
+			if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
+				cout << "line " << varNode->token.lineNumber << ":" << s;
+			}
+			else
+				cout << s;
+		}
+	}
+	void analyze1(shared_ptr<ASTNode> node) {
 		try {
 			if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
 				switch (varNode->token.typeToken)

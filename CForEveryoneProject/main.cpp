@@ -91,7 +91,7 @@ void main(){
         string s="abcd";
 }
          )";
-	string program = program_array;
+	string program = program_if;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
@@ -103,14 +103,14 @@ void main(){
     shared_ptr<ASTNode> ast = parser.parse();
     cout << "Abstract Syntax Tree:" << endl;
     ast->printASTNode();
-    //SemanticAnalyzer semantic;
-    //semantic.analyze(ast); 
-    //CodeGenerator generator(ast, tokens);
-    //generator.CodeGenerator_main();
-    ////generator.generateCode(ast);
-    //shared_ptr<ASTNode> &astNew= generator.getNewAst();
-    //astNew->printASTNode();
-    //cout <<"base program:"<<endl << program << endl;
-    //cout<<"profram in c:"<<endl << astNew->printOriginalCode(0);
+    SemanticAnalyzer semantic;
+    semantic.analyze(ast); 
+    CodeGenerator generator(ast, tokens);
+    generator.CodeGenerator_main();
+    //generator.generateCode(ast);
+    shared_ptr<ASTNode> &astNew= generator.getNewAst();
+    astNew->printASTNode();
+    cout <<"base program:"<<endl << program << endl;
+    cout<<"profram in c:"<<endl << astNew->printOriginalCode(0);
     return 0;
 }
