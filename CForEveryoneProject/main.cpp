@@ -89,21 +89,7 @@ void main(){
         string s="abcd";
 }
          )";
-    string program_full = R"(
-void main(){
-        int [] arr=new int[3];
-        char* arr2 = malloc(4);
-        bool flag=true;
-        var x=8,y=9;
-        if(6<x<10)
-            print("x is"+x+"and y is"+y+"and x+y equals"+x+y);
-        elif(y<4||flag)
-            print("y<4"+"flag is:"+flag);
-        else
-            print("oooops...");
-}
-         )";
-	string program = program_full;
+	string program = program_array;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
