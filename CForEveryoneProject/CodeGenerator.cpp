@@ -144,6 +144,10 @@ void CodeGenerator::generate_dynamic_array(shared_ptr<ParentNode>& node)
 	children.push_back(make_shared<TokenNode>(Token(TOK_MALLOC, "malloc")));
 	children.push_back(make_shared<TokenNode>(Token(TOK_OPEN_PAREN, "(")));
 	children.push_back(expr);
+	children.push_back(make_shared<TokenNode>(Token(TOK_ASTERISK, "*")));
+	children.push_back(make_shared<TokenNode>(Token(TOK_ID, "sizeof(")));
+	children.push_back(make_shared<TokenNode>(Token(typeArr, mapsPetternTypes.at(typeArr))));
+	children.push_back(make_shared<TokenNode>(Token(TOK_CLOSE_PAREN, ")")));
 	children.push_back(make_shared<TokenNode>(Token(TOK_CLOSE_PAREN, ")")));
 	node->children = children;
 }
@@ -155,6 +159,12 @@ void CodeGenerator::generate_elif(shared_ptr<ParentNode>& node)
 	elseifNode->addChild(elseToken);
 	elseifNode->addChild(ifToken);
 	node->changeChild(elseifNode, 0);
+	int i = 0;
+	for (auto& child : node->children)
+	{
+		if(i++>0)
+			generateCode(child);
+	}
 }
 shared_ptr<ParentNode>& CodeGenerator::insertAfter(shared_ptr<ASTNode>& node, shared_ptr<ASTNode>& nodeToInsert)
 {
@@ -181,14 +191,14 @@ void CodeGenerator::generate_print_statement(shared_ptr<ParentNode>& node)
 	std::map<Pattern, std::string> typesPrint = {
 {TOK_INT,"%d"},
 {TOK_CHAR,"%c"},
-{TOK_BOOL,"%s"},
+{TOK_BOOL,"%d"},
 {TOK_DOUBLE,"%lf"},
 {TOK_FLOAT,"%f"},
 {TOK_LONG,"%ld"},
 {TOK_STRING,"%s"},
 {TOK_INT_TYPE,"%d"},
 {TOK_CHAR_TYPE,"%c"},
-{TOK_BOOL_TYPE,"%s"},
+{TOK_BOOL_TYPE,"%d"},
 {TOK_DOUBLE_TYPE,"%lf"},
 {TOK_FLOAT_TYPE,"%f"},
 {TOK_LONG_TYPE,"%ld"},
