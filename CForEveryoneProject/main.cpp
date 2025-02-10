@@ -89,7 +89,7 @@ void main(){
         string s="abcd";
 }
          )";
-	string program = program_array;
+	string program = program_print;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return 1;
