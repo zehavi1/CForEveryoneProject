@@ -1,11 +1,13 @@
 #pragma once
 #include "SemanticAnalyzer.h"
+#include "vector"
 
 class CodeGenerator
 {
 	shared_ptr<ASTNode> ast;
 	map<string, Variable> currentScope;
 	vector<Token> tokens;
+	shared_ptr<ParentNode> freeAll;
 	int indexScope = 0;
 public:
 	CodeGenerator(shared_ptr<ASTNode>& ast) :ast(ast) {};
@@ -22,6 +24,8 @@ public:
 	void generate_print_statement(shared_ptr<ParentNode>& node);
 	void generate_dynamic_array(shared_ptr<ParentNode>& node);
 	void addDefineBoolAndIncludes();
+	void addFree();
+	void addAllocAfterArrayDeclaration(vector<Variable> v);
 	//משתנים
 	void generate_declaration(shared_ptr<ParentNode>& node);
 	

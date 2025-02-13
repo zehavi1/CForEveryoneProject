@@ -103,13 +103,14 @@ void CodeGenerator:: generateCode(shared_ptr<ASTNode>& node) {
 }
 void CodeGenerator::addDefineBoolAndIncludes()
 {
-	bool isBool = false, isIO = false;
+	bool isBool = false, isIO = false, isArray = false;;
 	shared_ptr<ParentNode> basic = make_shared<ParentNode>("add code before");
 	shared_ptr<SentenceNode> crt = make_shared<SentenceNode>("#define _CRT_SECURE_NO_WARNINGS\n");
 	//shared_ptr<SentenceNode> forStrings = make_shared<SentenceNode>("#pragma warning (disable: 4996)\n");
 	shared_ptr<SentenceNode> includeStdio = make_shared<SentenceNode>("#include <stdio.h>\n");
 	shared_ptr<SentenceNode> insludeStdlib = make_shared<SentenceNode>("#include <stdlib.h>\n");
-	shared_ptr<SentenceNode> defineBool = make_shared<SentenceNode>("define bool{false,true};\n");
+	shared_ptr<SentenceNode> defineBool = make_shared<SentenceNode>("#define bool {false,true};\n");
+	shared_ptr<SentenceNode> addAlloc = make_shared<SentenceNode>("#define MAX_ALLOCATED 100\nvoid* allocated_arrays[MAX_ALLOCATED];\nint allocated_count = 0;\n");
 	basic->addChild(crt);
 	for (Token& t : tokens)
 	{
@@ -118,15 +119,39 @@ void CodeGenerator::addDefineBoolAndIncludes()
 		else
 			if (t.typeToken == TOK_PRINTF || t.typeToken == TOK_PRINT)
 				isIO = true;
+			else
+				if (t.typeToken == TOK_LEFT_ARRAY || t.typeToken == TOK_MALLOC)
+					isArray = true;
 	}
 	if (isBool)
 		basic->addChild(defineBool);
 	if (isIO)
 		basic->addChild(includeStdio);
+	if (isArray)
+		basic->addChild(addAlloc);
 	auto ast2 = dynamic_pointer_cast<ParentNode>(make_shared<ParentNode>("program with all"));
 	ast2->addChild(basic);
 	ast2->addChild(ast);
 	ast = ast2;
+
+}
+void addAllocAfterArrayDeclaration(vector<Variable> v )
+{
+	shared_ptr<ParentNode> p = make_shared<ParentNode>("allocate");
+	for (auto& a : v)
+	{
+		if (a.isArray == true)
+		{
+			string s = "allocated_arrays[allocated_count++] =";
+			s += a.token.value+";\n";
+			shared_ptr<SentenceNode> alloc = make_shared<SentenceNode>(s);
+			p->addChild(alloc);
+			
+		}
+	}
+}
+void addFree()
+{
 
 }
 void CodeGenerator::generate_dynamic_array(shared_ptr<ParentNode>& node)

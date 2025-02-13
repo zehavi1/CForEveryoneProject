@@ -128,6 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AllocationMemory.cpp" />
     <ClCompile Include="CForEveryoneProject.cpp" />
     <ClCompile Include="CodeGenerator.cpp" />
     <ClCompile Include="enums.cpp" />
@@ -143,6 +144,7 @@
     <ClCompile Include="Variable.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AllocationMemory.h" />
     <ClInclude Include="CodeGenerator.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="Function.h" />

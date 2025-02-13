@@ -8,9 +8,10 @@ class Variable
 public:
 	Token token;
 		bool initialized;
+		bool isArray;
 		Variable() {};
-		Variable(Token& token, bool initialized = false)
-			: token(token), initialized(initialized) {
+		Variable(Token& token,bool isArray=false, bool initialized = false)
+			: token(token),isArray(isArray), initialized(initialized) {
 		}
 };
 
