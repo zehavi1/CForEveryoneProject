@@ -15,6 +15,7 @@ public:
 	void CodeGenerator_main() {
 		addDefineBoolAndIncludes();
 		generateCode(ast);
+		//addFree();
 	}
 	shared_ptr<ASTNode>& getNewAst() { return ast; }
 	void generateCode(shared_ptr<ASTNode>& node);
@@ -25,7 +26,8 @@ public:
 	void generate_dynamic_array(shared_ptr<ParentNode>& node);
 	void addDefineBoolAndIncludes();
 	void addFree();
-	void addAllocAfterArrayDeclaration(vector<Variable> v);
+	void addAllocAfterArrayDeclaration(shared_ptr<ParentNode>& node, map<string, Variable> variables);
+
 	//משתנים
 	void generate_declaration(shared_ptr<ParentNode>& node);
 	

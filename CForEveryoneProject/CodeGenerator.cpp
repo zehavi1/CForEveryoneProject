@@ -135,25 +135,6 @@ void CodeGenerator::addDefineBoolAndIncludes()
 	ast = ast2;
 
 }
-void addAllocAfterArrayDeclaration(vector<Variable> v )
-{
-	shared_ptr<ParentNode> p = make_shared<ParentNode>("allocate");
-	for (auto& a : v)
-	{
-		if (a.isArray == true)
-		{
-			string s = "allocated_arrays[allocated_count++] =";
-			s += a.token.value+";\n";
-			shared_ptr<SentenceNode> alloc = make_shared<SentenceNode>(s);
-			p->addChild(alloc);
-			
-		}
-	}
-}
-void addFree()
-{
-
-}
 void CodeGenerator::generate_dynamic_array(shared_ptr<ParentNode>& node)
 {
 	// דקדוק: <dynamic_array_declaration> ::= <type> TOK_OPEN_BRACKET TOK_CLOSE_BRACKET TOK_ID TOK_ASSIGN TOK_NEW TOK_OPEN_BRACKET <expression> TOK_CLOSE_BRACKET
@@ -312,6 +293,48 @@ void CodeGenerator::generate_print_statement(shared_ptr<ParentNode>& node)
 
 }
 
+// פונקציה שמוסיפה קוד לאחר הכרזת מערך – היא מוסיפה שורה שמכניסה את המצביע שהוקצה לרשימה הגלובלית.
+void CodeGenerator::addAllocAfterArrayDeclaration(shared_ptr<ParentNode>& node,map<string,Variable> variables) {
+	shared_ptr<ParentNode> p = make_shared<ParentNode>("allocate");
+	for (const auto& entry : variables) {
+		const Variable& var = entry.second;
+		if (var.isArray == true) {
+			// לדוגמה: "allocated_arrays[allocated_count++] = arrName;"
+			string s = "allocated_arrays[allocated_count++] = " + var.token.value + ";\n";
+			shared_ptr<SentenceNode> alloc = make_shared<SentenceNode>(s);
+			p->addChild(alloc);
+		}
+	}
+	node->addChild(p);
+	// יש להוסיף את הצומת p לעץ הקוד הגלובלי (לדוגמה, בסוף הפונקציה main)
+	// לדוגמה: globalAST->addChild(p);
+}
+
+// פונקציה שמוסיפה קוד לשחרור כל ההקצאות הדינאמיות בסיום התוכנית.
+void CodeGenerator::addFree() {
+	// הקוד שיופק – לולאה שעוברת על כל המצביעים שהוקצו ונעשית free להם.
+	string s = "for (int i = 0; i < allocated_count; i++) {\n"
+		"    free(allocated_arrays[i]);\n"
+		"}\n";
+	shared_ptr<ParentNode> freeNode = make_shared<ParentNode>("free");
+	shared_ptr<SentenceNode> freeSentence = make_shared<SentenceNode>(s);
+	freeNode->addChild(freeSentence);
+
+	// יש להוסיף את הצומת freeNode לעץ הקוד הגלובלי, למשל בסיום הפונקציה main.
+	// לדוגמה:
+	// globalAST->addChild(freeNode);
+	auto ast2 = dynamic_pointer_cast<ParentNode>(ast);
+	for (auto& a : ast2->children)
+	{
+		if (a->nodeType == FUNCTION_DEFINITION)
+		{
+			auto node1 = dynamic_pointer_cast<ParentNode>(a);
+			auto& x = node1->children.back();
+			node1->children.back() = freeNode;
+			node1->addChild(x);
+		}
+	}
+}
 
 //משתנים
 //in the middle---
