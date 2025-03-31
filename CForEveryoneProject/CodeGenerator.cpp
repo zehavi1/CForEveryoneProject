@@ -59,8 +59,11 @@ void CodeGenerator::generateCode(shared_ptr<ASTNode>& node) {
 				addFree(parentNode);
 				break;
 			}
-			case PARAMETER_LIST:
-				//////////
+			case STRING_DECLARATION:
+				if (auto varNode = dynamic_pointer_cast<TokenNode>(parentNode->children[0])) {
+					if (varNode->token.typeToken == TOK_STRING_TYPE)
+						varNode->token.value = "char*";
+				}
 				break;
 			case BLOCK:
 			{
@@ -214,10 +217,6 @@ void CodeGenerator::generate_foreach_loop(shared_ptr<ParentNode>& node)
 	variableList->addChild(variable);
 	declaration->addChild(variableList);
 	declaration->addChild(make_shared<TokenNode>(Token(TOK_SEMICOLON, ";")));
-	//shared_ptr<ParentNode> block2 = make_shared<ParentNode>("block");
-	//block2->addChild(declaration);
-	//block2->addChild(block);
-	//children.push_back(block2);
 	block->children.insert(block->children.begin()+1, declaration);
 	children.push_back(block);
 	node->children = children;

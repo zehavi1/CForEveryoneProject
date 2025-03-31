@@ -15,7 +15,6 @@ public:
 	void CodeGenerator_main() {
 		addDefineBoolAndIncludes();
 		generateCode(ast);
-		//addFree();
 		
 	}
 	shared_ptr<ASTNode>& getNewAst() { return ast; }
@@ -27,7 +26,6 @@ public:
 	void generate_print_statement(shared_ptr<ParentNode>& node);
 	void generate_dynamic_array(shared_ptr<ParentNode>& node);
 	void addDefineBoolAndIncludes();
-	void addFree();
 	void addFree(shared_ptr<ParentNode>& node);
 	void addAllocAfterArrayDeclaration(shared_ptr<ParentNode>& node, map<string, Variable> variables);
 
