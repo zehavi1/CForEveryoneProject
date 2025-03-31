@@ -93,6 +93,16 @@ void main(){
 void main(){
         int [] arr=new int[3];
         char* arr2 = malloc(4);
+        int n=3;
+foreach(int i in arr,n){
+        print(i);
+}
+        double arr3[4]={1,2,3};
+        string s="abcd";
+        int x=8;
+        if(x>5){
+            print("x is greater than 5");
+}
         bool flag=true;
         var x=8,y=9;
         if(6<x<10)

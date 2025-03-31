@@ -110,6 +110,7 @@ public:
 		if (typeVar->token.typeToken != TOK_ID)
 		{
 			var = dynamic_pointer_cast<TokenNode>(node->children[3]);
+			var->token.typeToken = typeVar->token.typeToken;
 			defineVariable(var->token);
 		}
 		compareTypesInForeach(node, typeVar);

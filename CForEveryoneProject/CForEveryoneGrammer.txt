@@ -38,7 +38,7 @@
 <loop> ::= <for_loop> | <while_loop> | <foreach_loop>
 <for_loop> ::= TOK_FOR TOK_OPEN_PAREN <assignment> TOK_SEMICOLON <condition> TOK_SEMICOLON <assignment> TOK_CLOSE_PAREN <block>
 <while_loop> ::= TOK_WHILE TOK_OPEN_PAREN <condition> TOK_CLOSE_PAREN <block>
-<foreach_loop> ::= TOK_FOREACH TOK_OPEN_PAREN TOK_ID TOK_IN <collection> TOK_CLOSE_PAREN <block>
+<foreach_loop> ::= TOK_FOREACH TOK_OPEN_PAREN (<TOK_TYPE>?) TOK_ID TOK_IN <collection>,(TOK_ID | TOK_INT) TOK_CLOSE_PAREN <block>
 <collection> ::= TOK_ID | <full_array>
 
 <block> ::= TOK_OPEN_CURLY <statement>* TOK_CLOSE_CURLY

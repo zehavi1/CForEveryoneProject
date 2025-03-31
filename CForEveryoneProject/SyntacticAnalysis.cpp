@@ -213,6 +213,14 @@ shared_ptr<ASTNode> SyntacticAnalysis::factor() {
 	switch (pattern) {
 	case TOK_ID: {
 		shared_ptr<ASTNode> node = match(TOK_ID);
+		if (currentToken().typeToken == TOK_LEFT_ARRAY)
+		{
+			factorNode->addChild(node);
+			factorNode->addChild(match(TOK_LEFT_ARRAY));
+			factorNode->addChild(expression());
+			factorNode->addChild(match(TOK_RIGHT_ARRAY));
+			return factorNode;
+		}
 		return node;
 	}
 	case TOK_BOOL:
@@ -513,6 +521,15 @@ shared_ptr<ASTNode> SyntacticAnalysis::foreach_loop() {
 	foreachNode->addChild(match(TOK_ID, "Expected identifier after foreach"));
 	foreachNode->addChild(match(TOK_IN, "Expected 'in' after identifier"));
 	foreachNode->addChild(collection());
+	foreachNode->addChild(match(TOK_COMMA, "Expected , after collection"));
+	if (currentToken().typeToken == TOK_ID)
+	{
+		foreachNode->addChild(match(TOK_ID, "Expected size after , in foreach"));
+	}
+	else
+	{
+		foreachNode->addChild(match(TOK_INT, "Expected size after , in foreach"));
+	}
 	foreachNode->addChild(match(TOK_CLOSE_PAREN, "Expected ')' after foreach"));
 	foreachNode->addChild(block());
 	return foreachNode;
