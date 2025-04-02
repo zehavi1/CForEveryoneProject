@@ -115,15 +115,17 @@ void main(){
          )";
     std::string program_full = R"(
 void main(){
-        int [] arr=new int[3];
-        char* arr2 = malloc(4);
+        int [] arr=new int[3],* arr2 = malloc(4);
         int n=3;
-foreach(int i in arr,n){
+foreach(int i in arr,4){
         print(i);
+}
+foreach(float number in {1.6,2,3,4},4){
+        print(number);
 }
         double arr3[4]={1,2,3};
         string s="abcd";
-        int x=8;
+        int l=8;
         if(x>5){
             print("x is greater than 5");
 }

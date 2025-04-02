@@ -493,17 +493,18 @@ shared_ptr<ASTNode> SyntacticAnalysis::collection() {
 		return match(TOK_ID, "Expected identifier in collection");
 	else
 	{
-		shared_ptr<ParentNode> collectionNode = make_shared<ParentNode>("collection",COLLECTION);
-		if (currentToken().typeToken == TOK_LEFT_ARRAY) {
-			collectionNode->addChild(match(TOK_LEFT_ARRAY, "expected an array"));
-			collectionNode->addChild(expression()); // ניתוח הביטוי הראשון
-			while (currentToken().typeToken == TOK_COMMA) {
-				nextToken(); // לעבור לטוקן הבא
-				collectionNode->addChild(expression()); // ניתוח הביטוי הבא
-			}
-			collectionNode->addChild(match(TOK_RIGHT_ARRAY, "Expected closing bracket for array"));
-				return collectionNode;
-		}
+		return full_array();
+		//shared_ptr<ParentNode> collectionNode = make_shared<ParentNode>("collection",COLLECTION);
+		//if (currentToken().typeToken == TOK_LEFT_ARRAY) {
+		//	collectionNode->addChild(match(TOK_LEFT_ARRAY, "expected an array"));
+		//	collectionNode->addChild(expression()); // ניתוח הביטוי הראשון
+		//	while (currentToken().typeToken == TOK_COMMA) {
+		//		nextToken(); // לעבור לטוקן הבא
+		//		collectionNode->addChild(expression()); // ניתוח הביטוי הבא
+		//	}
+		//	collectionNode->addChild(match(TOK_RIGHT_ARRAY, "Expected closing bracket for array"));
+		//		return collectionNode;
+		//}
 	}
 }
 shared_ptr<ASTNode> SyntacticAnalysis::foreach_loop() {

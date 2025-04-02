@@ -158,6 +158,8 @@ void CodeGenerator::generate_dynamic_array(shared_ptr<ParentNode>& node)
 	children.push_back(make_shared<TokenNode>(Token(typeArr, mapsPetternTypes.at(typeArr))));
 	children.push_back(make_shared<TokenNode>(Token(TOK_CLOSE_PAREN, ")")));
 	children.push_back(make_shared<TokenNode>(Token(TOK_CLOSE_PAREN, ")")));
+	//children.push_back(make_shared<TokenNode>(Token(TOK_SEMICOLON, ";")));
+	
 	node->children = children;
 }
 void CodeGenerator::generate_foreach_loop(shared_ptr<ParentNode>& node)
@@ -171,7 +173,7 @@ void CodeGenerator::generate_foreach_loop(shared_ptr<ParentNode>& node)
 		nameNode = tokenNode;
 	}
 	auto collection = node->children[4];
-	string nameCollection = "";
+	string nameCollection = "???";
 	auto size = node->children[6];
 	shared_ptr<ParentNode> block = dynamic_pointer_cast<ParentNode>(node->children[8]);
 	if (node->children[2]->nodeType != TOK_INT && node->children[2]->nodeType != TOK_ID)
@@ -182,12 +184,31 @@ void CodeGenerator::generate_foreach_loop(shared_ptr<ParentNode>& node)
 		size = node->children[7];
 		block = dynamic_pointer_cast<ParentNode>(node->children[9]);
 	}
+	vector<shared_ptr<ASTNode>> children;
+
 	if (auto tokenNode = dynamic_pointer_cast<TokenNode>(collection)) {
 		nameCollection = tokenNode->token.value;
 	}
+	else
+	{
+		auto fullArray = dynamic_pointer_cast<ParentNode>(collection);
+		auto declareArray = make_shared<ParentNode>("declaration",DECLARATION);
+		nameCollection = dynamic_pointer_cast<TokenNode>(nameNode)->token.value+"Arr";
+		shared_ptr<ParentNode> variableList = make_shared<ParentNode>("variable_list", VARIABLE_LIST);
+		variableList->addChild(typeNode);
+		shared_ptr<ParentNode> variable = make_shared<ParentNode>("variable", VARIABLE);
+		variable->addChild(make_shared<TokenNode>(Token(TOK_ID, nameCollection)));
+		variable->addChild(make_shared<TokenNode>(Token(TOK_LEFT_ARRAY, "[")));
+		variable->addChild(make_shared<TokenNode>(Token(TOK_RIGHT_ARRAY, "]")));
+		variable->addChild(make_shared<TokenNode>(Token(TOK_ASSIGN, "=")));
+		variable->addChild(fullArray);
+		variableList->addChild(variable);
+		declareArray->addChild(variableList);
+		declareArray->addChild(make_shared<TokenNode>(Token(TOK_SEMICOLON, ";")));
+		children.push_back(declareArray);
+	}
 	string nameIndex = nameNode->token.value+"Index";
 	//node->children.clear();
-	vector<shared_ptr<ASTNode>> children;
 	children.push_back(make_shared<TokenNode>(Token(TOK_FOR, "for")));
 	children.push_back(make_shared<TokenNode>(Token(TOK_OPEN_PAREN, "(")));
 	children.push_back(make_shared<TokenNode>(Token(TOK_INT, "int")));
@@ -381,7 +402,8 @@ void CodeGenerator::addFree(shared_ptr<ParentNode>& a) {
 	shared_ptr<ParentNode> freeNode = make_shared<ParentNode>("free");
 	shared_ptr<SentenceNode> freeSentence = make_shared<SentenceNode>(s);
 	freeNode->addChild(freeSentence);
-	if (a->nodeType == FUNCTION_DEFINITION)
+	auto nameNode = dynamic_pointer_cast<TokenNode>(a->children[1]);
+	if (a->nodeType == FUNCTION_DEFINITION &&nameNode->token.value=="main")
 	{
 		auto node1 = dynamic_pointer_cast<ParentNode>(a->children[5]);
 		auto x = node1->children.back();
@@ -419,8 +441,6 @@ void CodeGenerator::addFree(shared_ptr<ParentNode>& a) {
 //in the middle---
 void CodeGenerator::generate_declaration(shared_ptr<ParentNode>& node)
 {
-
-
 	shared_ptr<ParentNode> dec_node = dynamic_pointer_cast<ParentNode>(node);
 	shared_ptr<TokenNode> type_node = dynamic_pointer_cast<TokenNode>(dec_node->children[0]);
 	if (type_node->token.typeToken == TOK_VAR)
@@ -433,7 +453,27 @@ void CodeGenerator::generate_declaration(shared_ptr<ParentNode>& node)
 		type_node->token.value = mapsPetternTypes.at(typeReal);
 	}
 	auto varList = dynamic_pointer_cast<ParentNode>(node->children[1])->children;
+	/*string s = "allocated_arrays[allocated_count++] = " + name + ";\n";
+	shared_ptr<SentenceNode> alloc = make_shared<SentenceNode>(s);
+	children.push_back(alloc);*/
 	for (auto& child : varList)
+	{
 		if (child->nodeType == DYNAMIC_ARRAY_DECLARATION)
+		{
 			generateCode(child);
+			/*auto parentChild = dynamic_pointer_cast<ParentNode>(child);
+			generate_dynamic_array(parentChild);*/
+		}
+		if (child->nodeType == DYNAMIC_ARRAY_DECLARATION || child->nodeType == POINTER_ARRAY_DECLARATION)
+		{
+			auto parentChild = dynamic_pointer_cast<ParentNode>(child);
+			auto nameNode = dynamic_pointer_cast<TokenNode>(parentChild->children[1]);
+			string name = nameNode->token.value;
+			string s = "allocated_arrays[allocated_count++] = " + name + ";\n";
+			shared_ptr<SentenceNode> alloc = make_shared<SentenceNode>(s);
+			node->addChild(alloc);
+		}
+	}
+		
+			
 }
