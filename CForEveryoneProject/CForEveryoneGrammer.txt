@@ -11,6 +11,9 @@
 <print_statement> ::= TOK_PRINT TOK_OPEN_PAREN <expr_print> TOK_CLOSE_PAREN TOK_SEMICOLON
 <expr_print>::=(<expr>|TOK_STRING) TOK_PLUS ((<expr>|TOK_STRING))*
 
+<input_statement> ::= TOK_SCANF TOK_OPEN_PAREN TOK_STRING_LITERAL TOK_STRING TOK_STRING_LITERAL (TOK_COMMA <variable>)* TOK_CLOSE_PAREN TOK_SEMICOLON
+<output_statement> ::= TOK_PRINTF TOK_OPEN_PAREN <string_literal> (TOK_COMMA <expr>)* TOK_CLOSE_PAREN TOK_SEMICOLON
+
 
 //declare variables
 <declaration> ::= (<type> | TOK_VAR) <variable_list> TOK_SEMICOLON

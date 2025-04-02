@@ -26,7 +26,7 @@ public:
 	shared_ptr<ASTNode> declaration1(bool canBeFunction=1);
 	shared_ptr<ASTNode> variable(Pattern typeVariable); // ניתוח משתנה
 	shared_ptr<ASTNode> variable_list(Pattern typeVariable); // ניתוח מזהה
-
+	shared_ptr<ASTNode> printf_statement();
 	//משפטי השמה והדפסה
 	shared_ptr<ASTNode> print_statement();
 	shared_ptr<ASTNode> variable_declaration(); // ניתוח הצהרות משתנים

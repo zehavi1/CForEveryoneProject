@@ -21,6 +21,7 @@ enum Pattern {
     TOK_RETURN,
     TOK_PRINT,
     TOK_PRINTF,
+    TOK_SCANF,
     TOK_NEW,
     TOK_LONG,
     TOK_INT,
@@ -89,6 +90,7 @@ const std::string tokenNames[] = {
     "TOK_RETURN",
     "TOK_PRINT",
     "TOK_PRINTF",
+    "TOK_SCANF",
     "TOK_NEW",
     "TOK_LONG",
     "TOK_INT",
@@ -243,7 +245,8 @@ enum ASTNodeType {
     POINTER_ARRAY_DECLARATION,
     ALLOCATION_FUNCTION_CALL,
     STRING_DECLARATION,
-    RETURN_STATEMENT
+    RETURN_STATEMENT,
+    PRINTF_STATEMENT
 };
 extern std::string ASTNodeTypeNames[];
 

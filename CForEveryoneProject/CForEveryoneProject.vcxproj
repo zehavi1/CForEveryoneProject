@@ -135,6 +135,7 @@
     <ClCompile Include="Function.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="main1.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="ParserLex-try.cpp" />
     <ClCompile Include="SemanticAnalyzer.cpp" />
@@ -158,6 +159,9 @@
     <ClInclude Include="SyntacticAnalysis.h" />
     <ClInclude Include="Token.h" />
     <ClInclude Include="Variable.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

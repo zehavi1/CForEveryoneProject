@@ -1,0 +1,24 @@
+void main(){
+        int [] arr=new int[3],* arr2 = malloc(4);
+        int n=3;
+foreach(int i in arr,4){
+        print(i);
+}
+foreach(float number in {1.6,2,3,4},4){
+        print(number);
+}
+        double arr3[4]={1,2,3};
+        string s="abcd";
+        int l=8;
+        if(x>5){
+            print("x is greater than 5");
+}
+        bool flag=true;
+        var x=8,y=9;
+        if(6<x<10)
+            print("x is"+x+"and y is"+y+"and x+y equals"+x+y);
+        elif(y<4||flag)
+            print("y<4"+"flag is:"+flag);
+        else
+            print("oooops...");
+}

@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="AllocationMemory" Collapsed="true">
+    <Position X="9.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACQAAAAAAAAAAAAAAAAAAAABAAAAAEAAAAAAAAAAAAA=</HashCode>
+      <FileName>AllocationMemory.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CodeGenerator" Collapsed="true">
+    <Position X="11.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEEAEQAAACAAgCAAAAAACBQDAACAAAAAAEAADAAEAEA=</HashCode>
+      <FileName>CodeGenerator.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Function" Collapsed="true">
+    <Position X="13.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAIAAAIAAAAEAAAAAAAgAACAAAA=</HashCode>
+      <FileName>Function.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Lexer" Collapsed="true">
+    <Position X="9.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACgAAAAAQAAAAgAAAEGAQAAgMgAAAEA=</HashCode>
+      <FileName>Lexer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SemanticAnalyzer" Collapsed="true">
+    <Position X="11.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQEAAAgAAQAAKAgAgAAAgABAAQAIIAAAAIAUAAAA=</HashCode>
+      <FileName>SemanticAnalyzer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Server" Collapsed="true">
+    <Position X="5.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Server.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SyntacticAnalysis" Collapsed="true">
+    <Position X="10.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>kAFBQAGAAEElSACEIEIACAMgEDERACCAAggAAAIGJAo=</HashCode>
+      <FileName>SyntacticAnalysis.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Token" Collapsed="true">
+    <Position X="12.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAEACAAAACAAAAAAAAABAAA=</HashCode>
+      <FileName>Token.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Variable" Collapsed="true">
+    <Position X="13.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAABAAAAAAAAAACAAAAAAAAAAAAAQAAAAAAAA=</HashCode>
+      <FileName>Variable.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="ASTNode" Collapsed="true">
+    <Position X="3.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAABAAAQAAAAAIAAAAAAEAAA=</HashCode>
+      <FileName>ASTNode.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="TokenNode" Collapsed="true">
+    <Position X="5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEACAAAAAAAAAAAAAAAAABAAAQAAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>ASTNode.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="ParentNode" Collapsed="true">
+    <Position X="7.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQAABAAAABAAAQEgAAIIAAAAAAQAAA=</HashCode>
+      <FileName>ASTNode.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="BinaryOpNode" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAABAAAQMAAAAIAAIAAAAgAA=</HashCode>
+      <FileName>ASTNode.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="SentenceNode" Collapsed="true">
+    <Position X="2.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAEAAAAAAAAAAAABAAAQAAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>ASTNode.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Enum Name="Lexical" Collapsed="true">
+    <Position X="11.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAACBAAAAgAAAAAAgBAIAEAAAoAAAAAAAAAhAAAA=</HashCode>
+      <FileName>Lexer.cpp</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Pattern" Collapsed="true">
+    <Position X="13.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIECgIQwCAgQkYDgYkogOEYIACTwTECAkCEIgAQhiKA=</HashCode>
+      <FileName>enums.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="ASTNodeType" Collapsed="true">
+    <Position X="9.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAACSICAYAhCAAAAxwEAgBIAIBBAAAQEEjgCAAEBGE=</HashCode>
+      <FileName>enums.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
