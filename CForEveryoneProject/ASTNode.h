@@ -29,7 +29,6 @@ public:
 	TokenNode(Variable v)  {
 		token = v.token;
 	}
-	/*TokenNode(Token token) :token(token) {}*/
 	TokenNode(const Token& token, ASTNodeType nodeType = ASTNODE) :token(token) { this->nodeType = nodeType; }
 	void printASTNode(int depth=0) {
 		printTabsDepth(depth);

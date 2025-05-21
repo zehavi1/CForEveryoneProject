@@ -141,12 +141,10 @@ const std::string tokenNames[] = {
     "TOK_REALLOC"
 };
 const std::map<std::string, Pattern> mapAlphaTokens = {
-		//{"type", TOK_TYPE},
 	{"void", TOK_VOID},
 	{"include", TOK_INCLUDE},
 	{"double", TOK_DOUBLE_TYPE},
     {"var", TOK_VAR},
-   // {"true", TOK_TRUE},
     {"string", TOK_STRING_TYPE},
     {"return", TOK_RETURN},
     {"print", TOK_PRINT},
@@ -161,7 +159,6 @@ const std::map<std::string, Pattern> mapAlphaTokens = {
 	{"foreach", TOK_FOREACH},
 	{"in", TOK_IN},
     {"float", TOK_FLOAT_TYPE},
-    //{"false", TOK_FALSE},
     {"else", TOK_ELSE},
     {"elif", TOK_ELIF},
     {"char", TOK_CHAR_TYPE},
@@ -171,7 +168,6 @@ const std::map<std::string, Pattern> mapAlphaTokens = {
     {"malloc",TOK_MALLOC},
     {"calloc",TOK_CALLOC},
     {"realloc",TOK_REALLOC}
-
 };
 const std::map<std::string, Pattern> mapNonAlphaTokens = {
 {"==", TOK_EQUAL},

@@ -37,7 +37,6 @@ int main(int argc, char* argv[])
         cerr << "Usage: " << argv[0] << " <path_to_input_file>" << endl;
         return 1;
     }
-
     string inputFilePath = argv[1];
     string outputFilePath = inputFilePath.substr(0, inputFilePath.find_last_of('.')) + ".c";
 

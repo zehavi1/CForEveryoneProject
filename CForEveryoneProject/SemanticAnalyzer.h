@@ -16,20 +16,17 @@ class SemanticAnalyzer
 {
 private:
 	map<string, Variable> variableScope;
-	//vector<map<string, Variable>> scopes;
 	stack<map<string, Variable>> scopes;
 	map<string, Function> functions;
-	//static vector<map<string, Variable>> scopesFinal;
-
-
 public:
 	friend class codeGenerator;
+	map<string, Function>& getFunctions() { return functions; }
+
 	void enterScope() {
 		if (!scopes.empty())
 			scopes.top() = variableScope;
 		scopes.push(variableScope); // כניסה לטווח חדש
 	}
-	map<string, Function>& getFunctions() { return functions; }
 	void exitScope(shared_ptr<ParentNode> node) {
 		if (!scopes.empty()) {
 			node->variableScope = variableScope;
@@ -40,17 +37,16 @@ public:
 	}
 	void declareVariable(shared_ptr<ParentNode> node)
 	{
-		//auto children = node->children;
 		shared_ptr<ParentNode> list;
 		shared_ptr<TokenNode> typeVar;
 		const std::map<Pattern, Pattern> mapTypes1 = {
-{TOK_BOOL, TOK_BOOL_TYPE},
-{TOK_CHAR, TOK_CHAR_TYPE},
-{TOK_DOUBLE, TOK_DOUBLE_TYPE},
-{TOK_FLOAT, TOK_FLOAT_TYPE},
-{TOK_INT, TOK_INT_TYPE},
-{TOK_LONG, TOK_LONG_TYPE},
-{TOK_STRING, TOK_STRING_TYPE} };
+		{TOK_BOOL, TOK_BOOL_TYPE},
+		{TOK_CHAR, TOK_CHAR_TYPE},
+		{TOK_DOUBLE, TOK_DOUBLE_TYPE},
+		{TOK_FLOAT, TOK_FLOAT_TYPE},
+		{TOK_INT, TOK_INT_TYPE},
+		{TOK_LONG, TOK_LONG_TYPE},
+		{TOK_STRING, TOK_STRING_TYPE} };
 		typeVar = dynamic_pointer_cast<TokenNode>(node->children[0]);
 		list = dynamic_pointer_cast<ParentNode>(node->children[1]);
 		if (typeVar->token.typeToken == TOK_VAR)
@@ -90,7 +86,7 @@ public:
 					shared_ptr<TokenNode> varNode3;
 					i = 0;
 					do {
-						 varNode3 = dynamic_pointer_cast<TokenNode>(children2[i]);
+						varNode3 = dynamic_pointer_cast<TokenNode>(children2[i]);
 						i++;
 					} while (!varNode3 || varNode3->token.typeToken != TOK_ID);
 					varNode3->token.typeToken = typeVar->token.typeToken;
@@ -103,7 +99,6 @@ public:
 	}
 	void declareVariableInForeach(shared_ptr<ParentNode> node)
 	{
-		//auto children = node->children;
 		shared_ptr<TokenNode> var;
 		shared_ptr<TokenNode> typeVar;
 
@@ -151,12 +146,6 @@ public:
 			p1 = it->second; // קבל את הערך המתאים מהמפה
 		return p1; // החזרת סוג 
 	}
-	//void defineVariable1(const string& name) {
-	//	if (variableScope.find(name) != variableScope.end()) {
-	//		throw runtime_error("Variable " + name + " already defined in this scope");
-	//	}
-	//	//variableScope[name] = 0; // הוספת משתנה לטווח
-	//}
 	void defineVariable(Token& token)
 	{
 		if (variableScope.find(token.value) != variableScope.end()) {
@@ -172,7 +161,7 @@ public:
 	{
 		auto varScope = variableScope.find(name);
 		auto func = functions.find(name);
-		if (varScope == variableScope.end()&&func==functions.end()) {
+		if (varScope == variableScope.end() && func == functions.end()) {
 			string s = "Variable " + name + " is used before it is defined\n";
 			throw s;
 		}
@@ -187,27 +176,27 @@ public:
 	{
 		Pattern typeReturn = dynamic_pointer_cast<TokenNode>(node->children[0])->token.typeToken;
 		string nameFunction = dynamic_pointer_cast<TokenNode>(node->children[1])->token.value;
-		Function func(nameFunction,typeReturn);
-		auto it = std::find_if(node->children.begin()+2, node->children.end(), [](auto child) {
-			return child->nodeType == PARAMETER_LIST; 
+		Function func(nameFunction, typeReturn);
+		auto it = std::find_if(node->children.begin() + 2, node->children.end(), [](auto child) {
+			return child->nodeType == PARAMETER_LIST;
 			});
 		auto params = dynamic_pointer_cast<ParentNode>(*it);
-		for (size_t i = 0; i < params->children.size(); i+=3)
+		for (size_t i = 0; i < params->children.size(); i += 3)
 		{
 			auto typeVar = dynamic_pointer_cast<TokenNode>(params->children[i])->token.typeToken;
-			auto nameVar = dynamic_pointer_cast<TokenNode>(params->children[i+1])->token.value;
+			auto nameVar = dynamic_pointer_cast<TokenNode>(params->children[i + 1])->token.value;
 			Token t(typeVar, nameVar, 1);
 			defineVariable(t);
 			Variable v(t);
 			func.addParameter(v);
 		}
-		functions[nameFunction]= func;
+		functions[nameFunction] = func;
 		auto block = node->children.back();
 		analyze(block);
 	}
-	void analyze(shared_ptr<ASTNode> node) 
+	void analyze(shared_ptr<ASTNode> node)
 	{
-		try 
+		try
 		{
 			if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
 				switch (varNode->token.typeToken)
@@ -327,7 +316,7 @@ public:
 							exitScope(parentNode);
 						}
 						else
-                		if (parentNode->name == "parameters")
+							if (parentNode->name == "parameters")
 								analyze(parentNode);
 							else if (parentNode->name == "block")
 							{
