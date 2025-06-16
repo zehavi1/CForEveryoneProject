@@ -134,6 +134,7 @@
     <ClCompile Include="enums.cpp" />
     <ClCompile Include="Function.cpp" />
     <ClCompile Include="Lexer.cpp" />
+    <ClCompile Include="LexicalAnalyzer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="main1.cpp" />
     <ClCompile Include="Parser.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="enums.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="Lexer.h" />
+    <ClInclude Include="LexicalAnalyzer.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="ASTNode.h" />

@@ -5,38 +5,9 @@
 #include "CodeGenerator.h"
 //#include "SemanticAnalyzer.h"
 
-std::string mainCompiler(std::string program) {
-	Lexer lexer;
-	if (program.empty()) {
-		cerr << "Failed to read program file!" << endl;
-		return "";
-	}
-	program += ' ';
-	auto tokens = lexer.tokenize(program);
-	lexer.printTokens(tokens);
-	SyntacticAnalysis parser(tokens);
-	shared_ptr<ASTNode> ast = parser.parse();
-	cout << "Abstract Syntax Tree:" << endl;
-	ast->printASTNode();
-	SemanticAnalyzer semantic;
-	semantic.analyze(ast);
-	CodeGenerator generator(ast, tokens);
-	generator.CodeGenerator_main();
-	shared_ptr<ASTNode>& astNew = generator.getNewAst();
-	astNew->printASTNode();
-	cout << "base program:" << endl << program << endl;
-	cout << "profram in c:" << endl << astNew->printOriginalCode(0);
-	return astNew->printOriginalCode(0);
-}
+
 int main3() {
-    //Graph g;
-   // g.loadFromCSV("‏‏automations1.csv");  // נתיב הקובץ שלך
-
-    // הדפסת הגרף
-   // g.printGraph();
-
-    // הצגת כל המסלולים למצב טוקן ממצב התחלתי מסוים
-   // g.printPathsToToken("start");  // התחל ממצב התחלה שאתה רוצה
+    
     Lexer lexer;
     //string program = lexer.readFileToString("programExample.txt");
 	//string program = "print(3 + ++a*2+(a-b));";

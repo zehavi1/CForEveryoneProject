@@ -31,6 +31,30 @@ void writeOutputToFile(const string& outputPath, const string& output) {
     file.close();
 }
 
+std::string mainCompiler(std::string program) {
+    Lexer lexer;
+    if (program.empty()) {
+        cerr << "Failed to read program file!" << endl;
+        return "";
+    }
+    program += ' ';
+    auto tokens = lexer.tokenize(program);
+    lexer.printTokens(tokens);
+    SyntacticAnalysis parser(tokens);
+    shared_ptr<ASTNode> ast = parser.parse();
+    cout << "Abstract Syntax Tree:" << endl;
+    ast->printASTNode();
+    SemanticAnalyzer semantic;
+    semantic.analyze(ast);
+    CodeGenerator generator(ast, tokens);
+    generator.CodeGenerator_main();
+    shared_ptr<ASTNode>& astNew = generator.getNewAst();
+    astNew->printASTNode();
+    cout << "base program:" << endl << program << endl;
+    string code = astNew->printOriginalCode(0);
+    cout << "profram in c:" << endl << code;
+    return code;
+}
 int main(int argc, char* argv[])
 {
     if (argc != 2) {
@@ -39,31 +63,8 @@ int main(int argc, char* argv[])
     }
     string inputFilePath = argv[1];
     string outputFilePath = inputFilePath.substr(0, inputFilePath.find_last_of('.')) + ".c";
-
     string program = readProgramFromFile(inputFilePath);
-    if (program.empty()) return 1;
-
-    Lexer lexer;
-    program += ' ';
-    auto tokens = lexer.tokenize(program);
-    lexer.printTokens(tokens);
-    SyntacticAnalysis parser(tokens);
-    shared_ptr<ASTNode> ast = parser.parse();
-    cout << "Abstract Syntax Tree:" << endl;
-    ast->printASTNode();
-
-    SemanticAnalyzer semantic;
-    semantic.analyze(ast);
-
-    CodeGenerator generator(ast, tokens);
-    generator.CodeGenerator_main();
-    shared_ptr<ASTNode>& astNew = generator.getNewAst();
-    astNew->printASTNode();
-
-    cout << "base program:" << endl << program << endl;
-    string finalCode = astNew->printOriginalCode(0);
-    cout << "program in C:" << endl << finalCode;
-
+    string finalCode = mainCompiler(program);
     writeOutputToFile(outputFilePath, finalCode);
 
     return 0;
