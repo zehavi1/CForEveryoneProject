@@ -2,10 +2,11 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include "Lexer.h"
+//#include "Lexer.h"
 #include "SyntacticAnalysis.h"
 #include "SemanticAnalyzer.h"
 #include "CodeGenerator.h"
+#include "LexicalAnalyzer.h"
 
 using namespace std;
 
@@ -32,13 +33,17 @@ void writeOutputToFile(const string& outputPath, const string& output) {
 }
 
 std::string mainCompiler(std::string program) {
-    Lexer lexer;
+    //Lexer lexer;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return "";
     }
     program += ' ';
-    auto tokens = lexer.tokenize(program);
+	LexicalAnalyzer lexer(program);
+	vector<Token> tokens = lexer.getTokens();
+	cout << "Tokens:" << endl;
+	
+   // auto tokens = lexer.tokenize(program);
     lexer.printTokens(tokens);
     SyntacticAnalysis parser(tokens);
     shared_ptr<ASTNode> ast = parser.parse();
@@ -63,9 +68,24 @@ int main(int argc, char* argv[])
     }
     string inputFilePath = argv[1];
     string outputFilePath = inputFilePath.substr(0, inputFilePath.find_last_of('.')) + ".c";
-    string program = readProgramFromFile(inputFilePath);
-    string finalCode = mainCompiler(program);
-    writeOutputToFile(outputFilePath, finalCode);
+    try {
+        string program = readProgramFromFile(inputFilePath);
+        string finalCode = mainCompiler(program);
+        writeOutputToFile(outputFilePath, finalCode);
+    }
+	catch (const list<Token>& tokens) {
+		cerr << "Lexical error occurred. Tokens: ";
+		for (const Token& token : tokens) {
+			cerr << token.value << " ";
+		}
+		cerr << endl;
+		return 1;
+	}
+	catch (const exception& e) {
+		cerr << "An error occurred: " << e.what() << endl;
+		return 1;
+	}
+    
 
     return 0;
 }

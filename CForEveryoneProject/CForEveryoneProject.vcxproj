@@ -132,6 +132,7 @@
     <ClCompile Include="CForEveryoneProject.cpp" />
     <ClCompile Include="CodeGenerator.cpp" />
     <ClCompile Include="enums.cpp" />
+    <ClCompile Include="ErrorHandler.cpp" />
     <ClCompile Include="Function.cpp" />
     <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="LexicalAnalyzer.cpp" />
@@ -150,6 +151,7 @@
     <ClInclude Include="AllocationMemory.h" />
     <ClInclude Include="CodeGenerator.h" />
     <ClInclude Include="enums.h" />
+    <ClInclude Include="ErrorHandler.h" />
     <ClInclude Include="Function.h" />
     <ClInclude Include="Lexer.h" />
     <ClInclude Include="LexicalAnalyzer.h" />
