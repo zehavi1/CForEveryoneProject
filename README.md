@@ -91,8 +91,9 @@ Generated C code:
 
 ```c
 int nums[] = {1, 2, 3, 4};
-for (int _i = 0; _i < 4; _i++) {
-    printf("%d\n", nums[_i]);
+for (int nIndex = 0; nIndex < 4; nIndex++) {
+    n=nums[nIndex];
+    printf("%d\n", n);
 }
 ```
 
