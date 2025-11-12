@@ -8,6 +8,7 @@ class CodeGenerator
 	map<string, Variable> currentScope;
 	vector<Token> tokens;
 	shared_ptr<ParentNode> freeAll;
+	bool isAlloc=false;
 	int indexScope = 0;
 public:
 	CodeGenerator(shared_ptr<ASTNode>& ast) :ast(ast) {};

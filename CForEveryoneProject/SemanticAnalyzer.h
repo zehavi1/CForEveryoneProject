@@ -8,6 +8,7 @@
 #include "Variable.h"
 #include "stack"
 #include "Function.h"
+#include "ErrorHandler.h"
 
 
 
@@ -28,7 +29,7 @@ public:
 	bool compareTypesInForeach(shared_ptr<ParentNode> node, shared_ptr<TokenNode> typeVar);
 	Pattern analyzeArrayType(shared_ptr<ParentNode> arrayNode);
 	void defineVariable(Token& token);
-	void useVariable(const string& name);
+	void useVariable(const Token& token);
 	void analyzeStringDeclaration(shared_ptr<ParentNode> node);
 	void analyzeFunction(shared_ptr<ParentNode> node);
 	void analyze(shared_ptr<ASTNode> node);

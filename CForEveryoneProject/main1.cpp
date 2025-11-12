@@ -31,19 +31,19 @@ void writeOutputToFile(const string& outputPath, const string& output) {
     file << output;
     file.close();
 }
-
-std::string mainCompiler(std::string program) {
+string mainCompilerForDev(std::string program)
+{
     //Lexer lexer;
     if (program.empty()) {
         cerr << "Failed to read program file!" << endl;
         return "";
     }
     program += ' ';
-	LexicalAnalyzer lexer(program);
-	vector<Token> tokens = lexer.getTokens();
-	cout << "Tokens:" << endl;
-	
-   // auto tokens = lexer.tokenize(program);
+    LexicalAnalyzer lexer(program);
+    vector<Token> tokens = lexer.getTokens();
+    cout << "Tokens:" << endl;
+
+    // auto tokens = lexer.tokenize(program);
     lexer.printTokens(tokens);
     SyntacticAnalysis parser(tokens);
     shared_ptr<ASTNode> ast = parser.parse();
@@ -60,25 +60,49 @@ std::string mainCompiler(std::string program) {
     cout << "profram in c:" << endl << code;
     return code;
 }
+std::string mainCompiler(std::string program) {
+    if (program.empty()) {
+        cerr << "Failed to read program file!" << endl;
+        return "";
+    }
+    program += ' ';
+	LexicalAnalyzer lexer(program);
+	vector<Token> tokens = lexer.getTokens();
+    SyntacticAnalysis parser(tokens);
+    shared_ptr<ASTNode> ast = parser.parse();
+    SemanticAnalyzer semantic;
+    semantic.analyze(ast);
+    CodeGenerator generator(ast, tokens);
+    generator.CodeGenerator_main();
+    shared_ptr<ASTNode>& astNew = generator.getNewAst();
+    //astNew->printASTNode();
+    string code = astNew->printOriginalCode(0);
+    return code;
+}
 int main(int argc, char* argv[])
 {
-    if (argc != 2) {
+    if (argc != 3&&argc!=2) {
         cerr << "Usage: " << argv[0] << " <path_to_input_file>" << endl;
         return 1;
     }
+    
     string inputFilePath = argv[1];
     string outputFilePath = inputFilePath.substr(0, inputFilePath.find_last_of('.')) + ".c";
+    string status = argc == 3 ? argv[2] : "1";
+    int statusNum = std::atoi(status.c_str());
+    string(*compilerArr[])(string) = { mainCompilerForDev, mainCompiler };
     try {
         string program = readProgramFromFile(inputFilePath);
-        string finalCode = mainCompiler(program);
+        string finalCode =compilerArr[statusNum](program);
         writeOutputToFile(outputFilePath, finalCode);
+		cout << "Compilation successful! Output written to: " << outputFilePath << endl;
     }
-	catch (const list<Token>& tokens) {
-		cerr << "Lexical error occurred. Tokens: ";
-		for (const Token& token : tokens) {
-			cerr << token.value << " ";
-		}
-		cerr << endl;
+	catch (const ErrorHandler& e) {
+		cerr << "Error: " << e.what() << endl;
+		return 1;
+	}
+	catch (const runtime_error& e) {
+		cerr << "Runtime error: " << e.what() << endl;
 		return 1;
 	}
 	catch (const exception& e) {

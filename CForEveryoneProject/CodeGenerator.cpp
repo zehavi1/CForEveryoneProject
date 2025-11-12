@@ -56,7 +56,8 @@ void CodeGenerator::generateCode(shared_ptr<ASTNode>& node) {
 					generateCode(child); // ניתוח ילד
 				}
 				currentScope = prevScope;
-				addFree(parentNode);
+				if(isAlloc)
+					addFree(parentNode);
 				break;
 			}
 			case STRING_DECLARATION:
@@ -123,7 +124,7 @@ void CodeGenerator::addDefineBoolAndIncludes()
 			if (t.typeToken == TOK_PRINTF || t.typeToken == TOK_PRINT)
 				isIO = true;
 			else
-				if (t.typeToken == TOK_LEFT_ARRAY || t.typeToken == TOK_MALLOC)
+				if (t.typeToken == TOK_NEW || t.typeToken == TOK_MALLOC)
 					isArray = true;
 	}
 	if (isBool)
@@ -131,7 +132,11 @@ void CodeGenerator::addDefineBoolAndIncludes()
 	if (isIO)
 		basic->addChild(includeStdio);
 	if (isArray)
+	{
+		isAlloc = true;
 		basic->addChild(addAlloc);
+	}
+		
 	auto ast2 = dynamic_pointer_cast<ParentNode>(make_shared<ParentNode>("program with all"));
 	ast2->addChild(basic);
 	ast2->addChild(ast);

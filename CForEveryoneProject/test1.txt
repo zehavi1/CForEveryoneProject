@@ -1,7 +1,7 @@
 void main(){
         int [] arr=new int[3],* arr2 = malloc(4);
         int n=3;
-foreach(int i in arr,4){
+	foreach(int i in arr,4){
         print(i);
 }
 foreach(float number in {1.6,2,3,4},4){

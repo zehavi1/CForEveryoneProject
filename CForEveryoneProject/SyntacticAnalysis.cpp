@@ -1,5 +1,6 @@
 #include "SyntacticAnalysis.h"
 #include <iostream>
+#include "ErrorHandler.h"
 using namespace std;
 
 SyntacticAnalysis::SyntacticAnalysis() {
@@ -19,8 +20,18 @@ void SyntacticAnalysis::nextToken() {
 }
 shared_ptr<TokenNode> SyntacticAnalysis::match(Pattern pattern, string msg) {
 	if (currentToken().typeToken != pattern) {
-		string s = "error occured in "+currentToken().value+'\n' + " describtion: " + msg;
-		throw s;
+		//string s = "Syntatic error occured in "+currentToken().value+'\n' + " describtion: " + msg;
+		list<Token> v1;
+		int i = currentTokenIndex-1;
+		while (tokens[i].typeToken != TOK_SEMICOLON && tokens[i].typeToken != TOK_OPEN_CURLY)
+			v1.push_front(tokens[i--]);
+		string s = "Syntatic error occured after: ";
+		for (Token i : v1)
+		{
+			s += i.value + " ";
+		}
+		s += "\nDescribtion: " + msg;
+		throw ErrorHandler(s, currentToken().lineNumber);
 	}
 	Token t = currentToken();
 	nextToken();
@@ -484,7 +495,6 @@ shared_ptr<ASTNode> SyntacticAnalysis::for_loop() {
 	forNode->addChild(match(TOK_FOR));
 	forNode->addChild(match(TOK_OPEN_PAREN, "Expected '(' after for"));
 	forNode->addChild(assignment());
-	//forNode->addChild((match(TOK_SEMICOLON, "Expected ';' after assignment")));
 	forNode->addChild(expression());
 	forNode->addChild(match(TOK_SEMICOLON, "Expected ';' after condition"));
 	forNode->addChild(assignment1());

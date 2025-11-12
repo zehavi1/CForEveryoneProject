@@ -110,7 +110,7 @@ bool SemanticAnalyzer::compareTypesInForeach(shared_ptr<ParentNode> node, shared
 	auto declaredVarType = typeVar->token.typeToken; // קבלת סוג המשתנה שהוגדר
 	if (declaredVarType != collectionType) {
 		string s = "Type mismatch: variable type" + tokenNames[declaredVarType] + "does not match the collection type" + tokenNames[collectionType];
-		throw s;
+		throw ErrorHandler("Samentic error occured.\n"+s, typeVar->token.lineNumber);
 	}
 }
 Pattern SemanticAnalyzer::analyzeArrayType(shared_ptr<ParentNode> arrayNode) {
@@ -128,20 +128,22 @@ void SemanticAnalyzer::defineVariable(Token& token)
 {
 	if (variableScope.find(token.value) != variableScope.end()) {
 		string s = "Variable " + token.value + " already defined in this scope";
-		throw s;
+		throw ErrorHandler("Samentic error occured.\n" + s, token.lineNumber);
+
 	}
 	variableScope[token.value] = Variable(token);
 
 }
 
 
-void SemanticAnalyzer::useVariable(const string& name)
+void SemanticAnalyzer::useVariable(const Token& token)
 {
+	string name = token.value;
 	auto varScope = variableScope.find(name);
 	auto func = functions.find(name);
 	if (varScope == variableScope.end() && func == functions.end()) {
-		string s = "Variable " + name + " is used before it is defined\n";
-		throw s;
+		string s = "Variable " + name + " is used before it is defined.";
+		throw ErrorHandler("Samentic error occured.\n" + s, token.lineNumber);
 	}
 }
 void SemanticAnalyzer::analyzeStringDeclaration(shared_ptr<ParentNode> node) {
@@ -174,13 +176,11 @@ void SemanticAnalyzer::analyzeFunction(shared_ptr<ParentNode> node)
 }
 void SemanticAnalyzer::analyze(shared_ptr<ASTNode> node)
 {
-	try
-	{
 		if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
 			switch (varNode->token.typeToken)
 			{
 			case TOK_ID: {
-				useVariable(varNode->token.value);
+				useVariable(varNode->token);
 			}
 					   break;
 			default:
@@ -238,24 +238,13 @@ void SemanticAnalyzer::analyze(shared_ptr<ASTNode> node)
 				break;
 			}
 		}
-
-
-	}
-	catch (string s) {
-		if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
-			cout << "line " << varNode->token.lineNumber << ":" << s;
-		}
-		else
-			cout << s;
-	}
 }
 void SemanticAnalyzer::analyze1(shared_ptr<ASTNode> node) {
-	try {
 		if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
 			switch (varNode->token.typeToken)
 			{
 			case TOK_ID: {
-				useVariable(varNode->token.value);
+				useVariable(varNode->token);
 			}
 					   break;
 			default:
@@ -309,14 +298,6 @@ void SemanticAnalyzer::analyze1(shared_ptr<ASTNode> node) {
 								analyze(child); // ניתוח ילד
 							}
 		}
-	}
-	catch (string s) {
-		if (auto varNode = dynamic_pointer_cast<TokenNode>(node)) {
-			cout << "line " << varNode->token.lineNumber << ":" << s;
-		}
-		else
-			cout << s;
-	}
 
 
 }

@@ -6,6 +6,7 @@
 #include <regex>
 #include "Token.h"
 #include <list>
+#include "ErrorHandler.h"
 using namespace std;
 class LexicalAnalyzer
 {
@@ -72,7 +73,7 @@ public:
     }
     void endLex()
     {
-		printf("Lexical analysis has done without errors\n");
+		//printf("Lexical analysis has done without errors\n");
     }
 	void initializeCharToLexicalMap() {
 		for (char c = 'a'; c <= 'z'; ++c) {
@@ -85,6 +86,7 @@ public:
 
 		charToLexical['_'] = UNDERSCORE_CAT;
 		charToLexical[' '] = SPACE_CAT;
+		charToLexical['\t'] = SPACE_CAT;
 		charToLexical['"'] = DOUBLE_QUOTE_CAT;
 		charToLexical['\''] = SINGLE_QUOTE_CAT;
 		charToLexical['\n'] = NEWLINE_CAT;
@@ -106,17 +108,16 @@ public:
         lexState = ERROR1;
         list<Token> v1;
         int i = tokens.size() - 1;
-        while (tokens[i].typeToken != TOK_SEMICOLON)
+        while (tokens[i].typeToken != TOK_SEMICOLON&& tokens[i].typeToken != TOK_OPEN_CURLY)
             v1.push_front(tokens[i--]);
-        //currentTokenValue = "lexical error occured in line" + lineNumber;
-        printf("lexical error occured in line %d in characters %s\n", lineNumber, currentTokenValue);
-        cout << "in ";
+        string s = "lexical error occurred in: ";
         for (Token i : v1)
         {
-            cout << i.value << " ";
+			s += i.value + " ";
         }
-        //tokens.emplace_back(TOK_ERROR, currentTokenValue, lineNumber);
-        throw tokens;
+        s += currentTokenValue+c;
+        
+		throw ErrorHandler(s, lineNumber);
     }
     void makeToken()
     {
